@@ -1,14 +1,21 @@
 {
   "name": "contextual-ui",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "0.1.0",
+  "description": "Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsup && tsc --emitDeclarationOnly --declarationDir dist",
+    "dev": "tsup --watch",
+    "lint": "tsc"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "packageManager": "pnpm@11.20.0",
   "dependencies": {
     "@radix-ui/react-slot": "^1.3.3",
