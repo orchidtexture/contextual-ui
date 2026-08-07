@@ -12,6 +12,8 @@ export interface FaqRootProps {
   className?: string;
 }
 
+export type FaqProps = FaqRootProps;
+
 export interface FaqItemProps {
   id: string;
   children: ReactNode;

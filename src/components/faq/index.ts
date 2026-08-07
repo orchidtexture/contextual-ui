@@ -16,4 +16,6 @@ export {
   exportAgentData,
 };
 
+export type { FaqItem, FaqData } from './faq.schema';
+
 export * from './faq.types';
