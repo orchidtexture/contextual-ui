@@ -169,19 +169,81 @@ export default function ContactSection() {
 
 ---
 
-## 🤖 AI Agent Integration
+## 🤖 AI Agent Integration & The SSOT Registry
 
-Contextual UI components are designed to be "read" by AI. 
+Contextual UI components are designed to be "read" by AI. To enforce the Single Source of Truth (SSOT) pattern, Contextual UI provides a unified Data Registry system.
 
-If you are building an AI-powered assistant that needs to know the content of your page, you can export the raw data structure without worrying about the React component tree:
+### 1. Define your Context
+Combine your site data and validate it using the library's Zod schemas. This centralizes your data for both UI rendering and AI consumption.
 
 ```typescript
-import { exportAgentData } from 'contextual-ui';
+// data/context.ts
+import { 
+  defineContext, 
+  FaqDataSchema, 
+  exportAgentData as exportFaqAgentData,
+  NavbarDataSchema,
+  exportNavbarAgentData
+} from 'contextual-ui';
 
-// In an API route or Server Action
-const contextForAI = exportAgentData(faqData); 
-// Returns clean [{ question, answer }] array
+import { faqData } from './faq';
+import { navbarData } from './navbar';
+
+export const siteContext = defineContext({
+  faq: {
+    schema: FaqDataSchema,
+    data: faqData,
+    exportAgentData: exportFaqAgentData,
+  },
+  navbar: {
+    schema: NavbarDataSchema,
+    data: navbarData,
+    exportAgentData: exportNavbarAgentData,
+  }
+});
 ```
+
+### 2. Expose the Agent API
+Instead of building custom endpoints, use our framework-agnostic route handlers to instantly expose your entire SSOT to AI agents and web crawlers.
+
+**Next.js App Router (`app/contextual/api/route.ts`):**
+```typescript
+import { createRouteHandler } from 'contextual-ui/server';
+import { siteContext } from '@/data/context';
+
+export const { GET } = createRouteHandler(siteContext);
+```
+
+**Next.js Pages Router (`pages/api/contextual.ts`):**
+```typescript
+import { createPagesRouteHandler } from 'contextual-ui/server';
+import { siteContext } from '@/data/context';
+
+export default createPagesRouteHandler(siteContext);
+```
+*(When accessed, this endpoint returns heavily optimized, validated JSON for LLM context windows).*
+
+---
+
+## 📊 The CMS Dashboard
+
+Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashboard. It reads your `siteContext` and uses Zod schemas to automatically generate a visual, read-only interface for human operators to inspect the Knowledge Base.
+
+```tsx
+// app/contextual/cms/page.tsx
+import { ContextualDashboard } from 'contextual-ui/dashboard';
+import { siteContext } from '@/data/context';
+
+export default function CMSPage() {
+  return (
+    <ContextualDashboard 
+      context={siteContext} 
+      title="Company Knowledge Base" 
+    />
+  );
+}
+```
+*Note: The dashboard uses scoped inline styles, guaranteeing it will never conflict with your app's global CSS or Tailwind resets.*
 
 ---
 

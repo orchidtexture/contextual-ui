@@ -5,13 +5,30 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.mjs",
+      "require": "./dist/server/index.js"
+    },
+    "./dashboard": {
+      "types": "./dist/dashboard/index.d.ts",
+      "import": "./dist/dashboard/index.mjs",
+      "require": "./dist/dashboard/index.js"
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup && tsc --emitDeclarationOnly --declarationDir dist",
+    "build": "tsup && node scripts/add-use-client.js && tsc --emitDeclarationOnly --declarationDir dist",
     "dev": "tsup --watch",
-    "lint": "tsc"
+    "lint": "tsc --noEmit"
   },
   "keywords": [],
   "author": "",
