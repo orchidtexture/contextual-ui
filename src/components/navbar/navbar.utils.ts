@@ -28,13 +28,12 @@ export function exportAgentData(data: NavbarData) {
 }
 
 /**
- * Creates a fully configured registry item for the SSOT dashboard.
+ * Creates a structural registry item for the schema definition (decoupled from data).
  */
-export function createNavbarRegistryItem(data: NavbarData) {
+export function navbarRegistry() {
   return {
     type: 'navbar' as const,
     schema: NavbarDataSchema,
-    data,
     exportAgentData,
     generateJsonLd: generateNavbarJsonLd,
   };

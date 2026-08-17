@@ -30,13 +30,12 @@ export function exportAgentData(items: FaqData) {
 }
 
 /**
- * Creates a fully configured registry item for the SSOT dashboard.
+ * Creates a structural registry item for the schema definition (decoupled from data).
  */
-export function createFaqRegistryItem(data: FaqData) {
+export function faqRegistry() {
   return {
     type: 'faq' as const,
     schema: FaqDataSchema,
-    data,
     exportAgentData,
     generateJsonLd: generateFaqJsonLd,
   };

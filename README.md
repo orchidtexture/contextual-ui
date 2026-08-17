@@ -181,92 +181,92 @@ export default function ContactSection() {
 
 ---
 
-## 🤖 AI Agent Integration & The SSOT Registry
+## 🤖 AI Agent Integration & The SSOT Registry (Schemas + Connectors)
 
-Contextual UI components are designed to be "read" by AI. To enforce the Single Source of Truth (SSOT) pattern, Contextual UI provides a unified Data Registry system.
+Contextual UI components are designed to be "read" by AI. To enforce the Single Source of Truth (SSOT) pattern without code duplication between your API and CMS, Contextual UI decouples structural component definitions (Zod schemas, JSON-LD generators, agent formatters) from concrete data payloads using **Schemas** and **Connectors**.
 
-### 1. Define your Context
-Combine your site data and validate it using Zod schemas via `defineContext`. This centralizes your data for UI rendering, search engine JSON-LD generation, and AI agent consumption.
-
-*(Note: You can import `defineContext`, `createFaqRegistryItem`, and `createNavbarRegistryItem` from either `contextual-ui` or `contextual-ui/server`)*:
+### 1. Define your Schema (Client & Server Safe)
+Define the shape of your site content once in a shared configuration file. This file contains no database drivers or server secrets, making it safe to import on both the client and server.
 
 ```typescript
-// data/context.ts
-import { defineContext, createFaqRegistryItem, createNavbarRegistryItem } from 'contextual-ui/server';
-import { faqData } from './faq';
-import { navbarData } from './navbar';
+// data/site.schema.ts (Safe for Client & Server)
+import { defineSchema, faqRegistry, navbarRegistry } from 'contextual-ui/server';
 
-export const siteContext = defineContext({
-  faq: createFaqRegistryItem(faqData),
-  navbar: createNavbarRegistryItem(navbarData),
+export const siteSchema = defineSchema({
+  faq: faqRegistry(),
+  navbar: navbarRegistry(),
 });
 ```
 
-*What `defineContext` does:*
-- **Runtime Validation**: Validates your data against component Zod schemas (with safe fallback warnings if validation fails).
-- **AI Agent Export**: Bundles data via `.getAgentData()` to provide clean, structured JSON for LLM context windows.
-- **SEO & Dashboard Integration**: Connects `generateJsonLd` and schema definitions so search engines and the CMS Dashboard can inspect and render structured data.
+### 2. Connect Your Data Sources (Server-Only)
+Bind your schema to any data source (Postgres, Notion, CMS, or static JSON) using connectors. This single connector powers **both** your API and your CMS.
 
-### 2. Expose the Agent API
-Instead of building custom endpoints, use our framework-agnostic route handlers to instantly expose your entire SSOT to AI agents and web crawlers.
+```typescript
+// data/site.server.ts (Server-Only)
+import { siteSchema } from './site.schema';
+import { getDictionary } from '@/dictionaries';
+
+export const siteContext = siteSchema.withConnector(async () => {
+  const dict = await getDictionary('en');
+  return {
+    faq: dict.faq.items,
+    navbar: dict.nav,
+  };
+});
+```
+
+### 3. Expose the Agent API
+Instantly expose your entire validated SSOT to AI agents and web crawlers using our framework-agnostic route handlers.
 
 **Next.js App Router (`app/contextual/api/route.ts`):**
 ```typescript
 import { createRouteHandler } from 'contextual-ui/server';
-import { siteContext } from '@/data/context';
+import { siteContext } from '@/data/site.server';
 
 export const { GET } = createRouteHandler(siteContext);
 ```
 
-**Next.js Pages Router (`pages/api/contextual.ts`):**
-```typescript
-import { createPagesRouteHandler } from 'contextual-ui/server';
-import { siteContext } from '@/data/context';
-
-export default createPagesRouteHandler(siteContext);
-```
-*(When accessed, this endpoint returns heavily optimized, validated JSON for LLM context windows).*
-
 ---
 
-## 📊 The CMS Dashboard
+## 📊 The CMS Dashboard & Hydration
 
-Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashboard featuring a **collapsible sidebar navigation** and **Schema-aware JSON-LD inspection tabs**. Because the registry context contains Zod schemas and functions, you define the context inside a **Client Component wrapper** to avoid Next.js serialization errors.
+Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashboard featuring a **collapsible sidebar navigation** and **Schema-aware JSON-LD inspection tabs**. 
+
+Because schemas and functions are separated from raw data, your Server Component uses the exact same connector to fetch data, passing serializable JSON across the RSC boundary to be hydrated on the client.
 
 ```tsx
-// 1. Create a Client Wrapper (app/contextual/cms/DashboardClient.tsx)
+// 1. Fetch data using the server context connector (app/contextual/cms/page.tsx)
+import { siteContext } from '@/data/site.server';
+import { CMSClient } from './CMSClient';
+
+export default async function CMSPage() {
+  // Fetches data via the connector (Postgres, Notion, Dictionary, etc.)
+  const rawData = await siteContext.fetchData(); 
+  return <CMSClient rawData={rawData} />;
+}
+```
+
+```tsx
+// 2. Hydrate on the Client Component (app/contextual/cms/CMSClient.tsx)
 'use client';
 
 import { ContextualDashboard } from 'contextual-ui/dashboard';
-import { defineContext } from 'contextual-ui/server';
-import { createFaqRegistryItem, createNavbarRegistryItem } from 'contextual-ui/server';
+import { siteSchema } from '@/data/site.schema'; // Safe to import! No DB drivers.
 import { ContactSchema } from '@/components/ContactSection';
 
-export function DashboardClient({ rawData }: { rawData: any }) {
-  // Define context dynamically on the client!
-  const siteContext = defineContext({
-    faq: createFaqRegistryItem(rawData.faq),
-    navbar: createNavbarRegistryItem(rawData.nav),
-  });
+export function CMSClient({ rawData }: { rawData: any }) {
+  // Hydrate the shared schema with serialized server data
+  const context = siteSchema.hydrate(rawData);
 
   return (
     <ContextualDashboard 
-      context={siteContext} 
+      context={context} 
       title="Company Knowledge Base & CMS" 
       forms={{
         contact: ContactSchema 
       }}
     />
   );
-}
-
-// 2. Fetch data in the Server Component (app/contextual/cms/page.tsx)
-import { DashboardClient } from './DashboardClient';
-import { getDictionary } from '@/data/dictionary';
-
-export default async function CMSPage() {
-  const data = await getDictionary('en'); // Fetch serializable JSON
-  return <DashboardClient rawData={data} />;
 }
 ```
 *Features:*

@@ -1,1 +1,1 @@
-export * from './defineContext';
+export * from './defineSchema';

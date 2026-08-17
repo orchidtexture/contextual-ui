@@ -1,17 +1,18 @@
-import { ContextRegistry, ContextConfig } from '../registry/defineContext';
-
 export interface RouteHandlerOptions {
   headers?: Record<string, string>;
 }
 
-export function createRouteHandler<TConfig extends ContextConfig>(
-  registry: ContextRegistry<TConfig>,
+export function createRouteHandler(
+  registry: any,
   options: RouteHandlerOptions = {}
 ) {
   return {
     GET: async (_req: Request): Promise<Response> => {
       try {
-        const agentData = registry.getAgentData();
+        const agentData = typeof registry.getAgentData === 'function'
+          ? await Promise.resolve(registry.getAgentData())
+          : {};
+
         const defaultHeaders = {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
@@ -44,8 +45,8 @@ export function createRouteHandler<TConfig extends ContextConfig>(
 /**
  * Creates a Next.js Pages Router compatible API handler (pages/api/*).
  */
-export function createPagesRouteHandler<TConfig extends ContextConfig>(
-  registry: ContextRegistry<TConfig>,
+export function createPagesRouteHandler(
+  registry: any,
   options: RouteHandlerOptions = {}
 ) {
   return async (req: any, res: any) => {
@@ -55,7 +56,10 @@ export function createPagesRouteHandler<TConfig extends ContextConfig>(
     }
 
     try {
-      const agentData = registry.getAgentData();
+      const agentData = typeof registry.getAgentData === 'function'
+        ? await Promise.resolve(registry.getAgentData())
+        : {};
+
       const defaultHeaders = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -76,4 +80,3 @@ export function createPagesRouteHandler<TConfig extends ContextConfig>(
     }
   };
 }
-

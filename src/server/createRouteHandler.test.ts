@@ -1,4 +1,4 @@
-import { defineContext } from '../registry/defineContext';
+import { defineSchema, staticConnector } from '../registry/defineSchema';
 import { createRouteHandler } from './createRouteHandler';
 import { z } from 'zod';
 
@@ -6,14 +6,17 @@ const TestSchema = z.object({
   message: z.string(),
 });
 
-const context = defineContext({
+const siteSchema = defineSchema({
   test: {
     schema: TestSchema,
-    data: { message: 'Hello AI Agent' },
   },
 });
 
-const handler = createRouteHandler(context);
+const serverContext = siteSchema.withConnector(staticConnector({
+  test: { message: 'Hello AI Agent' },
+}));
+
+const handler = createRouteHandler(serverContext);
 
 async function testRouteHandler() {
   const req = new Request('http://localhost/contextual/api');
