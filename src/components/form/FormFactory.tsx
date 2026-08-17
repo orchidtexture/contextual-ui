@@ -11,6 +11,7 @@ import {
   FormTextAreaProps,
   FormSubmitProps,
   FormErrorMessageProps,
+  FormSectionProps,
   FormContextValue,
   FormItemContextValue,
 } from './form.types';
@@ -171,6 +172,23 @@ export function createForm<T extends ZodSchema>(schema: T) {
     );
   }
 
+  function Section({ title, description, children, className, asChild }: FormSectionProps) {
+    const Comp = asChild ? Slot : 'div';
+    return (
+      <Comp className={className} data-contextual="form-section">
+        {(title || description) && (
+          <div data-contextual="form-section-header">
+            {title && <div data-contextual="form-section-title">{title}</div>}
+            {description && <div data-contextual="form-section-description">{description}</div>}
+          </div>
+        )}
+        <div data-contextual="form-section-content">
+          {children}
+        </div>
+      </Comp>
+    );
+  }
+
   return {
     Root,
     Field,
@@ -179,5 +197,6 @@ export function createForm<T extends ZodSchema>(schema: T) {
     TextArea,
     Submit,
     ErrorMessage,
+    Section,
   };
 }

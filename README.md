@@ -144,17 +144,28 @@ const Form = createForm(ContactSchema);
 export default function ContactSection() {
   return (
     <Form.Root onSubmit={(data) => console.log(data)}>
-      <Form.Field name="email">
-        <Form.Label>Email Address</Form.Label>
-        <Form.Input className="input-style" />
-        <Form.ErrorMessage className="error-style" />
-      </Form.Field>
+      <Form.Section 
+        title="Personal Information" 
+        description="We'll never share your email."
+        className="space-y-4 mb-6"
+      >
+        <Form.Field name="email">
+          <Form.Label>Email Address</Form.Label>
+          <Form.Input className="input-style" />
+          <Form.ErrorMessage className="error-style" />
+        </Form.Field>
+      </Form.Section>
 
-      <Form.Field name="message">
-        <Form.Label>Message</Form.Label>
-        <Form.TextArea className="input-style" />
-        <Form.ErrorMessage />
-      </Form.Field>
+      <Form.Section 
+        title="Your Message"
+        className="space-y-4 mb-6"
+      >
+        <Form.Field name="message">
+          <Form.Label>Message</Form.Label>
+          <Form.TextArea className="input-style" />
+          <Form.ErrorMessage />
+        </Form.Field>
+      </Form.Section>
 
       <Form.Submit>Send Message</Form.Submit>
     </Form.Root>
@@ -164,6 +175,7 @@ export default function ContactSection() {
 
 **Why use it?**
 - **Type Safety**: The `name` prop on `Field` only accepts keys defined in your Zod schema.
+- **Section Grouping**: Organize complex forms cleanly with built-in `Form.Section` headers and descriptions.
 - **Accessibility**: Automatically manages `aria-invalid`, `htmlFor`, and focus states.
 - **Logic-less UI**: No need to manage `onChange` or `value` manually.
 

@@ -1,6 +1,14 @@
 import { ReactNode } from 'react';
 import { ZodSchema, TypeOf, ZodError } from 'zod';
 
+export interface FormSectionProps {
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  children: React.ReactNode;
+  className?: string;
+  asChild?: boolean;
+}
+
 export interface FormRootProps<T extends ZodSchema> {
   onSubmit: (data: TypeOf<T>) => void | Promise<void>;
   onError?: (error: ZodError) => void;
