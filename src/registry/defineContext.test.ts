@@ -1,6 +1,8 @@
 import { defineContext } from './defineContext';
-import { FaqDataSchema, exportAgentData as exportFaqAgentData } from '../components/faq';
-import { NavbarDataSchema, exportAgentData as exportNavbarAgentData } from '../components/navbar';
+import { FaqDataSchema } from '../components/faq/faq.schema';
+import { exportAgentData as exportFaqAgentData } from '../components/faq/faq.utils';
+import { NavbarDataSchema } from '../components/navbar/navbar.schema';
+import { exportAgentData as exportNavbarAgentData } from '../components/navbar/navbar.utils';
 
 const faqData = [
   { id: '1', question: 'What is Contextual UI?', answer: 'A headless library.' }

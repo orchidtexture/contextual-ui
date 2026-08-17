@@ -26,7 +26,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup && node scripts/add-use-client.js && tsc --emitDeclarationOnly --declarationDir dist",
+    "build": "tsup && tsc --emitDeclarationOnly --declarationDir dist",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit"
   },

@@ -5,7 +5,10 @@ import { createForm } from '../components/form';
 import dashboardCss from './dashboard.css';
 
 export interface ContextualDashboardProps {
-  context: { raw: Record<string, any> };
+  context: { 
+    raw: Record<string, any>;
+    config?: Record<string, any> 
+  };
   forms?: Record<string, any>;
   title?: string;
   className?: string;
@@ -34,11 +37,14 @@ export function ContextualDashboard({
     : undefined;
 
   const activeData = !isFormTab ? context.raw[activeTab] : null;
+  const sectionConfig = context.config ? context.config[activeTab] : undefined;
+  const sectionType = sectionConfig?.type;
+  const generateJsonLd = sectionConfig?.generateJsonLd;
 
-  const faqItems = !isFormTab ? getFaqItems(activeData) : [];
-  const faqTitle = !isFormTab ? getFaqTitle(activeData) : undefined;
-  const isFaq = !isFormTab && isFaqSection(activeTab, activeData);
-  const isNavbar = !isFormTab && isNavbarSection(activeTab, activeData);
+  const faqItems = sectionType === 'faq' ? getFaqItems(activeData) : !isFormTab ? getFaqItems(activeData) : [];
+  const faqTitle = sectionType === 'faq' ? getFaqTitle(activeData) : !isFormTab ? getFaqTitle(activeData) : undefined;
+  const isFaq = sectionType === 'faq' || (!isFormTab && isFaqSection(activeTab, activeData));
+  const isNavbar = sectionType === 'navbar' || (!isFormTab && isNavbarSection(activeTab, activeData));
 
   const itemCount = isFormTab
     ? formSchema
@@ -145,6 +151,15 @@ export function ContextualDashboard({
               {/* Schema-driven Renderers or Auto-Generated Form Sandboxes */}
               {formSchema ? (
                 <AutoFormViewer schema={formSchema} />
+              ) : generateJsonLd ? (
+                <SchemaAwareViewer 
+                  data={activeData} 
+                  generateJsonLd={generateJsonLd} 
+                  isFaq={isFaq}
+                  faqItems={faqItems}
+                  faqTitle={faqTitle}
+                  isNavbar={isNavbar}
+                />
               ) : isFaq ? (
                 <FaqTable data={faqItems} title={faqTitle} />
               ) : isNavbar ? (
@@ -474,6 +489,68 @@ function NavbarViewer({ data }: { data: any }) {
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+function SchemaAwareViewer({
+  data,
+  generateJsonLd,
+  isFaq,
+  faqItems,
+  faqTitle,
+  isNavbar,
+}: {
+  data: any;
+  generateJsonLd: (data: any) => any;
+  isFaq: boolean;
+  faqItems: any[];
+  faqTitle?: string;
+  isNavbar: boolean;
+}) {
+  const [viewMode, setViewMode] = useState<'data' | 'schema'>('data');
+  const jsonLdData = useMemo(() => {
+    try {
+      return generateJsonLd(data);
+    } catch (e) {
+      return { error: 'Failed to generate JSON-LD', details: String(e) };
+    }
+  }, [data, generateJsonLd]);
+
+  return (
+    <div>
+      <div className="contextual-sub-tab-header">
+        <button
+          onClick={() => setViewMode('data')}
+          className={`contextual-sub-tab-button ${
+            viewMode === 'data' ? 'contextual-sub-tab-button-active' : ''
+          }`}
+          type="button"
+        >
+          📋 Current Data
+        </button>
+        <button
+          onClick={() => setViewMode('schema')}
+          className={`contextual-sub-tab-button ${
+            viewMode === 'schema' ? 'contextual-sub-tab-button-active' : ''
+          }`}
+          type="button"
+        >
+          🕸️ JSON-LD Schema
+        </button>
+      </div>
+
+      {viewMode === 'data' ? (
+        isFaq ? (
+          <FaqTable data={faqItems} title={faqTitle} />
+        ) : isNavbar ? (
+          <NavbarViewer data={data} />
+        ) : (
+          <JsonViewer data={data} />
+        )
+      ) : (
+        <JsonViewer data={jsonLdData} />
+      )}
     </div>
   );
 }

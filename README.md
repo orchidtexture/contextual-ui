@@ -186,34 +186,26 @@ export default function ContactSection() {
 Contextual UI components are designed to be "read" by AI. To enforce the Single Source of Truth (SSOT) pattern, Contextual UI provides a unified Data Registry system.
 
 ### 1. Define your Context
-Combine your site data and validate it using the library's Zod schemas. This centralizes your data for both UI rendering and AI consumption.
+Combine your site data and validate it using Zod schemas via `defineContext`. This centralizes your data for UI rendering, search engine JSON-LD generation, and AI agent consumption.
+
+*(Note: You can import `defineContext`, `createFaqRegistryItem`, and `createNavbarRegistryItem` from either `contextual-ui` or `contextual-ui/server`)*:
 
 ```typescript
 // data/context.ts
-import { 
-  defineContext, 
-  FaqDataSchema, 
-  exportAgentData as exportFaqAgentData,
-  NavbarDataSchema,
-  exportNavbarAgentData
-} from 'contextual-ui';
-
+import { defineContext, createFaqRegistryItem, createNavbarRegistryItem } from 'contextual-ui/server';
 import { faqData } from './faq';
 import { navbarData } from './navbar';
 
 export const siteContext = defineContext({
-  faq: {
-    schema: FaqDataSchema,
-    data: faqData,
-    exportAgentData: exportFaqAgentData,
-  },
-  navbar: {
-    schema: NavbarDataSchema,
-    data: navbarData,
-    exportAgentData: exportNavbarAgentData,
-  }
+  faq: createFaqRegistryItem(faqData),
+  navbar: createNavbarRegistryItem(navbarData),
 });
 ```
+
+*What `defineContext` does:*
+- **Runtime Validation**: Validates your data against component Zod schemas (with safe fallback warnings if validation fails).
+- **AI Agent Export**: Bundles data via `.getAgentData()` to provide clean, structured JSON for LLM context windows.
+- **SEO & Dashboard Integration**: Connects `generateJsonLd` and schema definitions so search engines and the CMS Dashboard can inspect and render structured data.
 
 ### 2. Expose the Agent API
 Instead of building custom endpoints, use our framework-agnostic route handlers to instantly expose your entire SSOT to AI agents and web crawlers.
@@ -239,28 +231,48 @@ export default createPagesRouteHandler(siteContext);
 
 ## 📊 The CMS Dashboard
 
-Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashboard. It reads your `siteContext` and uses Zod schemas to automatically generate a visual, read-only interface for human operators to inspect the Knowledge Base.
+Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashboard featuring a **collapsible sidebar navigation** and **Schema-aware JSON-LD inspection tabs**. Because the registry context contains Zod schemas and functions, you define the context inside a **Client Component wrapper** to avoid Next.js serialization errors.
 
 ```tsx
-// app/contextual/cms/page.tsx
+// 1. Create a Client Wrapper (app/contextual/cms/DashboardClient.tsx)
+'use client';
+
 import { ContextualDashboard } from 'contextual-ui/dashboard';
-import { siteContext } from '@/data/context';
+import { defineContext } from 'contextual-ui/server';
+import { createFaqRegistryItem, createNavbarRegistryItem } from 'contextual-ui/server';
 import { ContactSchema } from '@/components/ContactSection';
 
-export default function CMSPage() {
+export function DashboardClient({ rawData }: { rawData: any }) {
+  // Define context dynamically on the client!
+  const siteContext = defineContext({
+    faq: createFaqRegistryItem(rawData.faq),
+    navbar: createNavbarRegistryItem(rawData.nav),
+  });
+
   return (
     <ContextualDashboard 
       context={siteContext} 
       title="Company Knowledge Base & CMS" 
       forms={{
-        // Pass the Zod schema or FormFactory instance directly!
         contact: ContactSchema 
       }}
     />
   );
 }
+
+// 2. Fetch data in the Server Component (app/contextual/cms/page.tsx)
+import { DashboardClient } from './DashboardClient';
+import { getDictionary } from '@/data/dictionary';
+
+export default async function CMSPage() {
+  const data = await getDictionary('en'); // Fetch serializable JSON
+  return <DashboardClient rawData={data} />;
+}
 ```
-*Note: Passing a Zod schema automatically generates an **Interactive Sandbox** (to test live validation and submissions) and a **Schema Specification** data dictionary view.*
+*Features:*
+- **Collapsible Sidebar**: Easily toggle the sidebar to maximize screen space with smooth CSS transitions and tooltips.
+- **Current Data vs. JSON-LD Tabs**: Instantly switch between viewing raw structured data tables and the generated Schema.org JSON-LD markup that search engines and AI crawlers consume.
+- **Interactive Form Sandboxes**: Passing Zod schemas automatically generates fully validated sandboxes and schema specifications.
 
 ---
 

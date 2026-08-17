@@ -1,8 +1,7 @@
 import { defineConfig } from 'tsup';
 
-export default defineConfig({
-  entry: ['src/index.ts', 'src/server/index.ts', 'src/dashboard/index.ts'],
-  format: ['cjs', 'esm'],
+const commonConfig = {
+  format: ['cjs', 'esm'] as const,
   dts: false,
   splitting: true,
   sourcemap: true,
@@ -12,4 +11,22 @@ export default defineConfig({
     '.css': 'text',
   },
   external: ['react', 'react-dom', 'next'],
-});
+};
+
+export default defineConfig([
+  {
+    ...commonConfig,
+    entry: ['src/index.ts', 'src/dashboard/index.ts'],
+    esbuildOptions(options) {
+      options.banner = {
+        js: '"use client";',
+      };
+    },
+  },
+  {
+    ...commonConfig,
+    entry: ['src/server/index.ts'],
+    clean: false, // Prevent race condition with concurrent builds cleaning the output folder
+    outDir: 'dist/server',
+  }
+]);

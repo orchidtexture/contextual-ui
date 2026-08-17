@@ -4,6 +4,8 @@ export interface ContextSection<T extends z.ZodTypeAny = z.ZodTypeAny> {
   schema: T;
   data: z.infer<T>;
   exportAgentData?: (data: z.infer<T>) => any;
+  type?: string;
+  generateJsonLd?: (data: z.infer<T>) => any;
 }
 
 export type ContextConfig = Record<string, ContextSection<any>>;

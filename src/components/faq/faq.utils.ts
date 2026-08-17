@@ -1,4 +1,4 @@
-import { FaqData } from './faq.schema';
+import { FaqDataSchema, FaqData } from './faq.schema';
 
 /**
  * Generates a Schema.org FAQPage JSON-LD object.
@@ -27,4 +27,17 @@ export function exportAgentData(items: FaqData) {
     question,
     answer,
   }));
+}
+
+/**
+ * Creates a fully configured registry item for the SSOT dashboard.
+ */
+export function createFaqRegistryItem(data: FaqData) {
+  return {
+    type: 'faq' as const,
+    schema: FaqDataSchema,
+    data,
+    exportAgentData,
+    generateJsonLd: generateFaqJsonLd,
+  };
 }

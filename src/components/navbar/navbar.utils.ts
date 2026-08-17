@@ -1,4 +1,21 @@
-import { NavbarData } from './navbar.schema';
+import { NavbarDataSchema, NavbarData } from './navbar.schema';
+
+/**
+ * Generates a Schema.org SiteNavigationElement / WPHeader JSON-LD object.
+ */
+export function generateNavbarJsonLd(data: NavbarData) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SiteNavigationElement',
+    name: data.brand?.name || 'Navigation',
+    url: data.brand?.href || '/',
+    hasPart: data.links.map((link) => ({
+      '@type': 'WebPage',
+      name: link.label,
+      url: link.href,
+    })),
+  };
+}
 
 /**
  * Exports plain data for internal AI agents or other integrations.
@@ -7,5 +24,18 @@ export function exportAgentData(data: NavbarData) {
   return {
     brand: data.brand,
     links: data.links,
+  };
+}
+
+/**
+ * Creates a fully configured registry item for the SSOT dashboard.
+ */
+export function createNavbarRegistryItem(data: NavbarData) {
+  return {
+    type: 'navbar' as const,
+    schema: NavbarDataSchema,
+    data,
+    exportAgentData,
+    generateJsonLd: generateNavbarJsonLd,
   };
 }
