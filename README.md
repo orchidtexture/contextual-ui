@@ -245,17 +245,22 @@ Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashbo
 // app/contextual/cms/page.tsx
 import { ContextualDashboard } from 'contextual-ui/dashboard';
 import { siteContext } from '@/data/context';
+import { ContactSchema } from '@/components/ContactSection';
 
 export default function CMSPage() {
   return (
     <ContextualDashboard 
       context={siteContext} 
-      title="Company Knowledge Base" 
+      title="Company Knowledge Base & CMS" 
+      forms={{
+        // Pass the Zod schema or FormFactory instance directly!
+        contact: ContactSchema 
+      }}
     />
   );
 }
 ```
-*Note: The dashboard uses scoped inline styles, guaranteeing it will never conflict with your app's global CSS or Tailwind resets.*
+*Note: Passing a Zod schema automatically generates an **Interactive Sandbox** (to test live validation and submissions) and a **Schema Specification** data dictionary view.*
 
 ---
 

@@ -1,31 +1,48 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
+import { createForm } from '../components/form';
 
 export interface ContextualDashboardProps {
   context: { raw: Record<string, any> };
+  forms?: Record<string, any>;
   title?: string;
   className?: string;
 }
 
 export function ContextualDashboard({
   context,
+  forms,
   title = 'Contextual UI - Dashboard',
   className = '',
 }: ContextualDashboardProps) {
+  const dataSections = Object.keys(context.raw);
+  const formKeys = forms ? Object.keys(forms) : [];
+
   const [activeTab, setActiveTab] = useState<string>(
-    Object.keys(context.raw)[0] || ''
+    dataSections[0] || formKeys[0] || ''
   );
 
-  const sections = Object.keys(context.raw);
-  const activeData = context.raw[activeTab];
+  const formEntry = forms ? forms[activeTab] : undefined;
+  const isFormTab = formEntry !== undefined;
+  const formSchema = isFormTab
+    ? isZodSchema(formEntry)
+      ? formEntry
+      : formEntry?.schema
+    : undefined;
 
-  const faqItems = getFaqItems(activeData);
-  const faqTitle = getFaqTitle(activeData);
-  const isFaq = isFaqSection(activeTab, activeData);
-  const isNavbar = isNavbarSection(activeTab, activeData);
+  const activeData = !isFormTab ? context.raw[activeTab] : null;
 
-  const itemCount = isFaq
+  const faqItems = !isFormTab ? getFaqItems(activeData) : [];
+  const faqTitle = !isFormTab ? getFaqTitle(activeData) : undefined;
+  const isFaq = !isFormTab && isFaqSection(activeTab, activeData);
+  const isNavbar = !isFormTab && isNavbarSection(activeTab, activeData);
+
+  const itemCount = isFormTab
+    ? formSchema
+      ? `${Object.keys(getSchemaFields(formSchema)).length} Schema Fields`
+      : 'Interactive Form'
+    : isFaq
     ? faqItems.length
     : Array.isArray(activeData)
     ? activeData.length
@@ -55,8 +72,8 @@ export function ContextualDashboard({
       <div style={styles.layout}>
         {/* Sidebar / Section Switcher */}
         <div style={styles.sidebar}>
-          <div style={styles.sidebarTitle}>Registered Sections</div>
-          {sections.map((key) => (
+          <div style={styles.sidebarTitle}>Registered Data</div>
+          {dataSections.map((key) => (
             <button
               key={key}
               onClick={() => setActiveTab(key)}
@@ -68,6 +85,24 @@ export function ContextualDashboard({
               📂 {key.toUpperCase()}
             </button>
           ))}
+
+          {formKeys.length > 0 && (
+            <>
+              <div style={{ ...styles.sidebarTitle, marginTop: '16px' }}>Form Registry</div>
+              {formKeys.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setActiveTab(key)}
+                  style={{
+                    ...styles.tabButton,
+                    ...(activeTab === key ? styles.tabButtonActive : {}),
+                  }}
+                >
+                  📝 {key.toUpperCase()}
+                </button>
+              ))}
+            </>
+          )}
         </div>
 
         {/* Content Viewer */}
@@ -77,12 +112,14 @@ export function ContextualDashboard({
               <div style={styles.contentHeader}>
                 <h2>Section: <span style={{ color: '#2563eb' }}>{activeTab}</span></h2>
                 <span style={styles.countBadge}>
-                  {itemCount !== null ? `${itemCount} items` : 'Object Data'}
+                  {itemCount !== null ? itemCount : 'Object Data'}
                 </span>
               </div>
 
-              {/* Schema-driven Renderers */}
-              {isFaq ? (
+              {/* Schema-driven Renderers or Auto-Generated Form Sandboxes */}
+              {formSchema ? (
+                <AutoFormViewer schema={formSchema} />
+              ) : isFaq ? (
                 <FaqTable data={faqItems} title={faqTitle} />
               ) : isNavbar ? (
                 <NavbarViewer data={activeData} />
@@ -97,12 +134,215 @@ export function ContextualDashboard({
   );
 }
 
+function isZodSchema(obj: any): boolean {
+  return obj && typeof obj.safeParse === 'function';
+}
+
+function getSchemaFields(schema: any): Record<string, any> {
+  if (!schema) return {};
+  if (typeof schema.shape === 'function') {
+    return schema.shape();
+  }
+  if (schema.shape && typeof schema.shape === 'object') {
+    return schema.shape;
+  }
+  if (schema._def && typeof schema._def.shape === 'function') {
+    return schema._def.shape();
+  }
+  if (schema._def && schema._def.innerType) {
+    return getSchemaFields(schema._def.innerType);
+  }
+  return {};
+}
+
+function getZodTypeName(typeDef: any): string {
+  if (!typeDef) return 'unknown';
+  const typeName = typeDef._def?.typeName || typeDef.constructor?.name;
+  if (typeName) {
+    return typeName.replace(/^Zod/, '').toLowerCase();
+  }
+  return 'any';
+}
+
+function AutoFormViewer({ schema }: { schema: any }) {
+  const [subMode, setSubMode] = useState<'sandbox' | 'spec'>('sandbox');
+  const [submittedData, setSubmittedData] = useState<any>(null);
+  const [submitError, setSubmitError] = useState<any>(null);
+
+  const DynamicForm = useMemo(() => createForm(schema), [schema]);
+  const fieldsMap = getSchemaFields(schema);
+  const fieldNames = Object.keys(fieldsMap);
+
+  return (
+    <div>
+      <div style={styles.subTabHeader}>
+        <button
+          onClick={() => setSubMode('sandbox')}
+          style={{
+            ...styles.subTabButton,
+            ...(subMode === 'sandbox' ? styles.subTabButtonActive : {}),
+          }}
+        >
+          🧪 Interactive Sandbox
+        </button>
+        <button
+          onClick={() => setSubMode('spec')}
+          style={{
+            ...styles.subTabButton,
+            ...(subMode === 'spec' ? styles.subTabButtonActive : {}),
+          }}
+        >
+          📋 Schema Specification
+        </button>
+      </div>
+
+      {subMode === 'sandbox' ? (
+        <div>
+          <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>
+            Auto-generated interactive form based on Zod schema validation rules.
+          </p>
+          <DynamicForm.Root
+            onSubmit={(data) => {
+              setSubmittedData(data);
+              setSubmitError(null);
+            }}
+            onError={(err) => {
+              setSubmitError(err);
+              setSubmittedData(null);
+            }}
+          >
+            {fieldNames.map((fieldName) => {
+              const isTextArea =
+                fieldName.toLowerCase().includes('message') ||
+                fieldName.toLowerCase().includes('description') ||
+                fieldName.toLowerCase().includes('content');
+
+              return (
+                <div key={fieldName} style={{ marginBottom: '16px' }}>
+                  <DynamicForm.Field name={fieldName as any}>
+                    <DynamicForm.Label
+                      style={{
+                        display: 'block',
+                        fontWeight: 600,
+                        fontSize: '14px',
+                        marginBottom: '6px',
+                        color: '#374151',
+                      }}
+                    >
+                      {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+                    </DynamicForm.Label>
+                    {isTextArea ? (
+                      <DynamicForm.TextArea
+                        style={styles.formInput}
+                        placeholder={`Enter ${fieldName}...`}
+                      />
+                    ) : (
+                      <DynamicForm.Input
+                        style={styles.formInput}
+                        placeholder={`Enter ${fieldName}...`}
+                      />
+                    )}
+                    <DynamicForm.ErrorMessage
+                      style={{
+                        color: '#dc2626',
+                        fontSize: '12px',
+                        marginTop: '4px',
+                        display: 'block',
+                      }}
+                    />
+                  </DynamicForm.Field>
+                </div>
+              );
+            })}
+
+            <div
+              style={{
+                marginTop: '20px',
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center',
+              }}
+            >
+              <DynamicForm.Submit style={styles.submitButton}>
+                Submit Form
+              </DynamicForm.Submit>
+              {submitError && (
+                <span style={{ color: '#dc2626', fontSize: '13px' }}>
+                  Validation failed. Check errors above.
+                </span>
+              )}
+            </div>
+          </DynamicForm.Root>
+
+          {submittedData && (
+            <div style={styles.successBox}>
+              <strong>🎉 Validated & Submitted Successfully:</strong>
+              <pre
+                style={{
+                  margin: '8px 0 0 0',
+                  fontSize: '12px',
+                  fontFamily: 'monospace',
+                }}
+              >
+                {JSON.stringify(submittedData, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div>
+          <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>
+            Inspect the underlying Zod schema rules, types, and constraints.
+          </p>
+          <div style={styles.tableWrapper}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Field Name</th>
+                  <th style={styles.th}>Type</th>
+                  <th style={styles.th}>Constraints / Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {fieldNames.map((fieldName) => {
+                  const typeDef = fieldsMap[fieldName];
+                  const typeName = getZodTypeName(typeDef);
+                  const isOptional =
+                    typeDef?._def?.typeName === 'ZodOptional' ||
+                    typeDef?.isOptional?.();
+
+                  return (
+                    <tr key={fieldName} style={styles.tr}>
+                      <td style={styles.tdQuestion}>{fieldName}</td>
+                      <td style={styles.tdId}>{typeName}</td>
+                      <td style={styles.td}>
+                        {isOptional ? 'Optional' : 'Required'}
+                        {typeDef?.description
+                          ? ` — "${typeDef.description}"`
+                          : ''}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function getFaqItems(data: any): any[] {
   if (Array.isArray(data)) return data;
   if (data && typeof data === 'object') {
     if (Array.isArray(data.items)) return data.items;
     for (const val of Object.values(data)) {
-      if (Array.isArray(val) && val.length > 0 && (val[0]?.question || val[0]?.answer)) {
+      if (
+        Array.isArray(val) &&
+        val.length > 0 &&
+        (val[0]?.question || val[0]?.answer)
+      ) {
         return val;
       }
     }
@@ -123,7 +363,10 @@ function isFaqSection(tab: string, data: any): boolean {
     return data.length === 0 || data[0]?.question !== undefined;
   }
   if (data && typeof data === 'object') {
-    if (Array.isArray(data.items) && (data.items.length === 0 || data.items[0]?.question !== undefined)) {
+    if (
+      Array.isArray(data.items) &&
+      (data.items.length === 0 || data.items[0]?.question !== undefined)
+    ) {
       return true;
     }
     for (const val of Object.values(data)) {
@@ -137,7 +380,11 @@ function isFaqSection(tab: string, data: any): boolean {
 
 function isNavbarSection(tab: string, data: any): boolean {
   if (tab.toLowerCase() === 'navbar' || tab.toLowerCase() === 'nav') return true;
-  if (data && typeof data === 'object' && (data.brand !== undefined || Array.isArray(data.links))) {
+  if (
+    data &&
+    typeof data === 'object' &&
+    (data.brand !== undefined || Array.isArray(data.links))
+  ) {
     return true;
   }
   return false;
@@ -177,9 +424,17 @@ function NavbarViewer({ data }: { data: any }) {
       {data?.brand && (
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Brand Information</h3>
-          <p style={{ margin: '0 0 6px 0' }}><strong>Name:</strong> {data.brand.name}</p>
-          <p style={{ margin: '0 0 6px 0' }}><strong>Href:</strong> {data.brand.href}</p>
-          {data.brand.logo && <p style={{ margin: 0 }}><strong>Logo:</strong> {data.brand.logo}</p>}
+          <p style={{ margin: '0 0 6px 0' }}>
+            <strong>Name:</strong> {data.brand.name}
+          </p>
+          <p style={{ margin: '0 0 6px 0' }}>
+            <strong>Href:</strong> {data.brand.href}
+          </p>
+          {data.brand.logo && (
+            <p style={{ margin: 0 }}>
+              <strong>Logo:</strong> {data.brand.logo}
+            </p>
+          )}
         </div>
       )}
       <div style={styles.card}>
@@ -198,25 +453,20 @@ function NavbarViewer({ data }: { data: any }) {
 }
 
 function JsonViewer({ data }: { data: any }) {
-  return (
-    <pre style={styles.pre}>
-      {JSON.stringify(data, null, 2)}
-    </pre>
-  );
+  return <pre style={styles.pre}>{JSON.stringify(data, null, 2)}</pre>;
 }
 
 // Scoped inline styles for complete isolation and out-of-the-box beauty
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+    fontFamily:
+      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     color: '#1f2937',
     backgroundColor: '#f9fafb',
-    border: '1px solid #e5e7eb',
-    borderRadius: '12px',
     padding: '24px',
-    // maxWidth: '1200px',
     margin: '0 auto',
-    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+    width: '100%',
+    height: '100vh',
   },
   header: {
     display: 'flex',
@@ -369,5 +619,58 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '13px',
     fontFamily: 'monospace',
     overflowX: 'auto',
+  },
+  formPreviewWrapper: {
+    padding: '8px 0',
+  },
+  subTabHeader: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '16px',
+    borderBottom: '1px solid #e5e7eb',
+    paddingBottom: '12px',
+  },
+  subTabButton: {
+    padding: '6px 12px',
+    backgroundColor: '#f3f4f6',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontSize: '13px',
+    fontWeight: 500,
+    color: '#4b5563',
+  },
+  subTabButtonActive: {
+    backgroundColor: '#eff6ff',
+    color: '#2563eb',
+    border: '1px solid #bfdbfe',
+    fontWeight: 600,
+  },
+  formInput: {
+    width: '100%',
+    padding: '8px 12px',
+    border: '1px solid #d1d5db',
+    borderRadius: '6px',
+    fontSize: '14px',
+    outline: 'none',
+  },
+  submitButton: {
+    backgroundColor: '#2563eb',
+    color: '#ffffff',
+    padding: '10px 16px',
+    border: 'none',
+    borderRadius: '6px',
+    cursor: 'pointer',
+    fontWeight: 600,
+    fontSize: '14px',
+  },
+  successBox: {
+    marginTop: '20px',
+    padding: '12px',
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    borderRadius: '6px',
+    color: '#166534',
+    fontSize: '14px',
   },
 };

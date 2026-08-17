@@ -7,6 +7,7 @@ export interface FormSectionProps {
   children: React.ReactNode;
   className?: string;
   asChild?: boolean;
+  style?: React.CSSProperties;
 }
 
 export interface FormRootProps<T extends ZodSchema> {
@@ -27,6 +28,7 @@ export interface FormLabelProps {
   children: ReactNode;
   className?: string;
   asChild?: boolean;
+  style?: React.CSSProperties;
 }
 
 export interface FormInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -44,6 +46,7 @@ export interface FormSubmitProps extends React.ButtonHTMLAttributes<HTMLButtonEl
 export interface FormErrorMessageProps {
   className?: string;
   asChild?: boolean;
+  style?: React.CSSProperties;
 }
 
 export interface FormContextValue<T extends ZodSchema> {

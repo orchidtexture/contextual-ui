@@ -90,12 +90,12 @@ export function createForm<T extends ZodSchema>(schema: T) {
     );
   }
 
-  function Label({ children, asChild, className }: FormLabelProps) {
+  function Label({ children, asChild, className, style }: FormLabelProps) {
     const context = useContext(FormItemContext);
     if (!context) throw new Error('Form.Label must be used within Form.Field');
     const Comp = asChild ? Slot : 'label';
     return (
-      <Comp htmlFor={String(context.name)} className={className} data-contextual="form-label">
+      <Comp htmlFor={String(context.name)} className={className} style={style} data-contextual="form-label">
         {children}
       </Comp>
     );
@@ -156,7 +156,7 @@ export function createForm<T extends ZodSchema>(schema: T) {
     );
   }
 
-  function ErrorMessage({ className, asChild }: FormErrorMessageProps) {
+  function ErrorMessage({ className, asChild, style }: FormErrorMessageProps) {
     const itemContext = useContext(FormItemContext);
     const formContext = useContext(FormContext);
     if (!itemContext || !formContext) throw new Error('Form.ErrorMessage must be used within Form.Field');
@@ -166,16 +166,16 @@ export function createForm<T extends ZodSchema>(schema: T) {
 
     const Comp = asChild ? Slot : 'span';
     return (
-      <Comp className={className} data-contextual="form-error">
+      <Comp className={className} style={style} data-contextual="form-error">
         {fieldErrors[0]}
       </Comp>
     );
   }
 
-  function Section({ title, description, children, className, asChild }: FormSectionProps) {
+  function Section({ title, description, children, className, asChild, style }: FormSectionProps) {
     const Comp = asChild ? Slot : 'div';
     return (
-      <Comp className={className} data-contextual="form-section">
+      <Comp className={className} style={style} data-contextual="form-section">
         {(title || description) && (
           <div data-contextual="form-section-header">
             {title && <div data-contextual="form-section-title">{title}</div>}
@@ -198,5 +198,6 @@ export function createForm<T extends ZodSchema>(schema: T) {
     Submit,
     ErrorMessage,
     Section,
+    schema,
   };
 }
