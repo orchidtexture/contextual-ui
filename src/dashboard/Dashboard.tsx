@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { createForm } from '../components/form';
+import dashboardCss from './dashboard.css';
 
 export interface ContextualDashboardProps {
   context: { raw: Record<string, any> };
@@ -22,6 +23,7 @@ export function ContextualDashboard({
   const [activeTab, setActiveTab] = useState<string>(
     dataSections[0] || formKeys[0] || ''
   );
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(false);
 
   const formEntry = forms ? forms[activeTab] : undefined;
   const isFormTab = formEntry !== undefined;
@@ -54,64 +56,88 @@ export function ContextualDashboard({
 
   return (
     <div
-      style={styles.container}
-      className={className}
+      className={`contextual-dashboard ${className}`}
       data-contextual="dashboard-root"
     >
+      <style dangerouslySetInnerHTML={{ __html: dashboardCss }} />
       {/* Header */}
-      <div style={styles.header}>
+      <div className="contextual-dashboard-header">
         <div>
-          <h1 style={styles.title}>{title}</h1>
-          <p style={styles.subtitle}>
+          <h1 className="contextual-dashboard-title">{title}</h1>
+          <p className="contextual-dashboard-subtitle">
             Single Source of Truth (SSOT) inspection for AI agents, search engines, and human operators.
           </p>
         </div>
       </div>
 
       {/* Layout */}
-      <div style={styles.layout}>
-        {/* Sidebar / Section Switcher */}
-        <div style={styles.sidebar}>
-          <div style={styles.sidebarTitle}>Registered Data</div>
-          {dataSections.map((key) => (
+      <div className="contextual-dashboard-layout">
+        {/* Collapsible Sidebar / Section Switcher */}
+        <div
+          className={`contextual-sidebar ${
+            isSidebarCollapsed ? 'collapsed' : ''
+          }`}
+        >
+          <div className="contextual-sidebar-header">
+            <span className="contextual-sidebar-title">Navigation</span>
             <button
-              key={key}
-              onClick={() => setActiveTab(key)}
-              style={{
-                ...styles.tabButton,
-                ...(activeTab === key ? styles.tabButtonActive : {}),
-              }}
+              onClick={() => setIsSidebarCollapsed((prev) => !prev)}
+              className="contextual-sidebar-toggle"
+              title={isSidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
+              type="button"
             >
-              📂 {key.toUpperCase()}
+              {isSidebarCollapsed ? '»' : '«'}
             </button>
-          ))}
+          </div>
+
+          <div className="contextual-nav-group">
+            <div className="contextual-nav-group-title">Registered Data</div>
+            {dataSections.map((key) => (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key)}
+                title={key.toUpperCase()}
+                className={`contextual-tab-button ${
+                  activeTab === key ? 'contextual-tab-button-active' : ''
+                }`}
+                type="button"
+              >
+                <span>📂</span>
+                <span className="label">{key.toUpperCase()}</span>
+              </button>
+            ))}
+          </div>
 
           {formKeys.length > 0 && (
-            <>
-              <div style={{ ...styles.sidebarTitle, marginTop: '16px' }}>Form Registry</div>
+            <div className="contextual-nav-group" style={{ marginTop: '16px' }}>
+              <div className="contextual-nav-group-title">Form Registry</div>
               {formKeys.map((key) => (
                 <button
                   key={key}
                   onClick={() => setActiveTab(key)}
-                  style={{
-                    ...styles.tabButton,
-                    ...(activeTab === key ? styles.tabButtonActive : {}),
-                  }}
+                  title={key.toUpperCase()}
+                  className={`contextual-tab-button ${
+                    activeTab === key ? 'contextual-tab-button-active' : ''
+                  }`}
+                  type="button"
                 >
-                  📝 {key.toUpperCase()}
+                  <span>📝</span>
+                  <span className="label">{key.toUpperCase()}</span>
                 </button>
               ))}
-            </>
+            </div>
           )}
         </div>
 
         {/* Content Viewer */}
-        <div style={styles.content}>
+        <div className="contextual-content">
           {activeTab && (
             <div>
-              <div style={styles.contentHeader}>
-                <h2>Section: <span style={{ color: '#2563eb' }}>{activeTab}</span></h2>
-                <span style={styles.countBadge}>
+              <div className="contextual-content-header">
+                <h2>
+                  Section: <span style={{ color: '#2563eb' }}>{activeTab}</span>
+                </h2>
+                <span className="contextual-count-badge">
                   {itemCount !== null ? itemCount : 'Object Data'}
                 </span>
               </div>
@@ -175,22 +201,22 @@ function AutoFormViewer({ schema }: { schema: any }) {
 
   return (
     <div>
-      <div style={styles.subTabHeader}>
+      <div className="contextual-sub-tab-header">
         <button
           onClick={() => setSubMode('sandbox')}
-          style={{
-            ...styles.subTabButton,
-            ...(subMode === 'sandbox' ? styles.subTabButtonActive : {}),
-          }}
+          className={`contextual-sub-tab-button ${
+            subMode === 'sandbox' ? 'contextual-sub-tab-button-active' : ''
+          }`}
+          type="button"
         >
           🧪 Interactive Sandbox
         </button>
         <button
           onClick={() => setSubMode('spec')}
-          style={{
-            ...styles.subTabButton,
-            ...(subMode === 'spec' ? styles.subTabButtonActive : {}),
-          }}
+          className={`contextual-sub-tab-button ${
+            subMode === 'spec' ? 'contextual-sub-tab-button-active' : ''
+          }`}
+          type="button"
         >
           📋 Schema Specification
         </button>
@@ -233,12 +259,12 @@ function AutoFormViewer({ schema }: { schema: any }) {
                     </DynamicForm.Label>
                     {isTextArea ? (
                       <DynamicForm.TextArea
-                        style={styles.formInput}
+                        className="contextual-form-input"
                         placeholder={`Enter ${fieldName}...`}
                       />
                     ) : (
                       <DynamicForm.Input
-                        style={styles.formInput}
+                        className="contextual-form-input"
                         placeholder={`Enter ${fieldName}...`}
                       />
                     )}
@@ -263,7 +289,7 @@ function AutoFormViewer({ schema }: { schema: any }) {
                 alignItems: 'center',
               }}
             >
-              <DynamicForm.Submit style={styles.submitButton}>
+              <DynamicForm.Submit className="contextual-submit-button">
                 Submit Form
               </DynamicForm.Submit>
               {submitError && (
@@ -275,7 +301,7 @@ function AutoFormViewer({ schema }: { schema: any }) {
           </DynamicForm.Root>
 
           {submittedData && (
-            <div style={styles.successBox}>
+            <div className="contextual-success-box">
               <strong>🎉 Validated & Submitted Successfully:</strong>
               <pre
                 style={{
@@ -294,13 +320,13 @@ function AutoFormViewer({ schema }: { schema: any }) {
           <p style={{ fontSize: '13px', color: '#6b7280', marginBottom: '16px' }}>
             Inspect the underlying Zod schema rules, types, and constraints.
           </p>
-          <div style={styles.tableWrapper}>
-            <table style={styles.table}>
+          <div className="contextual-table-wrapper">
+            <table className="contextual-table">
               <thead>
                 <tr>
-                  <th style={styles.th}>Field Name</th>
-                  <th style={styles.th}>Type</th>
-                  <th style={styles.th}>Constraints / Description</th>
+                  <th className="contextual-th">Field Name</th>
+                  <th className="contextual-th">Type</th>
+                  <th className="contextual-th">Constraints / Description</th>
                 </tr>
               </thead>
               <tbody>
@@ -312,10 +338,10 @@ function AutoFormViewer({ schema }: { schema: any }) {
                     typeDef?.isOptional?.();
 
                   return (
-                    <tr key={fieldName} style={styles.tr}>
-                      <td style={styles.tdQuestion}>{fieldName}</td>
-                      <td style={styles.tdId}>{typeName}</td>
-                      <td style={styles.td}>
+                    <tr key={fieldName}>
+                      <td className="contextual-td-question">{fieldName}</td>
+                      <td className="contextual-td-id">{typeName}</td>
+                      <td className="contextual-td">
                         {isOptional ? 'Optional' : 'Required'}
                         {typeDef?.description
                           ? ` — "${typeDef.description}"`
@@ -393,22 +419,22 @@ function isNavbarSection(tab: string, data: any): boolean {
 function FaqTable({ data, title }: { data: any[]; title?: string }) {
   return (
     <div>
-      {title && <h3 style={styles.cardTitle}>{title}</h3>}
-      <div style={styles.tableWrapper}>
-        <table style={styles.table}>
+      {title && <h3 className="contextual-card-title">{title}</h3>}
+      <div className="contextual-table-wrapper">
+        <table className="contextual-table">
           <thead>
             <tr>
-              <th style={styles.th}>ID</th>
-              <th style={styles.th}>Question</th>
-              <th style={styles.th}>Answer</th>
+              <th className="contextual-th">ID</th>
+              <th className="contextual-th">Question</th>
+              <th className="contextual-th">Answer</th>
             </tr>
           </thead>
           <tbody>
             {data.map((item, index) => (
-              <tr key={item.id || index} style={styles.tr}>
-                <td style={styles.tdId}>{item.id || index + 1}</td>
-                <td style={styles.tdQuestion}>{item.question}</td>
-                <td style={styles.td}>{item.answer}</td>
+              <tr key={item.id || index}>
+                <td className="contextual-td-id">{item.id || index + 1}</td>
+                <td className="contextual-td-question">{item.question}</td>
+                <td className="contextual-td">{item.answer}</td>
               </tr>
             ))}
           </tbody>
@@ -422,8 +448,8 @@ function NavbarViewer({ data }: { data: any }) {
   return (
     <div>
       {data?.brand && (
-        <div style={styles.card}>
-          <h3 style={styles.cardTitle}>Brand Information</h3>
+        <div className="contextual-card">
+          <h3 className="contextual-card-title">Brand Information</h3>
           <p style={{ margin: '0 0 6px 0' }}>
             <strong>Name:</strong> {data.brand.name}
           </p>
@@ -437,13 +463,13 @@ function NavbarViewer({ data }: { data: any }) {
           )}
         </div>
       )}
-      <div style={styles.card}>
-        <h3 style={styles.cardTitle}>Navigation Links</h3>
-        <ul style={styles.ul}>
+      <div className="contextual-card">
+        <h3 className="contextual-card-title">Navigation Links</h3>
+        <ul className="contextual-ul">
           {data?.links?.map((link: any, index: number) => (
-            <li key={link.id || index} style={styles.li}>
+            <li key={link.id || index} className="contextual-li">
               <span>🔗 {link.label}</span>
-              <span style={styles.muted}>({link.href || 'No Href'})</span>
+              <span className="contextual-muted">({link.href || 'No Href'})</span>
             </li>
           ))}
         </ul>
@@ -453,224 +479,5 @@ function NavbarViewer({ data }: { data: any }) {
 }
 
 function JsonViewer({ data }: { data: any }) {
-  return <pre style={styles.pre}>{JSON.stringify(data, null, 2)}</pre>;
+  return <pre className="contextual-pre">{JSON.stringify(data, null, 2)}</pre>;
 }
-
-// Scoped inline styles for complete isolation and out-of-the-box beauty
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    fontFamily:
-      '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    color: '#1f2937',
-    backgroundColor: '#f9fafb',
-    padding: '24px',
-    margin: '0 auto',
-    width: '100%',
-    height: '100vh',
-  },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    borderBottom: '1px solid #e5e7eb',
-    paddingBottom: '16px',
-    marginBottom: '24px',
-  },
-  title: {
-    fontSize: '24px',
-    fontWeight: '700',
-    margin: '0 0 4px 0',
-  },
-  subtitle: {
-    fontSize: '14px',
-    color: '#6b7280',
-    margin: 0,
-  },
-  layout: {
-    display: 'flex',
-    gap: '24px',
-    flexWrap: 'wrap',
-  },
-  sidebar: {
-    width: '240px',
-    flexShrink: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-  },
-  sidebarTitle: {
-    fontSize: '12px',
-    fontWeight: '700',
-    color: '#9ca3af',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-    marginBottom: '4px',
-  },
-  tabButton: {
-    textAlign: 'left',
-    padding: '10px 14px',
-    backgroundColor: 'transparent',
-    border: '1px solid transparent',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#4b5563',
-    transition: 'all 0.2s',
-  },
-  tabButtonActive: {
-    backgroundColor: '#eff6ff',
-    color: '#2563eb',
-    border: '1px solid #bfdbfe',
-    fontWeight: '600',
-  },
-  content: {
-    flexGrow: 1,
-    minWidth: '280px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    padding: '20px',
-    minHeight: '400px',
-  },
-  contentHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    borderBottom: '1px solid #f3f4f6',
-    paddingBottom: '12px',
-    marginBottom: '16px',
-  },
-  countBadge: {
-    backgroundColor: '#f3f4f6',
-    color: '#374151',
-    padding: '2px 8px',
-    borderRadius: '6px',
-    fontSize: '12px',
-  },
-  tableWrapper: {
-    overflowX: 'auto',
-  },
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    textAlign: 'left',
-    fontSize: '14px',
-  },
-  th: {
-    backgroundColor: '#f9fafb',
-    color: '#374151',
-    padding: '10px 12px',
-    borderBottom: '1px solid #e5e7eb',
-    fontWeight: '600',
-  },
-  td: {
-    padding: '10px 12px',
-    borderBottom: '1px solid #f3f4f6',
-    color: '#4b5563',
-  },
-  tdId: {
-    padding: '10px 12px',
-    borderBottom: '1px solid #f3f4f6',
-    fontFamily: 'monospace',
-    color: '#9ca3af',
-    fontSize: '12px',
-  },
-  tdQuestion: {
-    padding: '10px 12px',
-    borderBottom: '1px solid #f3f4f6',
-    fontWeight: '600',
-    color: '#1f2937',
-  },
-  tr: {
-    transition: 'background-color 0.2s',
-  },
-  card: {
-    backgroundColor: '#f9fafb',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    padding: '16px',
-    marginBottom: '16px',
-  },
-  cardTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
-    marginTop: 0,
-    marginBottom: '12px',
-  },
-  ul: {
-    margin: 0,
-    paddingLeft: '20px',
-  },
-  li: {
-    marginBottom: '8px',
-    fontSize: '14px',
-  },
-  muted: {
-    color: '#9ca3af',
-    marginLeft: '6px',
-    fontSize: '12px',
-  },
-  pre: {
-    backgroundColor: '#1f2937',
-    color: '#f3f4f6',
-    padding: '16px',
-    borderRadius: '8px',
-    fontSize: '13px',
-    fontFamily: 'monospace',
-    overflowX: 'auto',
-  },
-  formPreviewWrapper: {
-    padding: '8px 0',
-  },
-  subTabHeader: {
-    display: 'flex',
-    gap: '8px',
-    marginBottom: '16px',
-    borderBottom: '1px solid #e5e7eb',
-    paddingBottom: '12px',
-  },
-  subTabButton: {
-    padding: '6px 12px',
-    backgroundColor: '#f3f4f6',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontSize: '13px',
-    fontWeight: 500,
-    color: '#4b5563',
-  },
-  subTabButtonActive: {
-    backgroundColor: '#eff6ff',
-    color: '#2563eb',
-    border: '1px solid #bfdbfe',
-    fontWeight: 600,
-  },
-  formInput: {
-    width: '100%',
-    padding: '8px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    fontSize: '14px',
-    outline: 'none',
-  },
-  submitButton: {
-    backgroundColor: '#2563eb',
-    color: '#ffffff',
-    padding: '10px 16px',
-    border: 'none',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    fontWeight: 600,
-    fontSize: '14px',
-  },
-  successBox: {
-    marginTop: '20px',
-    padding: '12px',
-    backgroundColor: '#f0fdf4',
-    border: '1px solid #bbf7d0',
-    borderRadius: '6px',
-    color: '#166534',
-    fontSize: '14px',
-  },
-};

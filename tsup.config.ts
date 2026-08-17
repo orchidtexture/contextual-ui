@@ -8,5 +8,8 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   minify: true,
+  loader: {
+    '.css': 'text',
+  },
   external: ['react', 'react-dom', 'next'],
 });
