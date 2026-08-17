@@ -6,7 +6,7 @@ export default async function CMSPage() {
   const rawData = await siteConnector.fetchData();
   const hydrated = siteSchema.hydrate(rawData);
 
-  // Serialize the hydrated context (omitting non-serializable Zod schema functions across the RSC boundary)
+  // Serialize the hydrated context (only passing raw data across the RSC boundary)
   const serializedContext = {
     raw: hydrated.raw,
   };

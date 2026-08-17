@@ -101,15 +101,19 @@ export function ContextualDashboard({
             {dataSections.map((key) => (
               <button
                 key={key}
-                onClick={() => setActiveTab(key)}
+                onClick={() => {
+                  console.log('Tab clicked:', key);
+                  setActiveTab(key);
+                }}
                 title={key.toUpperCase()}
                 className={`contextual-tab-button ${
                   activeTab === key ? 'contextual-tab-button-active' : ''
                 }`}
                 type="button"
+                style={{ position: 'relative', zIndex: 10 }}
               >
-                <span>📂</span>
-                <span className="label">{key.toUpperCase()}</span>
+                <span style={{ pointerEvents: 'none' }}>📂</span>
+                <span className="label" style={{ pointerEvents: 'none' }}>{key.toUpperCase()}</span>
               </button>
             ))}
           </div>
@@ -120,15 +124,19 @@ export function ContextualDashboard({
               {formKeys.map((key) => (
                 <button
                   key={key}
-                  onClick={() => setActiveTab(key)}
+                  onClick={() => {
+                    console.log('Form tab clicked:', key);
+                    setActiveTab(key);
+                  }}
                   title={key.toUpperCase()}
                   className={`contextual-tab-button ${
                     activeTab === key ? 'contextual-tab-button-active' : ''
                   }`}
                   type="button"
+                  style={{ position: 'relative', zIndex: 10 }}
                 >
-                  <span>📝</span>
-                  <span className="label">{key.toUpperCase()}</span>
+                  <span style={{ pointerEvents: 'none' }}>📝</span>
+                  <span className="label" style={{ pointerEvents: 'none' }}>{key.toUpperCase()}</span>
                 </button>
               ))}
             </div>

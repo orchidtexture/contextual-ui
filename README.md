@@ -1,18 +1,10 @@
 # Contextual UI
 
+[![npm version](https://img.shields.io/npm/v/@contextual-ui/core.svg?style=flat-square)](https://www.npmjs.com/package/@contextual-ui/core)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
+
 **Contextual UI** is a headless component library designed for the modern web—where your UI isn't just consumed by humans, but also by search engines and AI agents.
-
-Built with **React**, **Zod**, and **Radix UI**, it provides the infrastructure to build accessible, type-safe, and SEO-optimized components with zero design opinion.
-
-## 🚀 Key Features
-
-- **🤖 Agentic AI Ready**: Built-in methods to export clean, structured data for LLM context windows.
-- **🔍 Schema.org SEO**: Automatically generates and injects JSON-LD for components like FAQs.
-- **🏗️ Form Factory**: A type-safe engine to create complex forms from Zod schemas with zero boilerplate.
-- **⚛️ Headless & Flexible**: Uses `@radix-ui/react-slot` (asChild) for complete styling freedom.
-- **🛡️ Type Safe**: Deep TypeScript integration with Zod for end-to-end validation.
-
----
 
 ## 🧠 The Philosophy: Websites as a Single Source of Truth (SSOT)
 
@@ -31,23 +23,38 @@ In short, Contextual UI transforms your application from a simple visual pamphle
 
 ---
 
-## 📦 Installation
+## 📦 Monorepo Ecosystem
 
-```bash
-npm install contextual-ui zod
-# or
-pnpm add contextual-ui zod
-```
+Contextual UI is built as an open-core monorepo. Here is how the packages are organized:
+
+### Packages (`packages/`)
+- [`@contextual-ui/core`](./packages/core/README.md) — The core headless React components and Zod schemas (Faq, Navbar, Form Factory, etc.).
+- [`@contextual-ui/dashboard`](./packages/dashboard) — UI components for building internal CMS and Dashboards.
+
+### Connectors (`connectors/`)
+- [`@contextual-ui/connector-static`](./connectors/static) — Plugin for static data sourcing.
+
+### Apps (`apps/`)
+- [`starter-kit`](./apps/starter-kit) — A reference Next.js implementation showcasing the ecosystem in action.
 
 ---
 
-## 🧩 Components
+## 🚀 Quick Start
 
-### 1. FAQ (SEO & AI Optimized)
-The FAQ component handles state, accessibility, and automatically injects `FAQPage` JSON-LD into your page for search engine indexing.
+Get started with the core component library in your React/Next.js project.
+
+```bash
+npm install @contextual-ui/core zod
+# or
+pnpm add @contextual-ui/core zod
+```
+
+### Example: SEO & AI Optimized FAQ
+
+Contextual UI components are headless, type-safe, and automatically handle structural metadata.
 
 ```tsx
-import { Faq } from 'contextual-ui';
+import { Faq } from '@contextual-ui/core';
 
 const data = [
   { id: '1', question: 'What is Contextual UI?', answer: 'A headless library...' }
@@ -71,225 +78,49 @@ export function FaqSection() {
 }
 ```
 
-**Why use it?**
-- **SEO**: It automatically renders a JSON-LD `<script>` tag, ensuring search engines like Google can index your FAQ content with rich results.
-- **AI**: Use `exportAgentData(data)` to provide clean text to an LLM without HTML noise.
+For more examples (Navbar, Forms, CMS Integration), see the [`@contextual-ui/core` documentation](./packages/core/README.md).
 
 ---
 
-### 2. Navbar (Mobile Responsive & Data-Driven)
-The Navbar component provides a robust structure for site navigation, handling mobile toggles and accessible state out of the box.
+## ✨ Key Features
 
-```tsx
-import { Navbar } from 'contextual-ui';
-
-const navData = {
-  brand: { name: 'Contextual UI', href: '/' },
-  links: [
-    { id: '1', label: 'Features', href: '#features' },
-    { id: '2', label: 'Docs', href: '/docs' },
-  ]
-};
-
-export function Header() {
-  return (
-    <Navbar.Root data={navData} className="flex justify-between p-4">
-      <Navbar.Brand className="font-bold text-xl" />
-      
-      {/* Desktop Navigation */}
-      <Navbar.Content className="hidden md:flex gap-4">
-        {navData.links.map(link => (
-          <a key={link.id} href={link.href}>{link.label}</a>
-        ))}
-      </Navbar.Content>
-
-      {/* Mobile Toggle */}
-      <Navbar.Toggle className="md:hidden" />
-
-      {/* Mobile Navigation */}
-      <Navbar.Menu className="md:hidden flex flex-col mt-4">
-        {navData.links.map(link => (
-          <a key={link.id} href={link.href} className="py-2">{link.label}</a>
-        ))}
-      </Navbar.Menu>
-    </Navbar.Root>
-  );
-}
-```
-
-**Why use it?**
-- **Responsive State**: Built-in state for mobile menu toggles without `useState` boilerplate.
-- **Compositional Pattern**: Freedom to structure desktop and mobile menus exactly how you want.
-- **Data Validation**: Optional Zod schema validation for nested navigation links.
+- **🏗️ Form Factory**: A type-safe engine to create complex forms from Zod schemas with zero boilerplate.
+- **⚛️ Headless & Flexible**: Uses `@radix-ui/react-slot` (`asChild`) for complete styling freedom.
+- **🛡️ End-to-End Type Safety**: Deep TypeScript integration with Zod for end-to-end validation.
+- **🔍 Schema-Driven Metadata**: Automated structured data syncing (JSON-LD) and Agentic context exports.
 
 ---
 
-### 3. Form Factory (`createForm`)
-Stop writing `useState` and manual validation for every form. Define a schema, and let the factory build the components.
+## 🛠️ Contributing Guide
 
-```tsx
-'use client';
-import { createForm } from 'contextual-ui';
-import { z } from 'zod';
+We welcome contributions! To get started developing locally in this monorepo:
 
-// 1. Define your schema
-const ContactSchema = z.object({
-  email: z.string().email("Invalid email"),
-  message: z.string().min(10, "Message too short"),
-});
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v18+)
+- [pnpm](https://pnpm.io/) (v9+)
 
-// 2. Create your typed components
-const Form = createForm(ContactSchema);
+### Setup
 
-export default function ContactSection() {
-  return (
-    <Form.Root onSubmit={(data) => console.log(data)}>
-      <Form.Section 
-        title="Personal Information" 
-        description="We'll never share your email."
-        className="space-y-4 mb-6"
-      >
-        <Form.Field name="email">
-          <Form.Label>Email Address</Form.Label>
-          <Form.Input className="input-style" />
-          <Form.ErrorMessage className="error-style" />
-        </Form.Field>
-      </Form.Section>
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-org/contextual-ui.git
+cd contextual-ui
 
-      <Form.Section 
-        title="Your Message"
-        className="space-y-4 mb-6"
-      >
-        <Form.Field name="message">
-          <Form.Label>Message</Form.Label>
-          <Form.TextArea className="input-style" />
-          <Form.ErrorMessage />
-        </Form.Field>
-      </Form.Section>
+# 2. Install dependencies
+pnpm install
 
-      <Form.Submit>Send Message</Form.Submit>
-    </Form.Root>
-  );
-}
+# 3. Build the core packages
+pnpm build
+
+# 4. Start development mode
+pnpm dev
 ```
 
-**Why use it?**
-- **Type Safety**: The `name` prop on `Field` only accepts keys defined in your Zod schema.
-- **Section Grouping**: Organize complex forms cleanly with built-in `Form.Section` headers and descriptions.
-- **Accessibility**: Automatically manages `aria-invalid`, `htmlFor`, and focus states.
-- **Logic-less UI**: No need to manage `onChange` or `value` manually.
+Check out the [Architecture Refactor Plan](./ARCHITECTURE_REFACTOR_PLAN.md) to understand how the core is decoupled from data connectors and dashboard components.
 
 ---
 
-## 🤖 AI Agent Integration & The SSOT Registry (Schemas + Connectors)
+## 📄 License & Community
 
-Contextual UI components are designed to be "read" by AI. To enforce the Single Source of Truth (SSOT) pattern without code duplication between your API and CMS, Contextual UI decouples structural component definitions (Zod schemas, JSON-LD generators, agent formatters) from concrete data payloads using **Schemas** and **Connectors**.
-
-### 1. Define your Schema (Client & Server Safe)
-Define the shape of your site content once in a shared configuration file. This file contains no database drivers or server secrets, making it safe to import on both the client and server.
-
-```typescript
-// data/site.schema.ts (Safe for Client & Server)
-import { defineSchema, faqRegistry, navbarRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  faq: faqRegistry(),
-  navbar: navbarRegistry(),
-});
-```
-
-### 2. Connect Your Data Sources (Server-Only)
-Bind your schema to any data source (Postgres, Notion, CMS, or static JSON) using connectors. This single connector powers **both** your API and your CMS.
-
-```typescript
-// data/site.server.ts (Server-Only)
-import { siteSchema } from './site.schema';
-import { getDictionary } from '@/dictionaries';
-
-export const siteContext = siteSchema.withConnector(async () => {
-  const dict = await getDictionary('en');
-  return {
-    faq: dict.faq.items,
-    navbar: dict.nav,
-  };
-});
-```
-
-### 3. Expose the Agent API
-Instantly expose your entire validated SSOT to AI agents and web crawlers using our framework-agnostic route handlers.
-
-**Next.js App Router (`app/contextual/api/route.ts`):**
-```typescript
-import { createRouteHandler } from 'contextual-ui/server';
-import { siteContext } from '@/data/site.server';
-
-export const { GET } = createRouteHandler(siteContext);
-```
-
----
-
-## 📊 The CMS Dashboard & Hydration
-
-Contextual UI includes a built-in, beautifully styled, and responsive CMS Dashboard featuring a **collapsible sidebar navigation** and **Schema-aware JSON-LD inspection tabs**. 
-
-Because schemas and functions are separated from raw data, your Server Component uses the exact same connector to fetch data, passing serializable JSON across the RSC boundary to be hydrated on the client.
-
-```tsx
-// 1. Fetch data using the server context connector (app/contextual/cms/page.tsx)
-import { siteContext } from '@/data/site.server';
-import { CMSClient } from './CMSClient';
-
-export default async function CMSPage() {
-  // Fetches data via the connector (Postgres, Notion, Dictionary, etc.)
-  const rawData = await siteContext.fetchData(); 
-  return <CMSClient rawData={rawData} />;
-}
-```
-
-```tsx
-// 2. Hydrate on the Client Component (app/contextual/cms/CMSClient.tsx)
-'use client';
-
-import { ContextualDashboard } from 'contextual-ui/dashboard';
-import { siteSchema } from '@/data/site.schema'; // Safe to import! No DB drivers.
-import { ContactSchema } from '@/components/ContactSection';
-
-export function CMSClient({ rawData }: { rawData: any }) {
-  // Hydrate the shared schema with serialized server data
-  const context = siteSchema.hydrate(rawData);
-
-  return (
-    <ContextualDashboard 
-      context={context} 
-      title="Company Knowledge Base & CMS" 
-      forms={{
-        contact: ContactSchema 
-      }}
-    />
-  );
-}
-```
-*Features:*
-- **Collapsible Sidebar**: Easily toggle the sidebar to maximize screen space with smooth CSS transitions and tooltips.
-- **Current Data vs. JSON-LD Tabs**: Instantly switch between viewing raw structured data tables and the generated Schema.org JSON-LD markup that search engines and AI crawlers consume.
-- **Interactive Form Sandboxes**: Passing Zod schemas automatically generates fully validated sandboxes and schema specifications.
-
----
-
-## 🛠️ Customization
-
-Every component supports the `asChild` pattern via Radix UI. This means you can use your own styled components or any UI library (Tailwind, Shadcn, etc.):
-
-```tsx
-<Form.Submit asChild>
-  <button className="your-custom-tailwind-classes">
-    Submit
-  </button>
-</Form.Submit>
-```
-
----
-
-## 📜 License
-
-MIT © Tasuku Studio, Inc.
+- **Community**: Join the discussion on GitHub Discussions or open an Issue.
+- **License**: MIT © Tasuku Studio, Inc.
