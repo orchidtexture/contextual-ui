@@ -10,7 +10,7 @@ export interface ContextualDashboardProps {
 
 export function ContextualDashboard({
   context,
-  title = 'Contextual UI - SSOT Dashboard',
+  title = 'Contextual UI - Dashboard',
   className = '',
 }: ContextualDashboardProps) {
   const [activeTab, setActiveTab] = useState<string>(
@@ -18,6 +18,22 @@ export function ContextualDashboard({
   );
 
   const sections = Object.keys(context.raw);
+  const activeData = context.raw[activeTab];
+
+  const faqItems = getFaqItems(activeData);
+  const faqTitle = getFaqTitle(activeData);
+  const isFaq = isFaqSection(activeTab, activeData);
+  const isNavbar = isNavbarSection(activeTab, activeData);
+
+  const itemCount = isFaq
+    ? faqItems.length
+    : Array.isArray(activeData)
+    ? activeData.length
+    : Array.isArray(activeData?.items)
+    ? activeData.items.length
+    : Array.isArray(activeData?.links)
+    ? activeData.links.length
+    : null;
 
   return (
     <div
@@ -32,9 +48,6 @@ export function ContextualDashboard({
           <p style={styles.subtitle}>
             Single Source of Truth (SSOT) inspection for AI agents, search engines, and human operators.
           </p>
-        </div>
-        <div style={styles.badge}>
-          <span>🟢 Active Registry</span>
         </div>
       </div>
 
@@ -64,19 +77,17 @@ export function ContextualDashboard({
               <div style={styles.contentHeader}>
                 <h2>Section: <span style={{ color: '#2563eb' }}>{activeTab}</span></h2>
                 <span style={styles.countBadge}>
-                  {Array.isArray(context.raw[activeTab])
-                    ? `${context.raw[activeTab].length} items`
-                    : 'Object Data'}
+                  {itemCount !== null ? `${itemCount} items` : 'Object Data'}
                 </span>
               </div>
 
               {/* Schema-driven Renderers */}
-              {activeTab === 'faq' && Array.isArray(context.raw[activeTab]) ? (
-                <FaqTable data={context.raw[activeTab]} />
-              ) : activeTab === 'navbar' ? (
-                <NavbarViewer data={context.raw[activeTab]} />
+              {isFaq ? (
+                <FaqTable data={faqItems} title={faqTitle} />
+              ) : isNavbar ? (
+                <NavbarViewer data={activeData} />
               ) : (
-                <JsonViewer data={context.raw[activeTab]} />
+                <JsonViewer data={activeData} />
               )}
             </div>
           )}
@@ -86,27 +97,76 @@ export function ContextualDashboard({
   );
 }
 
-function FaqTable({ data }: { data: any[] }) {
+function getFaqItems(data: any): any[] {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    if (Array.isArray(data.items)) return data.items;
+    for (const val of Object.values(data)) {
+      if (Array.isArray(val) && val.length > 0 && (val[0]?.question || val[0]?.answer)) {
+        return val;
+      }
+    }
+  }
+  return [];
+}
+
+function getFaqTitle(data: any): string | undefined {
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    if (typeof data.title === 'string') return data.title;
+  }
+  return undefined;
+}
+
+function isFaqSection(tab: string, data: any): boolean {
+  if (tab.toLowerCase() === 'faq') return true;
+  if (Array.isArray(data)) {
+    return data.length === 0 || data[0]?.question !== undefined;
+  }
+  if (data && typeof data === 'object') {
+    if (Array.isArray(data.items) && (data.items.length === 0 || data.items[0]?.question !== undefined)) {
+      return true;
+    }
+    for (const val of Object.values(data)) {
+      if (Array.isArray(val) && val.length > 0 && val[0]?.question !== undefined) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function isNavbarSection(tab: string, data: any): boolean {
+  if (tab.toLowerCase() === 'navbar' || tab.toLowerCase() === 'nav') return true;
+  if (data && typeof data === 'object' && (data.brand !== undefined || Array.isArray(data.links))) {
+    return true;
+  }
+  return false;
+}
+
+function FaqTable({ data, title }: { data: any[]; title?: string }) {
   return (
-    <div style={styles.tableWrapper}>
-      <table style={styles.table}>
-        <thead>
-          <tr>
-            <th style={styles.th}>ID</th>
-            <th style={styles.th}>Question</th>
-            <th style={styles.th}>Answer</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item) => (
-            <tr key={item.id} style={styles.tr}>
-              <td style={styles.tdId}>{item.id}</td>
-              <td style={styles.tdQuestion}>{item.question}</td>
-              <td style={styles.td}>{item.answer}</td>
+    <div>
+      {title && <h3 style={styles.cardTitle}>{title}</h3>}
+      <div style={styles.tableWrapper}>
+        <table style={styles.table}>
+          <thead>
+            <tr>
+              <th style={styles.th}>ID</th>
+              <th style={styles.th}>Question</th>
+              <th style={styles.th}>Answer</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((item, index) => (
+              <tr key={item.id || index} style={styles.tr}>
+                <td style={styles.tdId}>{item.id || index + 1}</td>
+                <td style={styles.tdQuestion}>{item.question}</td>
+                <td style={styles.td}>{item.answer}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -114,19 +174,19 @@ function FaqTable({ data }: { data: any[] }) {
 function NavbarViewer({ data }: { data: any }) {
   return (
     <div>
-      {data.brand && (
+      {data?.brand && (
         <div style={styles.card}>
           <h3 style={styles.cardTitle}>Brand Information</h3>
-          <p><strong>Name:</strong> {data.brand.name}</p>
-          <p><strong>Href:</strong> {data.brand.href}</p>
-          {data.brand.logo && <p><strong>Logo:</strong> {data.brand.logo}</p>}
+          <p style={{ margin: '0 0 6px 0' }}><strong>Name:</strong> {data.brand.name}</p>
+          <p style={{ margin: '0 0 6px 0' }}><strong>Href:</strong> {data.brand.href}</p>
+          {data.brand.logo && <p style={{ margin: 0 }}><strong>Logo:</strong> {data.brand.logo}</p>}
         </div>
       )}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>Navigation Links</h3>
         <ul style={styles.ul}>
-          {data.links?.map((link: any) => (
-            <li key={link.id} style={styles.li}>
+          {data?.links?.map((link: any, index: number) => (
+            <li key={link.id || index} style={styles.li}>
               <span>🔗 {link.label}</span>
               <span style={styles.muted}>({link.href || 'No Href'})</span>
             </li>
@@ -154,7 +214,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: '1px solid #e5e7eb',
     borderRadius: '12px',
     padding: '24px',
-    maxWidth: '1200px',
+    // maxWidth: '1200px',
     margin: '0 auto',
     boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
   },
@@ -176,17 +236,10 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#6b7280',
     margin: 0,
   },
-  badge: {
-    backgroundColor: '#def7ec',
-    color: '#03543f',
-    padding: '4px 12px',
-    borderRadius: '9999px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
   layout: {
     display: 'flex',
     gap: '24px',
+    flexWrap: 'wrap',
   },
   sidebar: {
     width: '240px',
@@ -218,11 +271,12 @@ const styles: Record<string, React.CSSProperties> = {
   tabButtonActive: {
     backgroundColor: '#eff6ff',
     color: '#2563eb',
-    borderColor: '#bfdbfe',
+    border: '1px solid #bfdbfe',
     fontWeight: '600',
   },
   content: {
     flexGrow: 1,
+    minWidth: '280px',
     backgroundColor: '#ffffff',
     border: '1px solid #e5e7eb',
     borderRadius: '8px',
