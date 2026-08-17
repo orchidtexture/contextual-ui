@@ -71,15 +71,15 @@ Build independent packages responsible for data retrieval and injection.
 
 ---
 
-## Phase 5: Documentation & Starter Kit (⏳ Pending)
+## Phase 5: Documentation & Starter Kit (✅ Completed)
 Update external-facing materials to reflect the new architecture.
 
-- [ ] Update `README.md` to reflect the Open Core philosophy and monorepo packages.
-- [ ] Build `/apps/starter-kit` demonstrating the flow:
+- [x] Update `README.md` to reflect the Open Core philosophy and monorepo packages.
+- [x] Build `/apps/starter-kit` demonstrating the flow:
   1. Define schema in `@contextual-ui/core`
   2. Fetch data via `@contextual-ui/connector-static`
   3. Validate and hydrate in UI.
-- [ ] Document the Zod Metadata Protocol (`cx` utility).
+- [x] Document the Zod Metadata Protocol (`cx` utility).
 
 ---
 
