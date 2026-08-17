@@ -1,2 +1,7 @@
+packages:
+  - 'packages/*'
+  - 'connectors/*'
+  - 'apps/*'
 allowBuilds:
+  '0': esbuild
   esbuild: true

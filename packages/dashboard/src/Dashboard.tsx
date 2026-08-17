@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { createForm } from '../components/form';
+import { createForm, getFieldMetadata } from '@contextual-ui/core';
 import dashboardCss from './dashboard.css';
 
 export interface ContextualDashboardProps {
@@ -253,10 +253,17 @@ function AutoFormViewer({ schema }: { schema: any }) {
             }}
           >
             {fieldNames.map((fieldName) => {
-              const isTextArea =
+              const typeDef = fieldsMap[fieldName];
+              const meta = getFieldMetadata(typeDef) || {};
+              const widgetType = meta.widget || (
                 fieldName.toLowerCase().includes('message') ||
                 fieldName.toLowerCase().includes('description') ||
-                fieldName.toLowerCase().includes('content');
+                fieldName.toLowerCase().includes('content')
+                  ? 'textarea'
+                  : 'text'
+              );
+              const label = meta.label || (fieldName.charAt(0).toUpperCase() + fieldName.slice(1));
+              const placeholder = meta.placeholder || `Enter ${fieldName}...`;
 
               return (
                 <div key={fieldName} style={{ marginBottom: '16px' }}>
@@ -270,17 +277,18 @@ function AutoFormViewer({ schema }: { schema: any }) {
                         color: '#374151',
                       }}
                     >
-                      {fieldName.charAt(0).toUpperCase() + fieldName.slice(1)}
+                      {label}
                     </DynamicForm.Label>
-                    {isTextArea ? (
+                    {widgetType === 'textarea' || widgetType === 'rich-text' ? (
                       <DynamicForm.TextArea
                         className="contextual-form-input"
-                        placeholder={`Enter ${fieldName}...`}
+                        placeholder={placeholder}
+                        rows={meta.rows || 4}
                       />
                     ) : (
                       <DynamicForm.Input
                         className="contextual-form-input"
-                        placeholder={`Enter ${fieldName}...`}
+                        placeholder={placeholder}
                       />
                     )}
                     <DynamicForm.ErrorMessage

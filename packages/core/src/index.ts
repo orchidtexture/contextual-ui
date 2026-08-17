@@ -13,5 +13,5 @@ export type * from './components/navbar/navbar.types';
 export { NavbarDataSchema, NavItemSchema } from './components/navbar/navbar.schema';
 export { generateNavbarJsonLd, exportAgentData as exportNavbarAgentData, navbarRegistry } from './components/navbar/navbar.utils';
 
-export { defineSchema, staticConnector } from './registry';
-export type { SchemaSection, SchemaConfig, Connector, ServerContext, HydratedContext } from './registry';
+export { defineSchema, cx, getFieldMetadata } from './registry';
+export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata } from './registry';
