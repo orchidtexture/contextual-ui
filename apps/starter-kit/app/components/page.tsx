@@ -11,30 +11,33 @@ export default function ComponentsPage() {
   ];
 
   return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', padding: '32px', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <Link href="/" style={{ color: '#2563eb', textDecoration: 'none', fontSize: '14px' }}>
+    <main className="min-h-screen bg-slate-50 font-sans text-slate-900 px-6 py-12 max-w-3xl mx-auto">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="text-blue-600 hover:text-blue-800 no-underline text-sm font-medium inline-flex items-center gap-1.5 transition-colors"
+        >
           &larr; Back to Home
         </Link>
       </div>
 
-      <div style={{ marginBottom: '32px' }}>
+      <div className="mb-8 bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
         <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual-ui.dev">
-          <Breadcrumb.List style={{ display: 'flex', listStyle: 'none', padding: 0, margin: 0, gap: '8px', alignItems: 'center', fontSize: '14px' }}>
+          <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
             {breadcrumbData.map((item, index) => {
               const isLast = index === breadcrumbData.length - 1;
               return (
-                <Breadcrumb.Item key={item.id} id={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center gap-2">
                   {isLast ? (
-                    <Breadcrumb.Page style={{ fontWeight: 600, color: '#111827' }}>
+                    <Breadcrumb.Page className="font-semibold text-slate-900">
                       {item.label}
                     </Breadcrumb.Page>
                   ) : (
                     <>
-                      <Breadcrumb.Link href={item.url!} style={{ color: '#2563eb', textDecoration: 'none' }}>
+                      <Breadcrumb.Link href={item.url!} className="text-blue-600 hover:underline no-underline">
                         {item.label}
                       </Breadcrumb.Link>
-                      <Breadcrumb.Separator style={{ color: '#9ca3af' }}>
+                      <Breadcrumb.Separator className="text-slate-400">
                         /
                       </Breadcrumb.Separator>
                     </>
@@ -46,34 +49,36 @@ export default function ComponentsPage() {
         </Breadcrumb.Root>
       </div>
 
-      <h1 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>Component Showcase</h1>
-      <p style={{ color: '#4b5563', marginBottom: '32px' }}>
-        Explore Contextual UI components designed for humans, search engines, and AI agents.
-      </p>
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 mb-2">Component Showcase</h1>
+        <p className="text-slate-600 text-base">
+          Explore Contextual UI components designed for humans, search engines, and AI agents.
+        </p>
+      </div>
 
-      <section id="breadcrumb" style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '24px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px' }}>Breadcrumb</h2>
-        <p style={{ color: '#4b5563', marginBottom: '16px', fontSize: '15px', lineHeight: '1.5' }}>
-          The Breadcrumb component automatically injects Schema.org <code style={{ background: '#e5e7eb', padding: '2px 6px', borderRadius: '4px' }}>BreadcrumbList</code> JSON-LD for search engine indexing while enforcing accessible semantic navigation.
+      <section id="breadcrumb" className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+        <h2 className="text-xl font-bold text-slate-900 mb-3">Breadcrumb</h2>
+        <p className="text-slate-600 mb-6 text-sm leading-relaxed">
+          The Breadcrumb component automatically injects Schema.org <code className="bg-slate-100 text-slate-800 px-1.5 py-0.5 rounded text-xs font-mono border border-slate-200">BreadcrumbList</code> JSON-LD for search engine indexing while enforcing accessible semantic navigation.
         </p>
 
-        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '16px' }}>
+        <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 shadow-inner">
           <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual-ui.dev">
-            <Breadcrumb.List style={{ display: 'flex', listStyle: 'none', padding: 0, margin: 0, gap: '8px', alignItems: 'center', fontSize: '14px' }}>
+            <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
               {breadcrumbData.map((item, index) => {
                 const isLast = index === breadcrumbData.length - 1;
                 return (
-                  <Breadcrumb.Item key={item.id} id={item.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center gap-2">
                     {isLast ? (
-                      <Breadcrumb.Page style={{ fontWeight: 600, color: '#111827' }}>
+                      <Breadcrumb.Page className="font-semibold text-slate-900">
                         {item.label}
                       </Breadcrumb.Page>
                     ) : (
                       <>
-                        <Breadcrumb.Link href={item.url!} style={{ color: '#2563eb', textDecoration: 'none' }}>
+                        <Breadcrumb.Link href={item.url!} className="text-blue-600 hover:underline no-underline">
                           {item.label}
                         </Breadcrumb.Link>
-                        <Breadcrumb.Separator style={{ color: '#9ca3af' }}>
+                        <Breadcrumb.Separator className="text-slate-400">
                           /
                         </Breadcrumb.Separator>
                       </>
