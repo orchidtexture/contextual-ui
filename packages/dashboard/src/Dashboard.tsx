@@ -157,9 +157,9 @@ export function ContextualDashboard({
               </div>
 
               {/* Schema-driven Renderers or Auto-Generated Form Sandboxes */}
-              {formSchema ? (
+              {formSchema && (
                 <AutoFormViewer schema={formSchema} />
-              ) : generateJsonLd ? (
+              ) && generateJsonLd ? (  // TODO: inject jsonld schema from form
                 <SchemaAwareViewer 
                   data={activeData} 
                   generateJsonLd={generateJsonLd} 

@@ -97,7 +97,58 @@ export function Header() {
 
 ---
 
-### 3. Form Factory (`createForm`)
+### 3. Breadcrumb (SEO & AI Hierarchical Navigation)
+The Breadcrumb component renders accessible breadcrumb navigation while automatically injecting Schema.org `BreadcrumbList` JSON-LD and exposing structural data for AI agents.
+
+```tsx
+import { Breadcrumb } from '@contextual-ui/core';
+
+const breadcrumbData = [
+  { id: '1', label: 'Home', url: '/' },
+  { id: '2', label: 'Documentation', url: '/docs' },
+  { id: '3', label: 'Core Components', url: '/docs/core' }
+];
+
+export function PageBreadcrumbs() {
+  return (
+    <Breadcrumb.Root data={breadcrumbData} baseUrl="https://yoursite.com">
+      <Breadcrumb.List className="flex items-center space-x-2 text-sm text-gray-600">
+        {breadcrumbData.map((item, index) => {
+          const isLast = index === breadcrumbData.length - 1;
+
+          return (
+            <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center space-x-2">
+              {isLast ? (
+                <Breadcrumb.Page className="font-semibold text-gray-900">
+                  {item.label}
+                </Breadcrumb.Page>
+              ) : (
+                <>
+                  <Breadcrumb.Link href={item.url} className="hover:underline text-blue-600">
+                    {item.label}
+                  </Breadcrumb.Link>
+                  <Breadcrumb.Separator className="text-gray-400">
+                    /
+                  </Breadcrumb.Separator>
+                </>
+              )}
+            </Breadcrumb.Item>
+          );
+        })}
+      </Breadcrumb.List>
+    </Breadcrumb.Root>
+  );
+}
+```
+
+**Why use it?**
+- **SEO Rich Results**: Automatically outputs Schema.org `BreadcrumbList` metadata so search engines can display rich breadcrumb trails in search results.
+- **AI Agent Context**: Gives AI agents an explicit site taxonomy and hierarchical path instantly.
+- **Accessibility**: Enforces semantic `<nav aria-label="breadcrumb">`, `<ol>`, and `aria-current="page"` out of the box.
+
+---
+
+### 4. Form Factory (`createForm`)
 Stop writing `useState` and manual validation for every form. Define a schema, and let the factory build the components.
 
 ```tsx
