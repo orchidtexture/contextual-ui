@@ -12,6 +12,8 @@ export interface NavbarBrandProps {
   children?: ReactNode;
   className?: string;
   asChild?: boolean;
+  href?: string;
+  [key: string]: any;
 }
 
 export interface NavbarContentProps {

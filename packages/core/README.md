@@ -67,7 +67,9 @@ const navData = {
 export function Header() {
   return (
     <Navbar.Root data={navData} className="flex justify-between p-4">
-      <Navbar.Brand className="font-bold text-xl" />
+      <Navbar.Brand href="/" className="font-bold text-xl" />
+      {/* Or with custom children: */}
+      {/* <Navbar.Brand href="/" className="font-bold text-xl flex items-center gap-2"><span>✨</span> Brand Name</Navbar.Brand> */}
       
       {/* Desktop Navigation */}
       <Navbar.Content className="hidden md:flex gap-4">

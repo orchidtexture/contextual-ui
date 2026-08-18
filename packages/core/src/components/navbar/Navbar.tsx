@@ -57,17 +57,19 @@ export function Root({
   );
 }
 
-export function Brand({ children, asChild, className }: NavbarBrandProps) {
+export function Brand({ children, asChild, className, href, ...props }: NavbarBrandProps) {
   const { data } = React.useContext(NavbarContext)!;
   const Comp = asChild ? Slot : 'a';
+  const targetHref = href || data?.brand?.href || '/';
   
   // If no children, try to use data.brand
   if (!children && data?.brand) {
     return (
       <a 
-        href={data.brand.href} 
+        href={href || data.brand.href} 
         className={className}
         data-contextual="navbar-brand"
+        {...props}
       >
         {data.brand.logo && <img src={data.brand.logo} alt={data.brand.name} />}
         <span>{data.brand.name}</span>
@@ -77,8 +79,10 @@ export function Brand({ children, asChild, className }: NavbarBrandProps) {
 
   return (
     <Comp 
+      href={asChild ? href : targetHref}
       data-contextual="navbar-brand"
       className={className}
+      {...props}
     >
       {children}
     </Comp>
