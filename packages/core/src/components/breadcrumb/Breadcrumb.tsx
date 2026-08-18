@@ -123,10 +123,11 @@ export function Page({ children, asChild, className, ...props }: BreadcrumbPageP
 }
 
 export function Separator({ children, asChild, className, ...props }: BreadcrumbSeparatorProps) {
-  const Comp = asChild ? Slot : 'li';
+  const Comp = asChild ? Slot : 'span';
   return (
     <Comp
       aria-hidden="true"
+      role="presentation"
       data-contextual="breadcrumb-separator"
       className={className}
       {...props}
