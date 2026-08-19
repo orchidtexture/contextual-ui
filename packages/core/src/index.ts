@@ -21,3 +21,6 @@ export { generateNavbarJsonLd, exportAgentData as exportNavbarAgentData, navbarR
 
 export { defineSchema, cx, getFieldMetadata } from './registry';
 export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata } from './registry';
+
+export type { Thing, WithContext, Graph } from 'schema-dts';
+
