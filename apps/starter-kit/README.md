@@ -8,10 +8,9 @@ This is the official reference implementation for **Contextual UI**. It is a [Ne
 
 This starter kit showcases the **Single Source of Truth (SSOT)** pattern:
 
-- **Frontend UI**: Implementing headless `@contextual-ui/core` components (`Navbar`, `Faq`, `Breadcrumb`, `createForm`).
+- **Frontend UI**: Implementing headless `@contextual-ui/core` components (`Navbar`, `Faq`, `Breadcrumb`, `createForm`) with zero `any` types.
 - **Data Connectors**: Using `@contextual-ui/connector-static` to bind schemas to static data sources.
 - **Sitewide Knowledge Graph**: Exposing an interconnected Schema.org `/api/graph.json` endpoint via `@contextual-ui/jsonld-graph-builder`.
-- **AI Agent API**: Exposing your structured data as clean, agent-readable JSON via `/api/contextual`.
 - **CMS Dashboard**: Rendering `@contextual-ui/dashboard` to inspect raw data, validate JSON-LD, and edit content visually.
 
 ---
@@ -51,7 +50,7 @@ Define your data structures using standard Zod schemas combined with Contextual 
 
 ```typescript
 // data/site.schema.ts
-import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry, cx } from '@contextual-ui/core/server';
+import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from '@contextual-ui/core/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
@@ -60,11 +59,11 @@ export const siteSchema = defineSchema({
   navbar: navbarRegistry(),
   faq: faqRegistry(),
 
-  // Custom schema section with UI hints via cx()
+  // Custom schema section with standard Zod validation and field description
   announcement: {
     schema: z.object({
       enabled: z.boolean(),
-      message: cx(z.string(), { label: 'Announcement Banner Text', widget: 'text' }),
+      message: z.string().describe('Announcement Banner Text'),
     }),
   },
 });
@@ -72,58 +71,78 @@ export const siteSchema = defineSchema({
 
 ---
 
-### Step 3: Connect your Data Source (`data/site.server.ts`)
+### Step 3: Connect your Data Source & App (`data/site.server.ts`)
 
-Bind your schema to a data source using a server connector (or database/CMS client):
+Bind your schema to a data connector using `createContextualApp`. This automatically infers TypeScript types and wraps hydration into a unified instance:
 
 ```typescript
 // data/site.server.ts
+import { siteSchema } from './site.schema';
 import { staticConnector } from '@contextual-ui/connector-static';
+import { createContextualApp, InferData } from '@contextual-ui/core/server';
 
-export const siteConnector = staticConnector({
+const connector = staticConnector({
   website: {
-    name: 'My Website',
+    name: 'Contextual UI Starter Kit',
     url: 'https://example.com',
-    description: 'A modern Next.js website powered by Contextual UI.',
-  },
-  navbar: {
-    brand: { name: 'My Website', href: '/' },
-    links: [
-      { id: '1', label: 'Home', href: '/' },
-      { id: '2', label: 'Components', href: '/components' },
-    ],
+    description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
   },
   faq: [
-    { id: '1', question: 'How does this work?', answer: 'It connects data to UI and SEO automatically.' },
+    { id: '1', question: 'What is Contextual UI Starter Kit?', answer: 'An open-source starter for SSOT apps.' }
   ],
+  navbar: {
+    brand: { name: 'Contextual UI', href: '/' },
+    links: [
+      { id: '1', label: 'Home', href: '/' },
+      { id: '2', label: 'CMS Dashboard', href: '/cms' },
+    ]
+  },
   announcement: {
     enabled: true,
-    message: 'Welcome to our website!',
-  },
+    message: '🚀 Welcome to the Contextual UI Single Source of Truth architecture!',
+  }
 });
+
+export const siteApp = createContextualApp({
+  schema: siteSchema,
+  connector: connector,
+});
+
+export type SiteData = InferData<typeof siteSchema>;
 ```
 
 ---
 
-### Step 4: Render Accessible UI Components (`app/page.tsx`)
+### Step 4: Render Type-Safe UI Components (`app/page.tsx`)
 
-Fetch your data on the server and pass it to headless Contextual UI components. These components render accessible markup for users and automatically inject per-page `<script type="application/ld+json">` tags for Googlebot.
+Fetch your data on the server with `siteApp.fetchData()`. Contextual UI components provide fully typed data props with zero `any` casting.
 
 ```tsx
 // app/page.tsx (Server Component)
-import { siteConnector } from '@/data/site.server';
-import { Faq } from '@contextual-ui/core';
+import { siteApp } from '@/data/site.server';
+import { HomeClient } from './HomeClient';
 
 export default async function HomePage() {
-  const data = await siteConnector.fetchData();
+  const data = await siteApp.fetchData();
+  return <HomeClient data={data} />;
+}
+```
 
+```tsx
+// app/HomeClient.tsx (Client Component)
+'use client';
+
+import { Faq } from '@contextual-ui/core';
+import type { SiteData } from '@/data/site.server';
+
+export function HomeClient({ data }: { data: SiteData }) {
   return (
     <main className="p-8 max-w-3xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Frequently Asked Questions</h1>
 
-      {/* Automatically emits FAQPage Schema.org JSON-LD */}
+      {/* Fully typed FAQ items */}
       <Faq.Root data={data.faq}>
-        {data.faq.map((item: any) => (
+        {data.faq.map((item) => (
           <Faq.Item key={item.id} id={item.id} className="mb-4">
             <Faq.Trigger className="font-semibold text-lg cursor-pointer">
               {item.question}
@@ -143,67 +162,35 @@ export default async function HomePage() {
 
 ### Step 5: Export the Sitewide Knowledge Graph (`app/api/graph.json/route.ts`)
 
-Create a dedicated route handler to serve a unified, referentially-linked Schema.org `@graph` for search engines and AI agents.
+Export a complete, referentially-linked Schema.org `@graph` for Google, AI agents, and search bots in a single line:
 
 ```typescript
 // app/api/graph.json/route.ts
-import { siteSchema } from '@/data/site.schema';
-import { siteConnector } from '@/data/site.server';
-import { createGraphRouteHandler } from '@contextual-ui/core/server';
+import { siteApp } from '@/data/site.server';
 
-export async function GET(req: Request) {
-  const rawData = await siteConnector.fetchData();
-  const hydrated = siteSchema.hydrate(rawData);
-
-  const handler = createGraphRouteHandler(hydrated, {
-    graphOptions: {
-      baseUrl: 'https://example.com',
-      flatten: true,
-      dedupeStrategy: 'merge',
-    },
-  });
-
-  return handler.GET(req);
-}
+export const { GET } = siteApp.createGraphHandler({
+  graphOptions: {
+    baseUrl: 'https://example.com',
+    flatten: true,
+    dedupeStrategy: 'merge',
+  },
+});
 ```
 
 ---
 
-### Step 6: Expose the AI Agent Data Endpoint (`app/api/contextual/route.ts`)
-
-Provide a clean JSON feed of your site data stripped of HTML tags for LLM ingestion:
-
-```typescript
-// app/api/contextual/route.ts
-import { siteSchema } from '@/data/site.schema';
-import { siteConnector } from '@/data/site.server';
-import { createRouteHandler } from '@contextual-ui/core/server';
-
-export async function GET(req: Request) {
-  const rawData = await siteConnector.fetchData();
-  const hydrated = siteSchema.hydrate(rawData);
-  const handler = createRouteHandler(hydrated);
-  return handler.GET(req);
-}
-```
-
----
-
-### Step 7: Embed the CMS Dashboard (`app/cms/page.tsx`)
+### Step 6: Embed the CMS Dashboard (`app/cms/page.tsx`)
 
 Render the visual editing and inspection dashboard:
 
 ```tsx
 // app/cms/page.tsx (Server Component)
-import { siteConnector } from '@/data/site.server';
-import { siteSchema } from '@/data/site.schema';
-import { CMSDashboard } from '@contextual-ui/dashboard';
+import { siteApp } from '@/data/site.server';
+import { CMSClient } from './CMSClient';
 
 export default async function CMSPage() {
-  const rawData = await siteConnector.fetchData();
-  const hydrated = siteSchema.hydrate(rawData);
-
-  return <CMSDashboard schema={hydrated} />;
+  const data = await siteApp.fetchData();
+  return <CMSClient context={{ raw: data }} />;
 }
 ```
 
@@ -215,7 +202,6 @@ export default async function CMSPage() {
 apps/starter-kit/
 ├── app/
 │   ├── api/
-│   │   ├── contextual/    # 🤖 Clean plain text JSON for AI agents & LLMs
 │   │   └── graph.json/    # 🌐 Unified Schema.org Knowledge Graph (@graph)
 │   ├── cms/               # 📊 The Contextual CMS Dashboard route
 │   ├── components/        # 🧩 Route showcasing route-level components (Breadcrumb)
@@ -224,7 +210,7 @@ apps/starter-kit/
 ├── components/            # 🎨 UI Wrappers around Contextual UI primitives
 └── data/
     ├── site.schema.ts     # 📐 Centralized Zod schema definitions (SSOT)
-    └── site.server.ts     # 🔌 Server connector binding data to schemas
+    └── site.server.ts     # 🔌 Server app binding schemas to connectors
 ```
 
 ---

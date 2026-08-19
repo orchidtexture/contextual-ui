@@ -1,7 +1,8 @@
 import { siteSchema } from './site.schema';
 import { staticConnector } from '@contextual-ui/connector-static';
+import { createContextualApp, InferData } from '@contextual-ui/core/server';
 
-export const siteConnector = staticConnector({
+const connector = staticConnector({
   website: {
     name: 'Contextual UI Starter Kit',
     url: 'https://example.com',
@@ -22,3 +23,11 @@ export const siteConnector = staticConnector({
     message: '🚀 Welcome to the Contextual UI Single Source of Truth architecture!',
   }
 });
+
+export const siteApp = createContextualApp({
+  schema: siteSchema,
+  connector: connector,
+});
+
+export type SiteData = InferData<typeof siteSchema>;
+

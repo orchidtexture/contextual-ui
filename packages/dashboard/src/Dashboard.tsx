@@ -270,7 +270,7 @@ function AutoFormViewer({ schema }: { schema: any }) {
                   ? 'textarea'
                   : 'text'
               );
-              const label = meta.label || (fieldName.charAt(0).toUpperCase() + fieldName.slice(1));
+              const label = meta.label || meta.description || (fieldName.charAt(0).toUpperCase() + fieldName.slice(1));
               const placeholder = meta.placeholder || `Enter ${fieldName}...`;
 
               return (

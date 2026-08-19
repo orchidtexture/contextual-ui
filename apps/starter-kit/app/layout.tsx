@@ -1,5 +1,5 @@
 import './globals.css';
-import { siteConnector } from '@/data/site.server';
+import { siteApp } from '@/data/site.server';
 import { CustomNavbar } from '@/components/Navbar';
 
 export default async function RootLayout({
@@ -7,7 +7,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const data = await siteConnector.fetchData();
+  const data = await siteApp.fetchData();
 
   return (
     <html lang="en" className="h-full">

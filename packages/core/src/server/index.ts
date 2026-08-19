@@ -1,5 +1,6 @@
 export * from './createRouteHandler';
 export * from './createGraphRouteHandler';
+export * from './createContextualApp';
 export * from '../registry';
 export * from '@contextual-ui/jsonld-graph-builder';
 export { FaqDataSchema, FaqItemSchema } from '../components/faq/faq.schema';

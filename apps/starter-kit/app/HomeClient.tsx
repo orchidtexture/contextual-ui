@@ -1,8 +1,9 @@
 'use client';
 
 import { Faq } from '@contextual-ui/core';
+import type { SiteData } from '@/data/site.server';
 
-export function HomeClient({ data }: { data: any }) {
+export function HomeClient({ data }: { data: SiteData }) {
   return (
     <div className="pt-16">
       {/* Main Content with padding-top to account for fixed header */}
@@ -23,7 +24,7 @@ export function HomeClient({ data }: { data: any }) {
 
         <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
           <Faq.Root data={data.faq}>
-            {data.faq.map((item: any) => (
+            {data.faq.map((item) => (
               <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-slate-100 last:border-b-0 pb-4 last:pb-0">
                 <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full text-slate-800 hover:text-blue-600 transition-colors py-1">
                   {item.question}
@@ -48,13 +49,6 @@ export function HomeClient({ data }: { data: any }) {
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg no-underline text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-1.5"
           >
             Open CMS Dashboard &rarr;
-          </a>
-          <a
-            href="/api/contextual"
-            target="_blank"
-            className="bg-slate-700 hover:bg-slate-800 text-white px-4 py-2.5 rounded-lg no-underline text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-1.5"
-          >
-            View AI Agent API JSON &rarr;
           </a>
           <a
             href="/api/graph.json"

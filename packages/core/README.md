@@ -14,6 +14,77 @@ pnpm add @contextual-ui/core zod
 
 ---
 
+## 🚀 Quickstart: The Single Source of Truth (SSOT) Pattern
+
+### 1. Define Schema (`site.schema.ts`)
+Combine standard Zod schemas with pre-built registries that automatically generate Schema.org JSON-LD:
+
+```typescript
+import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from '@contextual-ui/core/server';
+import { z } from 'zod';
+
+export const siteSchema = defineSchema({
+  website: websiteRegistry(),
+  navbar: navbarRegistry(),
+  faq: faqRegistry(),
+  announcement: {
+    schema: z.object({
+      enabled: z.boolean(),
+      message: z.string().describe('Announcement text'),
+    }),
+  },
+});
+```
+
+### 2. Connect & Wrap into Contextual App (`site.server.ts`)
+Use `createContextualApp` to combine your schema and data connector into a unified, fully typed application context:
+
+```typescript
+import { siteSchema } from './site.schema';
+import { staticConnector } from '@contextual-ui/connector-static';
+import { createContextualApp, InferData } from '@contextual-ui/core/server';
+
+const connector = staticConnector({
+  website: { name: 'My App', url: 'https://example.com' },
+  faq: [{ id: '1', question: 'What is this?', answer: 'An SSOT UI kit.' }],
+  navbar: { links: [{ id: '1', label: 'Home', href: '/' }] },
+  announcement: { enabled: true, message: 'Welcome!' },
+});
+
+export const siteApp = createContextualApp({
+  schema: siteSchema,
+  connector,
+});
+
+// Fully inferred TypeScript types for your components
+export type SiteData = InferData<typeof siteSchema>;
+```
+
+### 3. Consume in Server Components (`app/page.tsx`)
+Fetch data with zero manual hydration boilerplate and complete type safety:
+
+```tsx
+import { siteApp } from '@/data/site.server';
+import { Faq } from '@contextual-ui/core';
+
+export default async function Page() {
+  const data = await siteApp.fetchData();
+
+  return (
+    <Faq.Root data={data.faq}>
+      {data.faq.map((item) => (
+        <Faq.Item key={item.id} id={item.id}>
+          <Faq.Trigger>{item.question}</Faq.Trigger>
+          <Faq.Content>{item.answer}</Faq.Content>
+        </Faq.Item>
+      ))}
+    </Faq.Root>
+  );
+}
+```
+
+---
+
 ## 🌐 Structured Data Architecture: Global Graph vs. Route-Level Metadata
 
 Contextual UI components distinguish between two fundamental types of structured data:
@@ -24,7 +95,7 @@ Contextual UI components distinguish between two fundamental types of structured
 * **How they are consumed:**
   1. Rendered in React UI for users.
   2. Injected into HTML via `<script type="application/ld+json">`.
-  3. Exported sitewide to `/api/graph.json` via `@contextual-ui/jsonld-graph-builder` / `createGraphRouteHandler` for search engine knowledge graphs and AI agent ingestion.
+  3. Exported sitewide to `/api/graph.json` via `@contextual-ui/jsonld-graph-builder` for search engine knowledge graphs and AI agent ingestion.
 
 ### 2. Ephemeral Route-Level Metadata (Page-Level Hierarchy)
 * **Components & Schemas:** `breadcrumbRegistry` (`BreadcrumbList`), `WebPage`.
@@ -38,7 +109,24 @@ Contextual UI components distinguish between two fundamental types of structured
 
 ## ⚡ Global Knowledge Graph Export (`/api/graph.json`)
 
-Contextual UI includes built-in server handlers to serve a unified, referentially-linked Schema.org `@graph` for search engines and AI agents with zero runtime scraping.
+Contextual UI provides one-line route handler generators to serve a unified, referentially-linked Schema.org `@graph` for search engines and AI agents with zero runtime scraping.
+
+### Using `createContextualApp` (Recommended)
+
+```typescript
+// app/api/graph.json/route.ts
+import { siteApp } from '@/data/site.server';
+
+export const { GET } = siteApp.createGraphHandler({
+  graphOptions: {
+    baseUrl: 'https://example.com',
+    flatten: true,
+    dedupeStrategy: 'merge',
+  },
+});
+```
+
+### Using Standalone `createGraphRouteHandler`
 
 ```typescript
 // app/api/graph.json/route.ts

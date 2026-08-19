@@ -54,6 +54,8 @@ function isProd() {
   }
 }
 
+export type InferData<T extends { parse: (data: any) => any }> = ReturnType<T['parse']>;
+
 export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
   const createDefaultContext = (ctx?: Partial<JsonLdContext>): JsonLdContext => ({
     createId: ctx?.createId ?? createId,

@@ -1,15 +1,10 @@
 'use client';
 
 import { Navbar } from '@contextual-ui/core';
+import type { SiteData } from '@/data/site.server';
 
 interface CustomNavbarProps {
-  data: {
-    navbar?: {
-      links: Array<{ id: string; label: string; href: string }>;
-      [key: string]: any;
-    };
-    [key: string]: any;
-  };
+  data: SiteData;
 }
 
 export function CustomNavbar({ data }: CustomNavbarProps) {

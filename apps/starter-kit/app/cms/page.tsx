@@ -1,14 +1,12 @@
-import { siteSchema } from '@/data/site.schema';
-import { siteConnector } from '@/data/site.server';
+import { siteApp } from '@/data/site.server';
 import { CMSClient } from './CMSClient';
 
 export default async function CMSPage() {
-  const rawData = await siteConnector.fetchData();
-  const hydrated = siteSchema.hydrate(rawData);
+  const data = await siteApp.fetchData();
 
-  // Serialize the hydrated context (only passing raw data across the RSC boundary)
+  // Serialize the data for client components
   const serializedContext = {
-    raw: hydrated.raw,
+    raw: data,
   };
 
   return <CMSClient context={serializedContext} />;
