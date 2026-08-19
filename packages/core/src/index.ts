@@ -20,7 +20,17 @@ export { NavbarDataSchema, NavItemSchema } from './components/navbar/navbar.sche
 export { generateNavbarJsonLd, exportAgentData as exportNavbarAgentData, navbarRegistry } from './components/navbar/navbar.utils';
 
 export { defineSchema, cx, getFieldMetadata } from './registry';
-export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata } from './registry';
+export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata, JsonLdContext } from './registry';
+
+export { buildGraph, createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+export type {
+  GraphBuilderOptions,
+  DedupeStrategy,
+  JsonLdObject,
+  JsonLdValue,
+  JsonLdGraphResult,
+} from '@contextual-ui/jsonld-graph-builder';
 
 export type { Thing, WithContext, Graph } from 'schema-dts';
+
 

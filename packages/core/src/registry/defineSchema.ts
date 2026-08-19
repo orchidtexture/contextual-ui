@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
 
 export interface UIMetadata {
   label?: string;
@@ -23,11 +24,17 @@ export function getFieldMetadata(schema: z.ZodTypeAny): UIMetadata | null {
   }
 }
 
+export interface JsonLdContext {
+  createId: typeof createId;
+  refersTo: typeof refersTo;
+  [key: string]: any;
+}
+
 export interface SchemaSection<T extends z.ZodTypeAny = z.ZodTypeAny> {
   schema: T;
   exportAgentData?: (data: z.infer<T>) => any;
   type?: string;
-  generateJsonLd?: (data: z.infer<T>) => any;
+  generateJsonLd?: (data: z.infer<T>, ctx: JsonLdContext) => any;
 }
 
 export type SchemaConfig = Record<string, SchemaSection<any>>;
@@ -36,6 +43,7 @@ export interface HydratedContext<TConfig extends SchemaConfig> {
   raw: { [K in keyof TConfig]: z.infer<TConfig[K]['schema']> };
   config: TConfig;
   getAgentData: () => Record<string, any>;
+  generateJsonLd: (ctx?: Partial<JsonLdContext>) => Record<string, any>;
 }
 
 function isProd() {
@@ -47,6 +55,12 @@ function isProd() {
 }
 
 export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
+  const createDefaultContext = (ctx?: Partial<JsonLdContext>): JsonLdContext => ({
+    createId: ctx?.createId ?? createId,
+    refersTo: ctx?.refersTo ?? refersTo,
+    ...ctx,
+  });
+
   return {
     config,
     hydrate(rawData: Record<string, any>): HydratedContext<TConfig> {
@@ -80,6 +94,17 @@ export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
           }
           return agentData;
         },
+        generateJsonLd: (ctx?: Partial<JsonLdContext>) => {
+          const context = createDefaultContext(ctx);
+          const jsonLdData: Record<string, any> = {};
+          for (const [key, section] of Object.entries(config)) {
+            const data = validatedData[key];
+            if (section.generateJsonLd) {
+              jsonLdData[key] = section.generateJsonLd(data, context);
+            }
+          }
+          return jsonLdData;
+        },
       };
     },
     parse(rawData: Record<string, any>) {
@@ -101,5 +126,20 @@ export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
       }
       return agentData;
     },
+    generateJsonLd(
+      validatedData: { [K in keyof TConfig]: z.infer<TConfig[K]['schema']> },
+      ctx?: Partial<JsonLdContext>
+    ) {
+      const context = createDefaultContext(ctx);
+      const jsonLdData: Record<string, any> = {};
+      for (const [key, section] of Object.entries(config)) {
+        const data = validatedData[key];
+        if (section.generateJsonLd) {
+          jsonLdData[key] = section.generateJsonLd(data, context);
+        }
+      }
+      return jsonLdData;
+    },
   };
 }
+
