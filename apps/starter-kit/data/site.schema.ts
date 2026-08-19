@@ -1,7 +1,8 @@
-import { defineSchema, faqRegistry, navbarRegistry, cx } from '@contextual-ui/core/server';
+import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry, cx } from '@contextual-ui/core/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
+  website: websiteRegistry(),
   faq: faqRegistry(),
   navbar: navbarRegistry(),
   announcement: {

@@ -2,6 +2,11 @@ import { siteSchema } from './site.schema';
 import { staticConnector } from '@contextual-ui/connector-static';
 
 export const siteConnector = staticConnector({
+  website: {
+    name: 'Contextual UI Starter Kit',
+    url: 'https://example.com',
+    description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
+  },
   faq: [
     { id: '1', question: 'What is Contextual UI Starter Kit?', answer: 'An open-source starter for SSOT apps.' }
   ],

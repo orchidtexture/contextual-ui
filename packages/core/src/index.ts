@@ -19,6 +19,10 @@ export type * from './components/navbar/navbar.types';
 export { NavbarDataSchema, NavItemSchema } from './components/navbar/navbar.schema';
 export { generateNavbarJsonLd, exportAgentData as exportNavbarAgentData, navbarRegistry } from './components/navbar/navbar.utils';
 
+export type { WebsiteData } from './components/website/website.schema';
+export { WebsiteDataSchema } from './components/website/website.schema';
+export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from './components/website/website.utils';
+
 export { defineSchema, cx, getFieldMetadata } from './registry';
 export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata, JsonLdContext } from './registry';
 

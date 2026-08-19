@@ -56,6 +56,13 @@ export function HomeClient({ data }: { data: any }) {
           >
             View AI Agent API JSON &rarr;
           </a>
+          <a
+            href="/api/graph.json"
+            target="_blank"
+            className="bg-purple-700 hover:bg-purple-800 text-white px-4 py-2.5 rounded-lg no-underline text-sm font-medium transition-colors shadow-sm inline-flex items-center gap-1.5"
+          >
+            View JSON-LD Graph JSON &rarr;
+          </a>
         </div>
       </main>
     </div>

@@ -2,7 +2,7 @@
 
 **Contextual UI Core** is the foundational headless component library designed for the modern web—where your UI isn't just consumed by humans, but also by search engines and AI agents.
 
-Built with **React**, **Zod**, and **Radix UI**, it provides the infrastructure to build accessible, type-safe, and SEO-optimized components with zero design opinion.
+Built with **React**, **Zod**, and **Radix UI**, it provides the infrastructure to build accessible, type-safe, and SEO-optimized components with zero design opinion, paired with an integrated Schema.org Knowledge Graph engine.
 
 ## 📦 Installation
 
@@ -14,10 +14,73 @@ pnpm add @contextual-ui/core zod
 
 ---
 
-## 🧩 Components
+## 🌐 Structured Data Architecture: Global Graph vs. Route-Level Metadata
 
-### 1. FAQ (SEO & AI Optimized)
-The FAQ component handles state, accessibility, and automatically injects `FAQPage` JSON-LD into your page for search engine indexing.
+Contextual UI components distinguish between two fundamental types of structured data:
+
+### 1. Global Knowledge Graph Entities (Domain-Level)
+* **Components & Schemas:** `websiteRegistry` (`WebSite`), `navbarRegistry` (`SiteNavigationElement`), `faqRegistry` (`FAQPage`), `Organization`, `Article`, `Product`.
+* **Where they live:** Defined centrally in your `siteSchema` (Single Source of Truth) and backed by CMS/connectors or databases.
+* **How they are consumed:**
+  1. Rendered in React UI for users.
+  2. Injected into HTML via `<script type="application/ld+json">`.
+  3. Exported sitewide to `/api/graph.json` via `@contextual-ui/jsonld-graph-builder` / `createGraphRouteHandler` for search engine knowledge graphs and AI agent ingestion.
+
+### 2. Ephemeral Route-Level Metadata (Page-Level Hierarchy)
+* **Components & Schemas:** `breadcrumbRegistry` (`BreadcrumbList`), `WebPage`.
+* **Where they live:** Derived dynamically from the active URL (`pathname`), routing params, or local page tree.
+* **How they are consumed:**
+  1. Rendered as interactive navigation breadcrumbs on the specific page.
+  2. Injected directly into that page's HTML `<head>` / DOM for search crawlers visiting that exact URL.
+  3. *Not* forced into the global `/api/graph.json` knowledge graph, avoiding unnecessary coupling between ephemeral page paths and centralized data schemas.
+
+---
+
+## ⚡ Global Knowledge Graph Export (`/api/graph.json`)
+
+Contextual UI includes built-in server handlers to serve a unified, referentially-linked Schema.org `@graph` for search engines and AI agents with zero runtime scraping.
+
+```typescript
+// app/api/graph.json/route.ts
+import { siteSchema } from '@/data/site.schema';
+import { siteConnector } from '@/data/site.server';
+import { createGraphRouteHandler } from '@contextual-ui/core/server';
+
+export async function GET(req: Request) {
+  const rawData = await siteConnector.fetchData();
+  const hydrated = siteSchema.hydrate(rawData);
+
+  const handler = createGraphRouteHandler(hydrated, {
+    graphOptions: {
+      baseUrl: 'https://example.com',
+      flatten: true,
+      dedupeStrategy: 'merge',
+    },
+  });
+
+  return handler.GET(req);
+}
+```
+
+---
+
+## 🧩 Built-in Schema Registries
+
+### 1. WebSite (`websiteRegistry`)
+Defines the root `WebSite` entity that interconnects all child components (`navbar`, `faq`) into a single connected knowledge graph.
+
+```typescript
+import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from '@contextual-ui/core/server';
+
+export const siteSchema = defineSchema({
+  website: websiteRegistry(),
+  navbar: navbarRegistry(),
+  faq: faqRegistry(),
+});
+```
+
+### 2. FAQ (`faqRegistry` & `<Faq />`)
+Handles collapsible state, accessible ARIA roles, and automatically generates Schema.org `FAQPage`, `Question`, and `Answer` nodes with linked `@id` identifiers.
 
 ```tsx
 import { Faq } from '@contextual-ui/core';
@@ -44,14 +107,8 @@ export function FaqSection() {
 }
 ```
 
-**Why use it?**
-- **SEO**: It automatically renders a JSON-LD `<script>` tag, ensuring search engines like Google can index your FAQ content with rich results.
-- **AI**: Use `exportAgentData(data)` to provide clean text to an LLM without HTML noise.
-
----
-
-### 2. Navbar (Mobile Responsive & Data-Driven)
-The Navbar component provides a robust structure for site navigation, handling mobile toggles and accessible state out of the box.
+### 3. Navbar (`navbarRegistry` & `<Navbar />`)
+Provides responsive navigation structure, mobile drawer toggles, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
 
 ```tsx
 import { Navbar } from '@contextual-ui/core';
@@ -68,20 +125,12 @@ export function Header() {
   return (
     <Navbar.Root data={navData} className="flex justify-between p-4">
       <Navbar.Brand href="/" className="font-bold text-xl" />
-      {/* Or with custom children: */}
-      {/* <Navbar.Brand href="/" className="font-bold text-xl flex items-center gap-2"><span>✨</span> Brand Name</Navbar.Brand> */}
-      
-      {/* Desktop Navigation */}
       <Navbar.Content className="hidden md:flex gap-4">
         {navData.links.map(link => (
           <a key={link.id} href={link.href}>{link.label}</a>
         ))}
       </Navbar.Content>
-
-      {/* Mobile Toggle */}
       <Navbar.Toggle className="md:hidden" />
-
-      {/* Mobile Navigation */}
       <Navbar.Menu className="md:hidden flex flex-col mt-4">
         {navData.links.map(link => (
           <a key={link.id} href={link.href} className="py-2">{link.label}</a>
@@ -92,15 +141,8 @@ export function Header() {
 }
 ```
 
-**Why use it?**
-- **Responsive State**: Built-in state for mobile menu toggles without `useState` boilerplate.
-- **Compositional Pattern**: Freedom to structure desktop and mobile menus exactly how you want.
-- **Data Validation**: Optional Zod schema validation for nested navigation links.
-
----
-
-### 3. Breadcrumb (SEO & AI Hierarchical Navigation)
-The Breadcrumb component renders accessible breadcrumb navigation while automatically injecting Schema.org `BreadcrumbList` JSON-LD and exposing structural data for AI agents.
+### 4. Breadcrumb (`breadcrumbRegistry` & `<Breadcrumb />`)
+Renders accessible breadcrumb hierarchy and emits Schema.org `BreadcrumbList` JSON-LD directly into the page DOM.
 
 ```tsx
 import { Breadcrumb } from '@contextual-ui/core';
@@ -117,7 +159,6 @@ export function PageBreadcrumbs() {
       <Breadcrumb.List className="flex items-center space-x-2 text-sm text-gray-600">
         {breadcrumbData.map((item, index) => {
           const isLast = index === breadcrumbData.length - 1;
-
           return (
             <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center space-x-2">
               {isLast ? (
@@ -143,73 +184,47 @@ export function PageBreadcrumbs() {
 }
 ```
 
-**Why use it?**
-- **SEO Rich Results**: Automatically outputs Schema.org `BreadcrumbList` metadata so search engines can display rich breadcrumb trails in search results.
-- **AI Agent Context**: Gives AI agents an explicit site taxonomy and hierarchical path instantly.
-- **Accessibility**: Enforces semantic `<nav aria-label="breadcrumb">`, `<ol>`, and `aria-current="page"` out of the box.
-
----
-
-### 4. Form Factory (`createForm`)
-Stop writing `useState` and manual validation for every form. Define a schema, and let the factory build the components.
+### 5. Form Factory (`createForm`)
+Type-safe form builder generated directly from standard Zod schemas.
 
 ```tsx
 'use client';
 import { createForm } from '@contextual-ui/core';
 import { z } from 'zod';
 
-// 1. Define your schema
 const ContactSchema = z.object({
   email: z.string().email("Invalid email"),
   message: z.string().min(10, "Message too short"),
 });
 
-// 2. Create your typed components
 const Form = createForm(ContactSchema);
 
 export default function ContactSection() {
   return (
     <Form.Root onSubmit={(data) => console.log(data)}>
-      <Form.Section 
-        title="Personal Information" 
-        description="We'll never share your email."
-        className="space-y-4 mb-6"
-      >
+      <Form.Section title="Contact Us">
         <Form.Field name="email">
           <Form.Label>Email Address</Form.Label>
-          <Form.Input className="input-style" />
-          <Form.ErrorMessage className="error-style" />
+          <Form.Input />
+          <Form.ErrorMessage />
         </Form.Field>
-      </Form.Section>
-
-      <Form.Section 
-        title="Your Message"
-        className="space-y-4 mb-6"
-      >
         <Form.Field name="message">
           <Form.Label>Message</Form.Label>
-          <Form.TextArea className="input-style" />
+          <Form.TextArea />
           <Form.ErrorMessage />
         </Form.Field>
       </Form.Section>
-
       <Form.Submit>Send Message</Form.Submit>
     </Form.Root>
   );
 }
 ```
 
-**Why use it?**
-- **Type Safety**: The `name` prop on `Field` only accepts keys defined in your Zod schema.
-- **Section Grouping**: Organize complex forms cleanly with built-in `Form.Section` headers and descriptions.
-- **Accessibility**: Automatically manages `aria-invalid`, `htmlFor`, and focus states.
-- **Logic-less UI**: No need to manage `onChange` or `value` manually.
-
 ---
 
 ## 🛠️ Customization
 
-Every component supports the `asChild` pattern via Radix UI. This means you can use your own styled components or any UI library (Tailwind, Shadcn, etc.):
+Every UI component supports the `asChild` pattern via Radix UI, allowing you to use your own styled components or design systems (Tailwind CSS, Shadcn UI, etc.):
 
 ```tsx
 <Form.Submit asChild>

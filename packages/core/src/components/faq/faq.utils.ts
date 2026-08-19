@@ -1,17 +1,26 @@
+import { createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+import type { JsonLdContext } from '../../registry/defineSchema';
 import { FaqDataSchema, FaqData } from './faq.schema';
 
 /**
- * Generates a Schema.org FAQPage JSON-LD object.
+ * Generates a Schema.org FAQPage JSON-LD object with full @id references.
  */
-export function generateFaqJsonLd(items: FaqData) {
+export function generateFaqJsonLd(items: FaqData, ctx?: Partial<JsonLdContext>) {
+  const create = ctx?.createId ?? createId;
+  const refer = ctx?.refersTo ?? refersTo;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
+    '@id': create('faq'),
+    isPartOf: refer('website'),
     mainEntity: items.map((item) => ({
       '@type': 'Question',
+      '@id': create('faq-q', item.id),
       name: item.question,
       acceptedAnswer: {
         '@type': 'Answer',
+        '@id': create('faq-a', item.id),
         text: item.answer,
       },
     })),

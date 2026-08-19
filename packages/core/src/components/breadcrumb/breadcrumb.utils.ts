@@ -1,14 +1,26 @@
+import { createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+import type { JsonLdContext } from '../../registry/defineSchema';
 import { BreadcrumbDataSchema, BreadcrumbData } from './breadcrumb.schema';
 
 /**
- * Generates a Schema.org BreadcrumbList JSON-LD object.
+ * Generates a Schema.org BreadcrumbList JSON-LD object with full @id references.
  */
-export function generateBreadcrumbJsonLd(items: BreadcrumbData, baseUrl: string = '') {
+export function generateBreadcrumbJsonLd(
+  items: BreadcrumbData,
+  baseUrl: string = '',
+  ctx?: Partial<JsonLdContext>
+) {
+  const create = ctx?.createId ?? createId;
+  const refer = ctx?.refersTo ?? refersTo;
+
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
+    '@id': create('breadcrumb'),
+    isPartOf: refer('website'),
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
+      '@id': create('breadcrumb-item', item.id || String(index + 1)),
       position: index + 1,
       name: item.label,
       ...(item.url
@@ -39,6 +51,7 @@ export function breadcrumbRegistry() {
     type: 'breadcrumb' as const,
     schema: BreadcrumbDataSchema,
     exportAgentData,
-    generateJsonLd: generateBreadcrumbJsonLd,
+    generateJsonLd: (data: BreadcrumbData, ctx?: Partial<JsonLdContext>) =>
+      generateBreadcrumbJsonLd(data, '', ctx),
   };
 }

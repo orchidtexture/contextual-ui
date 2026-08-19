@@ -12,6 +12,7 @@ import {
   NavbarMenuProps,
   NavbarContextValue
 } from './navbar.types';
+import { generateNavbarJsonLd } from './navbar.utils';
 
 export function Root({
   data: rawData,
@@ -32,6 +33,8 @@ export function Root({
     return result.data;
   }, [rawData]);
 
+  const jsonLd = useMemo(() => (data ? generateNavbarJsonLd(data) : null), [data]);
+
   const [isOpen, setIsOpen] = useState(false);
 
   const toggle = useCallback(() => setIsOpen((prev) => !prev), []);
@@ -51,6 +54,12 @@ export function Root({
         className={className}
         role="navigation"
       >
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
         {children}
       </nav>
     </NavbarContext.Provider>
