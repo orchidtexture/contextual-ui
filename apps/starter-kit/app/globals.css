@@ -4,13 +4,13 @@
 
 @layer base {
   body {
-    @apply bg-zinc-900 text-zinc-50 font-sans antialiased selection:bg-green-300 selection:text-white;
+    @apply bg-zinc-950 text-zinc-50 font-sans antialiased selection:bg-accent selection:text-zinc-900;
   }
   pre[class*="language-"],
   code[class*="language-"] {
     font-size: 12px !important;
     line-height: 1.5 !important;
-    @apply bg-zinc-900 !important;
+    @apply bg-zinc-950 !important;
   }
   .border-base {
     @apply border-zinc-800

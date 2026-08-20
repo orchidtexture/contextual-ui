@@ -22,7 +22,7 @@ const connector = staticConnector({
   },
   announcement: {
     enabled: true,
-    message: '🚀 Welcome to the Contextual UI Single Source of Truth architecture!',
+    message: '🚀 Welcome to the Contextual UI implementation reference website!',
   }
 });
 

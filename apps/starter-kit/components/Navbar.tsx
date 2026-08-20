@@ -13,9 +13,11 @@ export function CustomNavbar({ data }: CustomNavbarProps) {
       <div className="max-w-3xl w-full mx-auto flex justify-between items-center">
         <Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
           <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
-            <span className="bg-green-400 text-zinc-950 w-7 h-7 inline-flex items-center justify-center rounded-lg text-sm font-semibold shadow-sm">
-              {'C'}
-            </span>
+            <img
+              src="/images/contextual-ui-logo.png"
+              alt="Contextual UI Logo"
+              className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
+            />
             Contextual UI
           </Navbar.Brand>
           <Navbar.Content className="flex gap-6 items-center">
@@ -23,14 +25,14 @@ export function CustomNavbar({ data }: CustomNavbarProps) {
               <a
                 key={link.id}
                 href={link.href}
-                className="hover:text-green-500 no-underline text-sm font-medium transition-colors"
+                className="hover:text-silver no-underline text-sm font-medium transition-colors"
               >
                 {link.label}
               </a>
             ))}
             <a
               href="/components"
-              className="text-yellow-400 hover:text-yellow-600 no-underline text-sm font-semibold transition-colors"
+              className="text-accent hover:text-accent/90 no-underline text-sm font-semibold transition-colors"
             >
               Components
             </a>

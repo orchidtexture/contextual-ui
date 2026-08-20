@@ -48,8 +48,8 @@ function ShowcaseSection({
             onClick={() => setActiveTab('example')}
             className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer ${
               activeTab === 'example'
-                ? 'bg-zinc-800 text-green-400'
-                : ' hover:bg-zinc-700'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900'
             }`}
             type="button"
           >
@@ -59,8 +59,8 @@ function ShowcaseSection({
             onClick={() => setActiveTab('schema')}
             className={`p-1.5 text-xs font-semibold transition-colors cursor-pointer ${
               activeTab === 'schema'
-                ? 'bg-zinc-800 text-green-400'
-                : ' hover:bg-zinc-700'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900'
             }`}
             type="button"
           >
@@ -185,9 +185,11 @@ export function ComponentsClient({ data }: { data: SiteData }) {
         >
           <Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
             <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
-              <span className="bg-green-400 text-zinc-950 w-7 h-7 inline-flex items-center justify-center rounded-lg text-sm font-semibold shadow-sm">
-                気
-              </span>
+              <img
+                src="/images/contextual-ui-logo.png"
+                alt="Contextual UI Logo"
+                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
+              />
               Contextual UI
             </Navbar.Brand>
             <Navbar.Content className="flex gap-6 items-center">
@@ -195,7 +197,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
                 <a
                   key={link.id}
                   href={link.href}
-                  className="hover:text-green-500 no-underline text-sm font-medium transition-colors"
+                  className="hover:text-silver no-underline text-sm font-medium transition-colors"
                 >
                   {link.label}
                 </a>
@@ -226,7 +228,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
                       </Breadcrumb.Page>
                     ) : (
                       <>
-                        <Breadcrumb.Link href={item.url!} className="text-green-400 hover:underline no-underline">
+                        <Breadcrumb.Link href={item.url!} className="text-accent hover:underline no-underline">
                           {item.label}
                         </Breadcrumb.Link>
                         <Breadcrumb.Separator className="text-zinc-400">
@@ -254,7 +256,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
           <Faq.Root data={faqData}>
             {faqData.map((item) => (
               <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-base last:border-b-0 pb-4 last:pb-0">
-                <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-green-400 transition-colors py-1">
+                <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
                   {`${item.id}. ${item.question}`}
                 </Faq.Trigger>
                 <Faq.Content className="mt-2 text-zinc-400 text-sm leading-relaxed">
