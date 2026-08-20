@@ -9,8 +9,8 @@ interface CustomNavbarProps {
 
 export function CustomNavbar({ data }: CustomNavbarProps) {
   return (
-    <header className="fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b border-base z-50 flex items-center px-6 shadow-sm">
-      <div className="max-w-3xl w-full mx-auto flex justify-between items-center">
+    <header className="fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b border-base z-50 flex items-center px-16 shadow-sm">
+      <div className="w-full mx-auto flex justify-between items-center">
         <Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
           <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
             <img
@@ -25,17 +25,11 @@ export function CustomNavbar({ data }: CustomNavbarProps) {
               <a
                 key={link.id}
                 href={link.href}
-                className="hover:text-silver no-underline text-sm font-medium transition-colors"
+                className={"hover:text-silver no-underline text-sm font-medium transition-colors"}
               >
                 {link.label}
               </a>
             ))}
-            <a
-              href="/components"
-              className="text-accent hover:text-accent/90 no-underline text-sm font-semibold transition-colors"
-            >
-              Components
-            </a>
           </Navbar.Content>
         </Navbar.Root>
       </div>

@@ -34,7 +34,7 @@ function ShowcaseSection({
   }, [activeTab]);
 
   return (
-    <section id={id} className="border border-base rounded-2xl p-6 shadow-sm">
+    <section id={id} className="border border-base rounded-2xl p-10 shadow-sm">
       <h2 className="text-xl font-bold mb-3">{title}</h2>
       <p className="mb-6 text-sm leading-relaxed">{description}</p>
 
@@ -72,7 +72,7 @@ function ShowcaseSection({
         </span>
       </div>
 
-      <pre className="!bg-zinc-950 !text-zinc-100 p-4 rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
+      <pre className="!bg-zinc-950 !text-zinc-100 p-6 rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
         <code className={activeTab === 'example' ? 'language-jsx' : 'language-json'}>
           {activeTab === 'example' ? codeString : schemaString}
         </code>
@@ -164,10 +164,10 @@ export function ComponentsClient({ data }: { data: SiteData }) {
   }, null, 2);
 
   return (
-    <div className="pt-16">
-      <main className="min-h-screen px-6 py-12 pt-16 max-w-3xl mx-auto space-y-12">
+    <div className="pt-12">
+      <main className="min-h-screen p-16 mx-auto space-y-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Components</h1>
+          <h1 className="text-3xl font-bold tracking-tight mb-4">Components</h1>
           <p className="text-zinc-400">
             Explore Contextual UI components designed for humans, search engines, and AI agents.
           </p>

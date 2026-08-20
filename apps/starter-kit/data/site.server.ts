@@ -17,7 +17,9 @@ const connector = staticConnector({
     brand: { name: 'Contextual UI', href: '/' },
     links: [
       { id: '1', label: 'Home', href: '/' },
-      { id: '2', label: 'CMS Dashboard', href: '/cms' },
+      { id: '2', label: 'Components', href: '/components' },
+      { id: '3', label: 'Schema Graph', href: '/schema' },
+      // { id: '4', label: 'CMS Dashboard', href: '/cms' },
     ]
   },
   announcement: {
