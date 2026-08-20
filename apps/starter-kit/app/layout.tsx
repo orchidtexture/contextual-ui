@@ -11,7 +11,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="h-full">
-      <body className="h-full bg-slate-50 font-sans text-slate-900 selection:bg-blue-500 selection:text-white">
+      <body className="h-ful">
         <CustomNavbar data={data} />
         {children}
       </body>

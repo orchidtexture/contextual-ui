@@ -9,5 +9,9 @@ export default async function CMSPage() {
     raw: data,
   };
 
-  return <CMSClient context={serializedContext} />;
+  return (
+    <div className="pt-16 min-h-screen">
+      <CMSClient context={serializedContext} />
+    </div>
+  );
 }

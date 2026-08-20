@@ -4,6 +4,16 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 font-sans antialiased selection:bg-blue-500 selection:text-white;
+    @apply bg-zinc-900 text-zinc-50 font-sans antialiased selection:bg-green-300 selection:text-white;
   }
+  pre[class*="language-"],
+  code[class*="language-"] {
+    font-size: 12px !important;
+    line-height: 1.5 !important;
+    @apply bg-zinc-900 !important;
+  }
+  .border-base {
+    @apply border-zinc-800
+  }
+
 }
