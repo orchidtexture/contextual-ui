@@ -166,8 +166,8 @@ export function ComponentsClient({ data }: { data: SiteData }) {
   return (
     <div className="pt-12">
       <main className="min-h-screen p-16 mx-auto space-y-12">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-4">Components</h1>
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold tracking-tight mb-4">Components</h1>
           <p className="text-zinc-400">
             Explore Contextual UI components designed for humans, search engines, and AI agents.
           </p>
