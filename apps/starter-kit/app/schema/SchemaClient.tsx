@@ -33,7 +33,7 @@ export function SchemaClient({ schemaSource, graphJson }: SchemaClientProps) {
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight mb-4">Schema & Knowledge Graph</h1>
           <p className="text-zinc-400">
-            Contextual UI uses a Single Source of Truth (SSOT) schema definition to automatically compile and serve a referentially-linked Schema.org `@graph` for search engines and AI agents.
+            Contextual UI uses a Single Source of Truth (SSOT) schema definition to automatically compile and serve a referentially-linked Schema.org <code className="code-short">@graph</code> for search engines and AI agents.
           </p>
         </div>
 
@@ -45,7 +45,7 @@ export function SchemaClient({ schemaSource, graphJson }: SchemaClientProps) {
               <span className="p-2 border border-base rounded-md text-xs text-silver w-auto">site.schema.ts</span>
             </div>
             <p className="my-6 text-sm leading-relaxed text-zinc-300">
-              Central schema definition combining standard Zod types with pre-built schema registries (`websiteRegistry`, `faqRegistry`, `navbarRegistry`) that power both runtime UI and semantic metadata.
+              Central schema definition combining standard Zod types with pre-built schema registries ( <code className="code-short">websiteRegistry</code>, <code className="code-short">faqRegistry</code>, <code className="code-short">navbarRegistry</code> ) that power both runtime UI and semantic metadata.
             </p>
             <pre className="!bg-zinc-950 !text-zinc-100 p-4 rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
               <code className="language-typescript">
@@ -56,12 +56,12 @@ export function SchemaClient({ schemaSource, graphJson }: SchemaClientProps) {
 
           {/* Global Knowledge Graph JSON Section */}
           <section className="border border-base rounded-2xl p-6 shadow-sm">
-            <div className="flex justify-between mb-6">
+            <div className="mb-6">
               <h2 className="text-xl font-semibold">Compiled Knowledge Graph JSON</h2>
-              <a href="/api/graph.json" target="_blank" className="p-2 border border-base rounded-md text-xs text-silver hover:bg-zinc-900 w-auto">/api/graph.json &rarr;</a>
             </div>
             <p className="text-sm leading-relaxed text-zinc-300 my-6">
-              The generated Schema.org `@graph` compiled from the SSOT schema and connector data, served sitewide for search crawlers and AI agents.
+              The generated Schema.org <code className="code-short">@graph</code> compiled from the SSOT schema and connector data, served sitewide for search crawlers and AI agents. It can be consumed directly from the auto-generated endpoint
+              <a href="/api/graph.json" target="_blank" className="text-silver hover:bg-zinc-900 w-auto underline">  /api/graph.json</a>
             </p>
             <pre className="!bg-zinc-950 !text-zinc-100 p-4 rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner max-h-[300px]">
               <code className="language-json">

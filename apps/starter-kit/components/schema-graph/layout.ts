@@ -16,7 +16,7 @@ export async function getLayoutedElements(
       'elk.algorithm': 'layered',
       'elk.direction': 'RIGHT',
       'elk.edgeRouting': 'ORTHOGONAL',
-      'elk.spacing.nodeNode': '40',
+      'elk.spacing.nodeNode': '60',
       'elk.layered.spacing.nodeNodeBetweenLayers': '200',
     },
     children: nodes.map((node) => ({

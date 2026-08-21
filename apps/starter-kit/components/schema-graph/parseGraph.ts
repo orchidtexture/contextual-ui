@@ -35,7 +35,7 @@ export function parseGraphToReactFlow(graphData: any): { nodes: Node[]; edges: E
     const type = Array.isArray(rawType) ? rawType.join(', ') : rawType;
 
     // Determine label
-    const name = entity.name || entity.headline || entity.title;
+    const name = entity.name || entity.headline || entity.title || entity.text;
     let label = name;
     if (!label) {
       try {

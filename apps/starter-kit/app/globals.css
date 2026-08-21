@@ -15,5 +15,8 @@
   .border-base {
     @apply border-zinc-800
   }
+  .code-short {
+    @apply text-accent font-mono;
+  }
 
 }

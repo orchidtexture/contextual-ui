@@ -3,8 +3,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import ReactFlow, {
   Background,
-  Controls,
-  MiniMap,
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
