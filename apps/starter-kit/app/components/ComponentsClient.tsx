@@ -34,7 +34,7 @@ function ShowcaseSection({
   }, [activeTab]);
 
   return (
-    <section id={id} className="border border-base rounded-2xl p-10 shadow-sm scroll-mt-28">
+    <section id={id} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <h2 className="text-xl font-bold mb-3">{title}</h2>
       <p className="mb-6 text-sm leading-relaxed text-zinc-300">{description}</p>
 
@@ -72,7 +72,7 @@ function ShowcaseSection({
         </span>
       </div>
 
-      <pre className="!bg-zinc-950 !text-zinc-100 p-6 rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
+      <pre className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
         <code className={activeTab === 'example' ? 'language-jsx' : 'language-json'}>
           {activeTab === 'example' ? codeString : schemaString}
         </code>
@@ -282,12 +282,12 @@ export function ComponentsClient({ data }: { data: SiteData }) {
             <Navbar.Root data={data.navbar} className="w-full relative">
               <div className="flex justify-between items-center w-full">
                 <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
-                  <div
-                    className="p-1 rounded-lg text-silver bg-zinc-950 border border-base"
-                  >
-                    NB
-                  </div>
-                  Navbar
+                  <img
+                    src="/images/contextual-ui-logo.png"
+                    alt="Contextual UI Logo"
+                    className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
+                  />
+                  Contextual UI
                 </Navbar.Brand>
                   <Navbar.Content className="hidden md:flex gap-6 items-center">
                     {data.navbar?.links.map((link) => (

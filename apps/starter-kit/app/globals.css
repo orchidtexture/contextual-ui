@@ -10,7 +10,7 @@
   code[class*="language-"] {
     font-size: 12px !important;
     line-height: 1.5 !important;
-    @apply bg-zinc-950 !important;
+    @apply bg-zinc-900 !important;
   }
   .border-base {
     @apply border-zinc-800
