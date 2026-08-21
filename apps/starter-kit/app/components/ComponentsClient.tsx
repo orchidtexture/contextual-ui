@@ -34,9 +34,9 @@ function ShowcaseSection({
   }, [activeTab]);
 
   return (
-    <section id={id} className="border border-base rounded-2xl p-10 shadow-sm">
+    <section id={id} className="border border-base rounded-2xl p-10 shadow-sm scroll-mt-28">
       <h2 className="text-xl font-bold mb-3">{title}</h2>
-      <p className="mb-6 text-sm leading-relaxed">{description}</p>
+      <p className="mb-6 text-sm leading-relaxed text-zinc-300">{description}</p>
 
       <div className="border border-base rounded-xl p-4 shadow-inner mb-6">
         {children}
@@ -82,6 +82,34 @@ function ShowcaseSection({
 }
 
 export function ComponentsClient({ data }: { data: SiteData }) {
+  const [activeId, setActiveId] = useState<string>('navbar');
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: '-120px 0px -50% 0px' }
+    );
+
+    const sections = ['navbar', 'breadcrumb', 'faq'];
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      sections.forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) observer.unobserve(el);
+      });
+    };
+  }, []);
+
   const breadcrumbData = [
     { id: '1', label: 'Home', url: '/' },
     { id: '2', label: 'Components', url: '/components' },
@@ -164,109 +192,178 @@ export function ComponentsClient({ data }: { data: SiteData }) {
   }, null, 2);
 
   return (
-    <div className="pt-12">
-      <main className="min-h-screen p-16 mx-auto space-y-12">
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold tracking-tight mb-4">Components</h1>
-          <p className="text-zinc-400">
-            Explore Contextual UI components designed for humans, search engines, and AI agents.
-          </p>
-        </div>
+    <div className="pt-24 pb-28 max-w-7xl mx-auto px-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold tracking-tight mb-2">Components</h1>
+        <p className="text-zinc-400 text-sm">
+          Explore Contextual UI components designed for humans, search engines, and AI agents.
+        </p>
+      </div>
 
-        {/* Navbar Showcase */}
-        <ShowcaseSection
-          id="navbar"
-          title="Navbar"
-          description="The Navbar component renders accessible navigation structures with full semantic support."
-          codeString={navbarCode}
-          schemaString={navbarSchema}
-          exampleDescription="React component implementation using Navbar subcomponents."
-          schemaDescription="Schema.org SiteNavigationElement automatically injected in the DOM."
-        >
-          <Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
-            <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
-              <img
-                src="/images/contextual-ui-logo.png"
-                alt="Contextual UI Logo"
-                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
-              />
-              Contextual UI
-            </Navbar.Brand>
-            <Navbar.Content className="flex gap-6 items-center">
-              {data.navbar?.links.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  className="hover:text-silver no-underline text-sm font-medium transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </Navbar.Content>
-          </Navbar.Root>
-        </ShowcaseSection>
-
-        {/* Breadcrumb Showcase */}
-        <ShowcaseSection
-          id="breadcrumb"
-          title="Breadcrumb"
-          description="The Breadcrumb component automatically injects Schema.org BreadcrumbList JSON-LD for search engine indexing while enforcing accessible semantic navigation."
-          codeString={breadcrumbCode}
-          schemaString={breadcrumbSchema}
-          exampleDescription="Accessible breadcrumb trail implementation with list items and separators."
-          schemaDescription="Schema.org BreadcrumbList automatically injected in the DOM."
-        >
-          <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual-ui.dev">
-            <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
-              {breadcrumbData.map((item, index) => {
-                const isLast = index === breadcrumbData.length - 1;
+      <div className="flex flex-col lg:flex-row gap-12 items-start relative">
+        {/* Left Side Menu */}
+        <aside className="hidden lg:block lg:sticky lg:top-24 w-64 shrink-0 space-y-6">
+          <div className="backdrop-blur-sm shadow-sm space-y-4">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 px-2 pt-2">
+              Components
+            </h3>
+            <nav className="space-y-1">
+              {[
+                { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
+                { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
+                { id: 'faq', label: 'FAQ', desc: 'FAQ & Questions' },
+              ].map((item) => {
+                const isActive = activeId === item.id;
                 return (
-                  <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center gap-2">
-                    {isLast ? (
-                      <Breadcrumb.Page className="font-semibold">
-                        {item.label}
-                      </Breadcrumb.Page>
-                    ) : (
-                      <>
-                        <Breadcrumb.Link href={item.url!} className="text-accent hover:underline no-underline">
-                          {item.label}
-                        </Breadcrumb.Link>
-                        <Breadcrumb.Separator className="text-zinc-400">
-                          /
-                        </Breadcrumb.Separator>
-                      </>
-                    )}
-                  </Breadcrumb.Item>
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                      setActiveId(item.id);
+                    }}
+                    className={`flex flex-col px-3 py-2.5 rounded-xl text-sm transition-colors no-underline ${
+                      isActive
+                        ? 'text-accent border border-base shadow-sm font-medium'
+                        : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50'
+                    }`}
+                  >
+                    <span className="font-semibold">{item.label}</span>
+                    <span className="text-[11px] text-zinc-400">{item.desc}</span>
+                  </a>
                 );
               })}
-            </Breadcrumb.List>
-          </Breadcrumb.Root>
-        </ShowcaseSection>
+            </nav>
+          </div>
+        </aside>
 
-        {/* FAQ Showcase */}
-        <ShowcaseSection
-          id="faq"
-          title="FAQ"
-          description="The FAQ component organizes collapsible question-and-answer pairs with automatic Schema.org FAQPage structured data injection."
-          codeString={faqCode}
-          schemaString={faqSchema}
-          exampleDescription="Collapsible FAQ layout with trigger buttons and content sections."
-          schemaDescription="Schema.org FAQPage automatically injected in the DOM."
-        >
-          <Faq.Root data={faqData}>
-            {faqData.map((item) => (
-              <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-base last:border-b-0 pb-4 last:pb-0">
-                <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
-                  {`${item.id}. ${item.question}`}
-                </Faq.Trigger>
-                <Faq.Content className="mt-2 text-zinc-400 text-sm leading-relaxed">
-                  {item.answer}
-                </Faq.Content>
-              </Faq.Item>
-            ))}
-          </Faq.Root>
-        </ShowcaseSection>
-      </main>
+        {/* Main Content Area */}
+        <div className="flex-1 min-w-0 space-y-12 w-full">
+          {/* Mobile Navigation Pills */}
+          <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 border-b border-base w-full">
+            {[
+              { id: 'navbar', label: 'Navbar' },
+              { id: 'breadcrumb', label: 'Breadcrumb' },
+              { id: 'faq', label: 'FAQ' },
+            ].map((item) => {
+              const isActive = activeId === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={`#${item.id}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                    setActiveId(item.id);
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors no-underline ${
+                    isActive
+                      ? 'bg-zinc-900 text-accent border border-base'
+                      : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50'
+                  }`}
+                >
+                  {item.label}
+                </a>
+              );
+            })}
+          </div>
+
+          {/* Navbar Showcase */}
+          <ShowcaseSection
+            id="navbar"
+            title="Navbar"
+            description="The Navbar component renders accessible navigation structures with full semantic support."
+            codeString={navbarCode}
+            schemaString={navbarSchema}
+            exampleDescription="React component implementation using Navbar subcomponents."
+            schemaDescription="Schema.org SiteNavigationElement automatically injected in the DOM."
+          >
+            <Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
+              <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
+                <img
+                  src="/images/contextual-ui-logo.png"
+                  alt="Contextual UI Logo"
+                  className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
+                />
+                Contextual UI
+              </Navbar.Brand>
+              <Navbar.Content className="flex gap-6 items-center">
+                {data.navbar?.links.map((link) => (
+                  <a
+                    key={link.id}
+                    href={link.href}
+                    className="hover:text-silver no-underline text-sm font-medium transition-colors"
+                  >
+                    {link.label}
+                  </a>
+                ))}
+              </Navbar.Content>
+            </Navbar.Root>
+          </ShowcaseSection>
+
+          {/* Breadcrumb Showcase */}
+          <ShowcaseSection
+            id="breadcrumb"
+            title="Breadcrumb"
+            description="The Breadcrumb component automatically injects Schema.org BreadcrumbList JSON-LD for search engine indexing while enforcing accessible semantic navigation."
+            codeString={breadcrumbCode}
+            schemaString={breadcrumbSchema}
+            exampleDescription="Accessible breadcrumb trail implementation with list items and separators."
+            schemaDescription="Schema.org BreadcrumbList automatically injected in the DOM."
+          >
+            <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual-ui.dev">
+              <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
+                {breadcrumbData.map((item, index) => {
+                  const isLast = index === breadcrumbData.length - 1;
+                  return (
+                    <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center gap-2">
+                      {isLast ? (
+                        <Breadcrumb.Page className="font-semibold">
+                          {item.label}
+                        </Breadcrumb.Page>
+                      ) : (
+                        <>
+                          <Breadcrumb.Link href={item.url!} className="text-accent hover:underline no-underline">
+                            {item.label}
+                          </Breadcrumb.Link>
+                          <Breadcrumb.Separator className="text-zinc-400">
+                            /
+                          </Breadcrumb.Separator>
+                        </>
+                      )}
+                    </Breadcrumb.Item>
+                  );
+                })}
+              </Breadcrumb.List>
+            </Breadcrumb.Root>
+          </ShowcaseSection>
+
+          {/* FAQ Showcase */}
+          <ShowcaseSection
+            id="faq"
+            title="FAQ"
+            description="The FAQ component organizes collapsible question-and-answer pairs with automatic Schema.org FAQPage structured data injection."
+            codeString={faqCode}
+            schemaString={faqSchema}
+            exampleDescription="Collapsible FAQ layout with trigger buttons and content sections."
+            schemaDescription="Schema.org FAQPage automatically injected in the DOM."
+          >
+            <Faq.Root data={faqData}>
+              {faqData.map((item) => (
+                <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-base last:border-b-0 pb-4 last:pb-0">
+                  <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
+                    {`${item.id}. ${item.question}`}
+                  </Faq.Trigger>
+                  <Faq.Content className="mt-2 text-zinc-400 text-sm leading-relaxed">
+                    {item.answer}
+                  </Faq.Content>
+                </Faq.Item>
+              ))}
+            </Faq.Root>
+          </ShowcaseSection>
+        </div>
+      </div>
     </div>
   );
 }
