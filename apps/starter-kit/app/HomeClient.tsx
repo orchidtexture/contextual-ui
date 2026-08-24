@@ -1,8 +1,14 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { Faq, useContextualSiteContext } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
 import { HeroFlowDiagram } from '@/components/hero-flow';
+
+const TriangleSphere = dynamic(() => import('@/components/TriangleSphere'), {
+  ssr: false,
+  loading: () => <div className="w-full h-[360px] sm:h-[440px] lg:h-[480px]" />,
+});
 
 export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   const pageContext = useContextualSiteContext<SiteData>();
@@ -12,41 +18,47 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   return (
     <div className="pt-16 pb-32">
       {/* Main Content with padding-top to account for fixed header */}
-      <main className="pt-12 pb-16 px-6 max-w-5xl mx-auto space-y-20 sm:space-y-28">
+      <main className="pt-12 pb-16 px-6 max-w-6xl mx-auto space-y-20 sm:space-y-28">
 
-        {/* Hero Section */}
-        <section className="space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-base text-xs font-mono text-accent">
-            <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-            @contextual-ui/core v0.1
+        {/* Hero Section with Dynamic TriangleSphere */}
+        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+          <div className="lg:col-span-7 space-y-6">
+            {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-base text-xs font-mono text-accent">
+              <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
+              @contextual-ui/core v0.1
+            </div> */}
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight">
+              One Schema. UI for Humans, Structured Data for AI & Search Engines.
+            </h1>
+            <p className="text-lg text-zinc-300 leading-relaxed max-w-2xl">
+              The headless React library that turns your Website into accessible components and referential Schema.org Knowledge Graphs.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <a
+                href="#data-pipeline"
+                className="px-4 py-2 rounded-xl bg-accent text-zinc-950 font-semibold text-xs tracking-tight hover:bg-accent/90 transition-colors shadow-sm flex items-center gap-1.5"
+              >
+                <span>Explore Pipeline Diagram</span>
+                <span>↓</span>
+              </a>
+              <a
+                href="/docs"
+                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-base text-xs font-medium transition-colors"
+              >
+                Browse Docs
+              </a>
+              <a
+                href="/api/graph.json"
+                target="_blank"
+                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-base text-xs font-mono transition-colors"
+              >
+                /api/graph.json ↗
+              </a>
+            </div>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight">
-            One Schema. UI for Humans, Structured Data for AI & Search Engines.
-          </h1>
-          <p className="text-lg text-zinc-300 leading-relaxed max-w-3xl">
-            The headless React library that turns your Website into accessible components and referential Schema.org Knowledge Graphs.
-          </p>
-          <div className="flex flex-wrap items-center gap-3 pt-2">
-            <a
-              href="#data-pipeline"
-              className="px-4 py-2 rounded-xl bg-accent text-zinc-950 font-semibold text-xs tracking-tight hover:bg-accent/90 transition-colors shadow-sm flex items-center gap-1.5"
-            >
-              <span>Explore Pipeline Diagram</span>
-              <span>↓</span>
-            </a>
-            <a
-              href="/docs"
-              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-base text-xs font-medium transition-colors"
-            >
-              Browse Docs
-            </a>
-            <a
-              href="/api/graph.json"
-              target="_blank"
-              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-base text-xs font-mono transition-colors"
-            >
-              /api/graph.json ↗
-            </a>
+
+          <div className="lg:col-span-5 h-[360px] sm:h-[440px] lg:h-[480px] w-full flex items-center justify-center">
+            <TriangleSphere className="w-full h-full" />
           </div>
         </section>
 
@@ -56,8 +68,8 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
             <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
               <span>●</span> Architecture Flow
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
-              End-to-End Pipeline: Source to Graph & UI
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100">
+              Source to Graph & UI
             </h2>
             <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
               Explore how Contextual UI unifies data ingestion, SSOT schema validation, and multi-channel delivery across React components, Schema.org <code className="code-short">@graph</code> JSON-LD, and structured AI agent feeds.
