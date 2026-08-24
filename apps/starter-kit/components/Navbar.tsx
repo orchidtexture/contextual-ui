@@ -16,13 +16,13 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
       <div className="w-full mx-auto flex justify-between items-center">
         <Navbar.Root className="w-full relative">
           <div className="flex justify-between items-center w-full">
-            <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
+            <Navbar.Brand className="font-semibold font-mono text-base no-underline flex items-center gap-2.5">
               <img
                 src="/images/contextual-ui-logo.png"
-                alt="Contextual UI Logo"
+                alt="Contextual Site Logo"
                 className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
               />
-              Contextual UI
+              ContextualSite
             </Navbar.Brand>
             <Navbar.Content className="hidden md:flex gap-6 items-center">
               {data?.navbar?.links.map((link) => (

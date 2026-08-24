@@ -2,6 +2,7 @@
 
 import { Faq, useContextualSiteContext } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
+import { HeroFlowDiagram } from '@/components/hero-flow';
 
 export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   const pageContext = useContextualSiteContext<SiteData>();
@@ -11,21 +12,60 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   return (
     <div className="pt-16 pb-28">
       {/* Main Content with padding-top to account for fixed header */}
-      <main className="pt-12 pb-16 px-6 max-w-4xl mx-auto space-y-12">
+      <main className="pt-12 pb-16 px-6 max-w-5xl mx-auto space-y-14">
 
         {/* Hero Section */}
-        <div className="space-y-4 border-b border-base pb-10">
+        <div className="space-y-6 border-b border-base pb-10">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-base text-xs font-mono text-accent">
             <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
             @contextual-ui/core v0.1
           </div>
-          <h1 className="text-4xl font-bold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50">
             UI for Humans, Search Engines & AI Agents
           </h1>
-          <p className="text-lg text-zinc-300 leading-relaxed">
+          <p className="text-lg text-zinc-300 leading-relaxed max-w-3xl">
             Foundational headless component library built with <strong className="text-zinc-100 font-semibold">React</strong>, <strong className="text-zinc-100 font-semibold">Zod</strong>, and <strong className="text-zinc-100 font-semibold">Radix UI</strong>. It provides the infrastructure to build accessible, type-safe, and SEO-optimized components with zero design opinion, paired with an integrated Schema.org Knowledge Graph engine.
           </p>
+          <div className="flex flex-wrap items-center gap-3 pt-2">
+            <a
+              href="#data-pipeline"
+              className="px-4 py-2 rounded-xl bg-accent text-zinc-950 font-semibold text-xs tracking-tight hover:bg-accent/90 transition-colors shadow-sm flex items-center gap-1.5"
+            >
+              <span>Explore Pipeline Diagram</span>
+              <span>↓</span>
+            </a>
+            <a
+              href="/components"
+              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-base text-xs font-medium transition-colors"
+            >
+              Browse Components
+            </a>
+            <a
+              href="/api/graph.json"
+              target="_blank"
+              className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-base text-xs font-mono transition-colors"
+            >
+              /api/graph.json ↗
+            </a>
+          </div>
         </div>
+
+        {/* Data Pipeline Flow Diagram Section */}
+        <section id="data-pipeline" className="space-y-6 pt-2">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
+              <span>●</span> Architecture Flow
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
+              End-to-End Pipeline: Source to Graph & UI
+            </h2>
+            <p className="text-sm text-zinc-400 max-w-2xl leading-relaxed">
+              Explore how Contextual UI unifies data ingestion, SSOT schema validation, and multi-channel delivery across React components, Schema.org <code className="code-short">@graph</code> JSON-LD, and structured AI agent feeds.
+            </p>
+          </div>
+
+          <HeroFlowDiagram />
+        </section>
 
         {/* SSOT & Architecture Pillars */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
