@@ -10,10 +10,8 @@ export const HeroFlowNode = memo(({ data, selected }: NodeProps<FlowNodeData>) =
     title,
     subtitle,
     badge,
-    icon,
     color,
     accentClass,
-    tags,
   } = data;
 
   const isOutput = stage === 'output';
@@ -32,11 +30,6 @@ export const HeroFlowNode = memo(({ data, selected }: NodeProps<FlowNodeData>) =
           : undefined,
       }}
     >
-      {/* Ambient gradient flare in top-right */}
-      <div
-        className="absolute -top-6 -right-6 w-24 h-24 rounded-full pointer-events-none opacity-20 blur-xl transition-opacity duration-300 group-hover:opacity-40"
-        style={{ backgroundColor: color }}
-      />
 
       {/* Target Handle (Left) - Not needed for Source node */}
       {!isSource && (
@@ -59,8 +52,11 @@ export const HeroFlowNode = memo(({ data, selected }: NodeProps<FlowNodeData>) =
           />
           {badge}
         </span>
-        <span className="text-sm select-none" role="img" aria-label={title}>
-          {icon}
+        <span
+          className="text-[9px] px-1 rounded bg-zinc-800/50 text-zinc-400"
+          style={{ color: selected ? color : undefined }}
+        >
+          {selected ? 'ACTIVE' : 'VIEW'}
         </span>
       </div>
 
@@ -72,32 +68,6 @@ export const HeroFlowNode = memo(({ data, selected }: NodeProps<FlowNodeData>) =
         <p className="text-[11px] text-zinc-400 font-mono truncate leading-tight">
           {subtitle}
         </p>
-      </div>
-
-      {/* Mini Feature Chips / Tags */}
-      <div className="flex flex-wrap gap-1">
-        {tags.slice(0, 2).map((tag, i) => (
-          <span
-            key={i}
-            className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-zinc-950/60 border border-zinc-800 text-zinc-400 group-hover:border-zinc-700 transition-colors"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
-
-      {/* Click indicator hint */}
-      <div className="mt-2.5 pt-2 border-t border-zinc-800/60 flex items-center justify-between text-[10px] text-zinc-500 font-mono">
-        <span className="group-hover:text-zinc-300 transition-colors flex items-center gap-1">
-          <span>Inspect Spec</span>
-          <span className="text-xs">→</span>
-        </span>
-        <span
-          className="text-[9px] px-1 rounded bg-zinc-800/50 text-zinc-400"
-          style={{ color: selected ? color : undefined }}
-        >
-          {selected ? 'ACTIVE' : 'VIEW'}
-        </span>
       </div>
 
       {/* Source Handle (Right) - Not needed for Output nodes */}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { memo } from 'react';
-import { BaseEdge, EdgeLabelRenderer, EdgeProps, getBezierPath } from 'reactflow';
+import { BaseEdge, EdgeProps, getBezierPath } from 'reactflow';
 import { FlowEdgeData } from './types';
 
 export const HeroFlowEdge = memo(({
@@ -12,10 +12,9 @@ export const HeroFlowEdge = memo(({
   targetY,
   sourcePosition,
   targetPosition,
-  label,
   data,
 }: EdgeProps<FlowEdgeData>) => {
-  const [edgePath, labelX, labelY] = getBezierPath({
+  const [edgePath] = getBezierPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -71,27 +70,6 @@ export const HeroFlowEdge = memo(({
             path={edgePath}
           />
         </circle>
-      )}
-
-      {/* Floating Edge Label Pill */}
-      {label && (
-        <EdgeLabelRenderer>
-          <div
-            style={{
-              position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-              pointerEvents: 'all',
-            }}
-            className={`px-2 py-0.5 rounded-full text-[10px] font-mono tracking-tight transition-all duration-300 border backdrop-blur-md select-none ${
-              isHighlighted
-                ? 'bg-zinc-900/95 text-zinc-100 border-zinc-500 shadow-lg scale-105'
-                : 'bg-zinc-950/85 text-zinc-400 border-zinc-800/80 hover:text-zinc-200 hover:border-zinc-700'
-            }`}
-          >
-            <span className="inline-block mr-1 w-1.5 h-1.5 rounded-full" style={{ backgroundColor: color }} />
-            {label}
-          </div>
-        </EdgeLabelRenderer>
       )}
     </>
   );

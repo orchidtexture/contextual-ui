@@ -16,7 +16,6 @@ import 'reactflow/dist/style.css';
 import { initialNodes, initialEdges } from './flowData';
 import { HeroFlowNode } from './HeroFlowNode';
 import { HeroFlowEdge } from './HeroFlowEdge';
-import { HeroFlowInspector } from './HeroFlowInspector';
 import { FlowChannel, FlowNodeData, FlowEdgeData } from './types';
 
 const nodeTypes = {
@@ -29,7 +28,6 @@ const edgeTypes = {
 
 function FlowCanvas() {
   const [selectedChannel, setSelectedChannel] = useState<FlowChannel>('all');
-  const [isPlaying, setIsPlaying] = useState(true);
   const [selectedNodeId, setSelectedNodeId] = useState<string>('engine-node');
 
   const { fitView } = useReactFlow();
@@ -44,15 +42,15 @@ function FlowCanvas() {
 
       return {
         ...edge,
-        animated: isPlaying && isChannelMatch,
+        animated: isChannelMatch,
         data: {
           ...edge.data,
-          isActive: isPlaying && isChannelMatch,
+          isActive: isChannelMatch,
           isHighlighted: selectedChannel !== 'all' && isChannelMatch,
         },
       };
     });
-  }, [selectedChannel, isPlaying]);
+  }, [selectedChannel]);
 
   // Compute nodes with active selection styling
   const computedNodes = useMemo(() => {
@@ -123,7 +121,7 @@ function FlowCanvas() {
         {/* Channel Filter Pills */}
         <div className="flex items-center gap-1.5 p-1 bg-zinc-900/90 border border-zinc-800/80 rounded-xl text-xs font-mono">
           <span className="text-zinc-400 text-[11px] px-2 select-none font-semibold uppercase tracking-wider">
-            Flow View:
+            For:
           </span>
           <button
             onClick={() => handleChannelSelect('all')}
@@ -133,7 +131,7 @@ function FlowCanvas() {
                 : 'text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            All Channels
+            All
           </button>
           <button
             onClick={() => handleChannelSelect('ui')}
@@ -144,7 +142,7 @@ function FlowCanvas() {
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
-            UI Flow
+            Humans
           </button>
           <button
             onClick={() => handleChannelSelect('graph')}
@@ -155,7 +153,7 @@ function FlowCanvas() {
             }`}
           >
             <span className="w-1.5 h-1.5 rounded-full bg-purple-400"></span>
-            Knowledge Graph
+            Search Engines
           </button>
           <button
             onClick={() => handleChannelSelect('ai')}
@@ -169,45 +167,20 @@ function FlowCanvas() {
             AI Agents
           </button>
         </div>
-
-        {/* Canvas Actions */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="p-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 text-xs font-mono transition-colors flex items-center gap-1.5"
-            title={isPlaying ? 'Pause animations' : 'Play animations'}
-          >
-            <span className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-accent animate-pulse' : 'bg-zinc-600'}`} />
-            <span>{isPlaying ? 'Live Motion' : 'Paused'}</span>
-          </button>
-          <button
-            onClick={handleResetView}
-            className="p-1.5 px-2.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white text-xs font-mono transition-colors flex items-center gap-1.5"
-            title="Reset canvas view"
-          >
-            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-            </svg>
-            <span>Fit View</span>
-          </button>
-        </div>
       </div>
 
+      {/* Selected Node Description (simple inline text) */}
+      {activeNodeData && (
+        <p className="text-sm text-zinc-300 leading-relaxed px-1">
+          <span className={`font-mono font-medium text-xs uppercase tracking-wide mr-2 ${activeNodeData.accentClass}`}>
+            {activeNodeData.title} &mdash;
+          </span>
+          {activeNodeData.description}
+        </p>
+      )}
+
       {/* ReactFlow Canvas Container */}
-      <div className="w-full h-[460px] md:h-[500px] bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative">
-        {/* Status indicator top left */}
-        <div className="absolute top-4 left-4 z-10 bg-zinc-900/90 backdrop-blur-md border border-zinc-800 px-3 py-1.5 rounded-lg text-xs font-mono text-zinc-300 flex items-center gap-2 shadow-md">
-          <span className="w-2 h-2 rounded-full bg-accent animate-ping"></span>
-          <span className="font-semibold text-zinc-200">SSOT Architecture</span>
-          <span className="text-zinc-600">|</span>
-          <span className="text-zinc-400">Source &rarr; Graph Flow</span>
-        </div>
-
-        {/* Legend Hint top right */}
-        <div className="absolute top-4 right-4 z-10 hidden sm:flex items-center gap-2 bg-zinc-900/80 backdrop-blur-md border border-zinc-800 px-2.5 py-1 rounded-lg text-[11px] font-mono text-zinc-400 shadow-md">
-          <span>Click any node to inspect payload</span>
-        </div>
-
+      <div className="w-full h-[460px] md:h-[500px] bg-zinc-950 border border-base rounded-2xl overflow-hidden relative">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -225,9 +198,6 @@ function FlowCanvas() {
           <Background color="#52525b" gap={20} size={1} variant={BackgroundVariant.Dots} />
         </ReactFlow>
       </div>
-
-      {/* Interactive Inspector for clicked node */}
-      <HeroFlowInspector selectedNode={activeNodeData} />
     </div>
   );
 }

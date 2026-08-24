@@ -7,12 +7,10 @@ export interface FlowNodeData {
   title: string;
   subtitle: string;
   badge: string;
-  icon: string;
   color: string;
   accentClass: string;
   borderClass: string;
   bgGlowClass: string;
-  tags: string[];
   description: string;
   codeSnippet: {
     language: 'typescript' | 'json';
