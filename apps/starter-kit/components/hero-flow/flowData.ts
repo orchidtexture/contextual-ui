@@ -35,7 +35,7 @@ export const connector = staticConnector({
   navbar: {
     brand: { name: 'Contextual UI', href: '/' },
     links: [
-      { id: '1', label: 'Components', href: '/components' },
+      { id: '1', label: 'Docs', href: '/docs' },
       { id: '2', label: 'Schema Graph', href: '/schema' }
     ]
   }

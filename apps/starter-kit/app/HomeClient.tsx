@@ -35,10 +35,10 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
               <span>↓</span>
             </a>
             <a
-              href="/components"
+              href="/docs"
               className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-base text-xs font-medium transition-colors"
             >
-              Browse Components
+              Browse Docs
             </a>
             <a
               href="/api/graph.json"
@@ -152,11 +152,11 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
           <h3 className="text-sm font-mono uppercase tracking-wider text-zinc-400">Starter Kit Navigation</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
             <a
-              href="/components"
+              href="/docs"
               className="bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-base p-4 rounded-xl no-underline text-xs font-semibold transition-colors shadow-sm flex flex-col gap-1"
             >
-              <span className="text-accent text-sm">Components &rarr;</span>
-              <span className="text-zinc-400 font-normal">Explore Navbar, Breadcrumb, FAQ showcase</span>
+              <span className="text-accent text-sm">Documentation &rarr;</span>
+              <span className="text-zinc-400 font-normal">Explore ContextualSite, Navbar, Breadcrumb, FAQ</span>
             </a>
             <a
               href="/schema"

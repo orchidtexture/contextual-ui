@@ -5,7 +5,7 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-jsx';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
-import { Breadcrumb, Navbar, Faq } from '@contextual-ui/core';
+import { ContextualSite, Breadcrumb, Navbar, Faq } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
 
 function ShowcaseSection({
@@ -21,7 +21,7 @@ function ShowcaseSection({
   id: string;
   title: string;
   description: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   codeString: string;
   schemaString: string;
   exampleDescription: string;
@@ -38,9 +38,11 @@ function ShowcaseSection({
       <h2 className="text-xl font-bold mb-3">{title}</h2>
       <p className="mb-6 text-sm leading-relaxed text-zinc-300">{description}</p>
 
-      <div className="border border-base rounded-xl p-4 shadow-inner mb-6">
-        {children}
-      </div>
+      {children && (
+        <div className="border border-base rounded-xl p-4 shadow-inner mb-6">
+          {children}
+        </div>
+      )}
 
       <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
         <div className="flex ml-auto border border-base">
@@ -81,8 +83,8 @@ function ShowcaseSection({
   );
 }
 
-export function ComponentsClient({ data }: { data: SiteData }) {
-  const [activeId, setActiveId] = useState<string>('navbar');
+export function DocsClient({ data }: { data: SiteData }) {
+  const [activeId, setActiveId] = useState<string>('contextual-site');
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -96,7 +98,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
       { rootMargin: '-120px 0px -50% 0px' }
     );
 
-    const sections = ['navbar', 'breadcrumb', 'faq'];
+    const sections = ['contextual-site', 'navbar', 'breadcrumb', 'faq'];
     sections.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -112,8 +114,8 @@ export function ComponentsClient({ data }: { data: SiteData }) {
 
   const breadcrumbData = [
     { id: '1', label: 'Home', url: '/' },
-    { id: '2', label: 'Components', url: '/components' },
-    { id: '3', label: 'Showcase', url: '/components#showcase' },
+    { id: '2', label: 'Docs', url: '/docs' },
+    { id: '3', label: 'Showcase', url: '/docs#showcase' },
   ];
 
   const faqData = [
@@ -121,6 +123,69 @@ export function ComponentsClient({ data }: { data: SiteData }) {
     { id: '2', question: 'What do bears eat?', answer: 'Beets.' },
     { id: '3', question: 'Is identity theft a joke?', answer: "It's not. Millions of families suffer every year!" }
   ];
+
+  const contextualSiteCode = `import { siteApp } from '@/data/site.server';
+import { ContextualSite, Navbar, Faq } from '@contextual-ui/core';
+
+export default async function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const data = await siteApp.fetchData();
+  const graph = await siteApp.getGraph({
+    graphOptions: { baseUrl: 'https://contextual.site' },
+  });
+
+  return (
+    <html lang="en">
+      <body>
+        <ContextualSite data={data} graph={graph}>
+          {/* Child components automatically infer data from context */}
+          <Navbar.Root />
+          {children}
+        </ContextualSite>
+      </body>
+    </html>
+  );
+}`;
+
+  const contextualSiteSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://contextual.site/#website",
+        "name": data.website?.name || "Contextual UI Starter Kit",
+        "url": "https://contextual.site",
+        "description": data.website?.description || "A headless UI and semantic SEO Knowledge Graph starter kit."
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "@id": "https://contextual.site/#navbar",
+        "name": "Navigation Bar",
+        "isPartOf": { "@id": "https://contextual.site/#website" },
+        "hasPart": data.navbar?.links.map(link => ({
+          "@type": "WebPage",
+          "name": link.label,
+          "url": link.href
+        }))
+      },
+      {
+        "@type": "FAQPage",
+        "@id": "https://contextual.site/#faq",
+        "isPartOf": { "@id": "https://contextual.site/#website" },
+        "mainEntity": (data.faq || []).map(item => ({
+          "@type": "Question",
+          "name": item.question,
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": item.answer
+          }
+        }))
+      }
+    ]
+  }, null, 2);
 
   const navbarCode = `<Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
   <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
@@ -194,9 +259,9 @@ export function ComponentsClient({ data }: { data: SiteData }) {
   return (
     <div className="pt-24 pb-28 max-w-7xl mx-auto px-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight mb-2">Components</h1>
+        <h1 className="text-2xl font-bold tracking-tight mb-2">Docs & Components</h1>
         <p className="text-zinc-400 text-sm">
-          Explore Contextual UI components designed for humans, search engines, and AI agents.
+          Explore Contextual UI site providers and components designed for humans, search engines, and AI agents.
         </p>
       </div>
 
@@ -205,10 +270,11 @@ export function ComponentsClient({ data }: { data: SiteData }) {
         <aside className="hidden lg:block lg:sticky lg:top-24 w-64 shrink-0 space-y-6">
           <div className="backdrop-blur-sm shadow-sm space-y-4">
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 px-2 pt-2">
-              Components
+              Documentation
             </h3>
             <nav className="space-y-1">
               {[
+                { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & Graph' },
                 { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
                 { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
                 { id: 'faq', label: 'FAQ', desc: 'FAQ & Questions' },
@@ -243,6 +309,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
           {/* Mobile Navigation Pills */}
           <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 border-b border-base w-full">
             {[
+              { id: 'contextual-site', label: 'ContextualSite' },
               { id: 'navbar', label: 'Navbar' },
               { id: 'breadcrumb', label: 'Breadcrumb' },
               { id: 'faq', label: 'FAQ' },
@@ -269,6 +336,17 @@ export function ComponentsClient({ data }: { data: SiteData }) {
             })}
           </div>
 
+          {/* ContextualSite Showcase */}
+          <ShowcaseSection
+            id="contextual-site"
+            title="<ContextualSite /> Provider"
+            description="The root provider that coordinates domain-level data distribution to all contextual UI components and consolidates their schema data into a single, unified Schema.org JSON-LD @graph."
+            codeString={contextualSiteCode}
+            schemaString={contextualSiteSchema}
+            exampleDescription="Wrap your root layout with ContextualSite to provide data and unified @graph script."
+            schemaDescription="Unified Schema.org @graph automatically injected in a single script tag."
+          />
+
           {/* Navbar Showcase */}
           <ShowcaseSection
             id="navbar"
@@ -289,17 +367,17 @@ export function ComponentsClient({ data }: { data: SiteData }) {
                   />
                   Contextual UI
                 </Navbar.Brand>
-                  <Navbar.Content className="hidden md:flex gap-6 items-center">
-                    {data.navbar?.links.map((link) => (
-                      <a
-                        key={link.id}
-                        href={link.href}
-                        className="hover:text-silver no-underline text-sm font-medium transition-colors"
-                      >
-                        {link.label}
-                      </a>
-                    ))}
-                  </Navbar.Content>
+                <Navbar.Content className="hidden md:flex gap-6 items-center">
+                  {data.navbar?.links.map((link) => (
+                    <a
+                      key={link.id}
+                      href={link.href}
+                      className="hover:text-silver no-underline text-sm font-medium transition-colors"
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </Navbar.Content>
                 <Navbar.Toggle className="md:hidden p-2 text-zinc-400 hover:text-zinc-100 focus:outline-none cursor-pointer" />
               </div>
               <Navbar.Menu className="absolute top-16 left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl">
