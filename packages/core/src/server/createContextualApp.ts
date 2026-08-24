@@ -1,5 +1,6 @@
 import { createGraphRouteHandler, GraphRouteHandlerOptions } from './createGraphRouteHandler';
 import { InferData } from '../registry/defineSchema';
+import { buildGraph, JsonLdObject } from '@contextual-ui/jsonld-graph-builder';
 
 export interface ContextualAppOptions<
   TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any },
@@ -24,6 +25,15 @@ export function createContextualApp<
     async fetchData(): Promise<InferData<TSchema>> {
       const raw = await options.connector.fetchData();
       return options.schema.hydrate(raw).raw as InferData<TSchema>;
+    },
+    async getGraph(handlerOptions?: GraphRouteHandlerOptions) {
+      const hydrated = await getHydrated();
+      if (typeof hydrated.generateGraph === 'function') {
+        return hydrated.generateGraph({ ...handlerOptions?.graphOptions, jsonLdContext: handlerOptions?.jsonLdContext });
+      }
+      const generated = hydrated.generateJsonLd(handlerOptions?.jsonLdContext);
+      const entities = Object.values(generated).filter(Boolean) as JsonLdObject[];
+      return buildGraph(entities, handlerOptions?.graphOptions);
     },
     createGraphHandler(handlerOptions?: GraphRouteHandlerOptions) {
       return {

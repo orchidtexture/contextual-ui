@@ -148,7 +148,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
     }))
   }, null, 2);
 
-  const breadcrumbCode = `<Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual-ui.dev">
+  const breadcrumbCode = `<Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual.site">
   <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
     {breadcrumbData.map((item, index) => (
       <Breadcrumb.Item key={item.id}>
@@ -165,7 +165,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
       "@type": "ListItem",
       "position": index + 1,
       "name": item.label,
-      "item": `https://contextual-ui.dev${item.url}`
+      "item": `https://contextual.site${item.url}`
     }))
   }, null, 2);
 
@@ -326,7 +326,7 @@ export function ComponentsClient({ data }: { data: SiteData }) {
             exampleDescription="Accessible breadcrumb trail implementation with list items and separators."
             schemaDescription="Schema.org BreadcrumbList automatically injected in the DOM."
           >
-            <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual-ui.dev">
+            <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual.site">
               <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
                 {breadcrumbData.map((item, index) => {
                   const isLast = index === breadcrumbData.length - 1;

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+import { createId, refersTo, buildGraph, GraphBuilderOptions, JsonLdObject, JsonLdGraphResult } from '@contextual-ui/jsonld-graph-builder';
 
 export interface UIMetadata {
   label?: string;
@@ -44,6 +44,7 @@ export interface HydratedContext<TConfig extends SchemaConfig> {
   config: TConfig;
   getAgentData: () => Record<string, any>;
   generateJsonLd: (ctx?: Partial<JsonLdContext>) => Record<string, any>;
+  generateGraph: (options?: GraphBuilderOptions & { jsonLdContext?: Partial<JsonLdContext> }) => JsonLdGraphResult;
 }
 
 function isProd() {
@@ -107,6 +108,18 @@ export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
           }
           return jsonLdData;
         },
+        generateGraph: (options?: GraphBuilderOptions & { jsonLdContext?: Partial<JsonLdContext> }): JsonLdGraphResult => {
+          const context = createDefaultContext(options?.jsonLdContext);
+          const jsonLdData: Record<string, any> = {};
+          for (const [key, section] of Object.entries(config)) {
+            const data = validatedData[key];
+            if (section.generateJsonLd) {
+              jsonLdData[key] = section.generateJsonLd(data, context);
+            }
+          }
+          const entities = Object.values(jsonLdData).filter(Boolean) as JsonLdObject[];
+          return buildGraph(entities, options);
+        },
       };
     },
     parse(rawData: Record<string, any>) {
@@ -129,18 +142,26 @@ export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
       return agentData;
     },
     generateJsonLd(
-      validatedData: { [K in keyof TConfig]: z.infer<TConfig[K]['schema']> },
+      validatedData: { [K in keyof TConfig]: z.infer<TConfig[K]['schema']> } | Record<string, any>,
       ctx?: Partial<JsonLdContext>
     ) {
       const context = createDefaultContext(ctx);
       const jsonLdData: Record<string, any> = {};
       for (const [key, section] of Object.entries(config)) {
-        const data = validatedData[key];
+        const data = (validatedData as Record<string, any>)[key];
         if (section.generateJsonLd) {
           jsonLdData[key] = section.generateJsonLd(data, context);
         }
       }
       return jsonLdData;
+    },
+    generateGraph(
+      validatedData: { [K in keyof TConfig]: z.infer<TConfig[K]['schema']> } | Record<string, any>,
+      options?: GraphBuilderOptions & { jsonLdContext?: Partial<JsonLdContext> }
+    ): JsonLdGraphResult {
+      const jsonLdData = this.generateJsonLd(validatedData, options?.jsonLdContext);
+      const entities = Object.values(jsonLdData).filter(Boolean) as JsonLdObject[];
+      return buildGraph(entities, options);
     },
   };
 }

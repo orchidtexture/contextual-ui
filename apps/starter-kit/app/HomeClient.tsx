@@ -1,19 +1,17 @@
 'use client';
 
-import { Faq } from '@contextual-ui/core';
+import { Faq, useContextualSiteContext } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
 
-export function HomeClient({ data }: { data: SiteData }) {
+export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
+  const pageContext = useContextualSiteContext<SiteData>();
+  const data = explicitData ?? pageContext?.data;
+  const faqItems = data?.faq ?? [];
+
   return (
     <div className="pt-16 pb-28">
       {/* Main Content with padding-top to account for fixed header */}
       <main className="pt-12 pb-16 px-6 max-w-4xl mx-auto space-y-12">
-
-        {/* {data.announcement?.enabled && (
-          <div className="bg-silver p-4 rounded-xl text-zinc-900 text-sm shadow-sm font-medium">
-            {data.announcement.message}
-          </div>
-        )} */}
 
         {/* Hero Section */}
         <div className="space-y-4 border-b border-base pb-10">
@@ -78,8 +76,8 @@ export function HomeClient({ data }: { data: SiteData }) {
           </div>
 
           <div className="border border-zinc-200 rounded-2xl p-6 shadow-sm bg-zinc-950/20">
-            <Faq.Root data={data.faq}>
-              {data.faq.map((item) => (
+            <Faq.Root>
+              {faqItems.map((item) => (
                 <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-zinc-800 last:border-b-0 pb-4 last:pb-0">
                   <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
                     {item.question}
@@ -111,13 +109,6 @@ export function HomeClient({ data }: { data: SiteData }) {
               <span className="text-accent text-sm">Schema Graph &rarr;</span>
               <span className="text-zinc-400 font-normal">View SSOT and interactive Knowledge Graph</span>
             </a>
-            {/* <a
-              href="/cms"
-              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-base p-4 rounded-xl no-underline text-xs font-semibold transition-colors shadow-sm flex flex-col gap-1"
-            >
-              <span className="text-accent text-sm">CMS Dashboard &rarr;</span>
-              <span className="text-zinc-400 font-normal">Manage site content and live updates</span>
-            </a> */}
             <a
               href="/api/graph.json"
               target="_blank"

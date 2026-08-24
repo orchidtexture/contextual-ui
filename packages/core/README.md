@@ -60,60 +60,57 @@ export const siteApp = createContextualApp({
 export type SiteData = InferData<typeof siteSchema>;
 ```
 
-### 3. Render with `ContextualPage` Wrapper (`app/page.tsx`)
-Wrap your page with `ContextualPage` to automatically provide data to child components and inject a single, unified Schema.org `@graph` `<script>` tag:
+### 3. Render with `ContextualSite` Wrapper (`app/layout.tsx`)
+Wrap your layout or app root with `ContextualSite` to automatically provide data to child components and inject a single, unified Schema.org `@graph` `<script>` tag:
 
 ```tsx
 import { siteApp } from '@/data/site.server';
-import { siteSchema } from '@/data/site.schema';
-import { ContextualPage, Navbar, Faq } from '@contextual-ui/core';
+import { ContextualSite, Navbar, Faq } from '@contextual-ui/core';
 
-export default async function Page() {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const data = await siteApp.fetchData();
+  const graph = await siteApp.getGraph({
+    graphOptions: { baseUrl: 'https://example.com' },
+  });
 
   return (
-    <ContextualPage schema={siteSchema} data={data} options={{ baseUrl: 'https://example.com' }}>
-      {/* Navbar automatically consumes data.navbar from context */}
-      <Navbar.Root>
-        <Navbar.Brand />
-      </Navbar.Root>
+    <html lang="en">
+      <body>
+        <ContextualSite data={data} graph={graph}>
+          {/* Navbar automatically consumes data.navbar from context */}
+          <Navbar.Root>
+            <Navbar.Brand />
+          </Navbar.Root>
 
-      <main>
-        {/* Faq automatically consumes data.faq from context */}
-        <Faq.Root>
-          {data.faq.map((item) => (
-            <Faq.Item key={item.id} id={item.id}>
-              <Faq.Trigger>{item.question}</Faq.Trigger>
-              <Faq.Content>{item.answer}</Faq.Content>
-            </Faq.Item>
-          ))}
-        </Faq.Root>
-      </main>
-    </ContextualPage>
+          {children}
+        </ContextualSite>
+      </body>
+    </html>
   );
 }
 ```
 
-> **Note:** Child components can also be used standalone (outside `ContextualPage`), in which case you pass `data={...}` explicitly and they will render their own local `<script type="application/ld+json">` tag. When wrapped in `ContextualPage`, inline script tags are automatically suppressed in favor of the unified page graph.
+> **Note:** Child components can also be used standalone (outside `ContextualSite`), in which case you pass `data={...}` explicitly and they will render their own local `<script type="application/ld+json">` tag. When wrapped in `ContextualSite`, inline script tags are automatically suppressed in favor of the unified site graph.
 
 ---
 
-## 🏛️ Page Wrapper: `<ContextualPage />`
+## 🏛️ Site Wrapper: `<ContextualSite />`
 
-`ContextualPage` coordinates data distribution and Schema.org graph generation across your entire page:
+`ContextualSite` coordinates domain-level data distribution and Schema.org `WebSite` graph generation across your entire site:
 
 * **Unified `@graph` Generation:** Compiles all schema sections into a single Schema.org `@graph` object, deduplicating shared entities (e.g. `@id: 'website'`).
 * **Contextual Data Distribution:** Child components (`Navbar.Root`, `Faq.Root`, `Breadcrumb.Root`) automatically retrieve their respective data slice from context without manual prop passing.
 * **Custom Section Keys:** Use `sectionKey="myCustomKey"` on child components if your schema uses custom section names.
-* **Slot / Layout Support:** Supports `asChild` via Radix UI Slot, allowing you to attach page context directly onto existing container elements.
+* **Slot / Layout Support:** Supports `asChild` via Radix UI Slot, allowing you to attach site context directly onto existing container elements.
 
 ### Props
 
 | Prop | Type | Description |
 | :--- | :--- | :--- |
-| `schema` | `SchemaDefinition` | Schema definition returned by `defineSchema(...)`. |
 | `data` | `SiteData \| HydratedContext` | Data object matching the schema or a hydrated context. |
-| `options` | `ContextualPageOptions` | Graph configuration (e.g., `baseUrl`, `dedupeStrategy`, `disableJsonLdScript`). |
+| `graph` | `JsonLdGraphResult` | Pre-built Schema.org graph (ideal for passing across Server/Client boundary in RSC). |
+| `schema` | `SchemaDefinition` | Schema definition returned by `defineSchema(...)` (for client usage). |
+| `options` | `ContextualSiteOptions` | Graph configuration (e.g., `baseUrl`, `dedupeStrategy`, `disableJsonLdScript`). |
 | `asChild` | `boolean` | If true, merges props onto the immediate child element instead of rendering a `<div>`. |
 | `className` | `string` | CSS class name for the wrapper element. |
 

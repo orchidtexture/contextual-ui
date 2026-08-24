@@ -3,8 +3,8 @@
 import { useMemo } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { buildGraph, JsonLdObject } from '@contextual-ui/jsonld-graph-builder';
-import { ContextualPageContext } from './page.context';
-import { ContextualPageProps, ContextualPageContextValue } from './page.types';
+import { ContextualSiteContext } from './site.context';
+import { ContextualSiteProps, ContextualSiteContextValue } from './site.types';
 
 function isHydratedContext(data: any): boolean {
   return (
@@ -15,19 +15,28 @@ function isHydratedContext(data: any): boolean {
   );
 }
 
-export function ContextualPage<
+export function ContextualSite<
   TSchema extends { hydrate: (data: any) => any; generateJsonLd?: (data: any, ctx?: any) => any } = any,
   TData = any
 >({
   schema,
   data: rawData,
+  graph: explicitGraph,
   options,
   children,
   asChild = false,
   className,
   ...props
-}: ContextualPageProps<TSchema, TData>) {
+}: ContextualSiteProps<TSchema, TData>) {
   const { data, graph, getAgentData } = useMemo(() => {
+    if (explicitGraph !== undefined) {
+      return {
+        data: rawData,
+        graph: explicitGraph,
+        getAgentData: undefined,
+      };
+    }
+
     let resolvedData: any = rawData;
     let entities: JsonLdObject[] = [];
     let agentDataGetter: (() => Record<string, any>) | undefined;
@@ -70,13 +79,13 @@ export function ContextualPage<
       graph: builtGraph,
       getAgentData: agentDataGetter,
     };
-  }, [schema, rawData, options]);
+  }, [schema, rawData, explicitGraph, options]);
 
-  const contextValue = useMemo<ContextualPageContextValue>(
+  const contextValue = useMemo<ContextualSiteContextValue>(
     () => ({
       data,
       graph,
-      isContextualPage: true,
+      isContextualSite: true,
       getAgentData,
     }),
     [data, graph, getAgentData]
@@ -85,9 +94,9 @@ export function ContextualPage<
   const Comp = asChild ? Slot : 'div';
 
   return (
-    <ContextualPageContext.Provider value={contextValue}>
+    <ContextualSiteContext.Provider value={contextValue}>
       <Comp
-        data-contextual="page-root"
+        data-contextual="site-root"
         className={className}
         {...props}
       >
@@ -99,6 +108,6 @@ export function ContextualPage<
         )}
         {children}
       </Comp>
-    </ContextualPageContext.Provider>
+    </ContextualSiteContext.Provider>
   );
 }

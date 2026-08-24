@@ -1,17 +1,20 @@
 'use client';
 
-import { Navbar } from '@contextual-ui/core';
+import { Navbar, useContextualSiteContext } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
 
 interface CustomNavbarProps {
-  data: SiteData;
+  data?: SiteData;
 }
 
-export function CustomNavbar({ data }: CustomNavbarProps) {
+export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
+  const pageContext = useContextualSiteContext<SiteData>();
+  const data = explicitData ?? pageContext?.data;
+
   return (
     <header className="fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b border-base z-50 flex items-center px-6 md:px-16 shadow-sm">
       <div className="w-full mx-auto flex justify-between items-center">
-        <Navbar.Root data={data.navbar} className="w-full relative">
+        <Navbar.Root className="w-full relative">
           <div className="flex justify-between items-center w-full">
             <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
               <img
@@ -22,7 +25,7 @@ export function CustomNavbar({ data }: CustomNavbarProps) {
               Contextual UI
             </Navbar.Brand>
             <Navbar.Content className="hidden md:flex gap-6 items-center">
-              {data.navbar?.links.map((link) => (
+              {data?.navbar?.links.map((link) => (
                 <a
                   key={link.id}
                   href={link.href}
@@ -36,7 +39,7 @@ export function CustomNavbar({ data }: CustomNavbarProps) {
           </div>
 
           <Navbar.Menu className="absolute top-16 left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl">
-            {data.navbar?.links.map((link) => (
+            {data?.navbar?.links.map((link) => (
               <a
                 key={link.id}
                 href={link.href}

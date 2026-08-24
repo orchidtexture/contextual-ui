@@ -1,8 +1,10 @@
 import { buildGraph, GraphBuilderOptions, JsonLdObject } from '@contextual-ui/jsonld-graph-builder';
+import type { JsonLdContext } from '../registry/defineSchema';
 
 export interface GraphRouteHandlerOptions {
   headers?: Record<string, string>;
   graphOptions?: GraphBuilderOptions;
+  jsonLdContext?: Partial<JsonLdContext>;
 }
 
 export function createGraphRouteHandler(

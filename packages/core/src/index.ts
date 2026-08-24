@@ -1,5 +1,5 @@
-export { ContextualPage, ContextualPageContext, useContextualPageContext, useIsContextualPage } from './components/page';
-export type { ContextualPageProps, ContextualPageOptions, ContextualPageContextValue } from './components/page';
+export { ContextualSite, ContextualSiteContext, useContextualSiteContext, useIsContextualSite } from './components/site';
+export type { ContextualSiteProps, ContextualSiteOptions, ContextualSiteContextValue } from './components/site';
 
 export { Faq } from './components/faq';
 export type { FaqItem, FaqData } from './components/faq/faq.schema';
