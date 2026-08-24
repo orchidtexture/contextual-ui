@@ -3,6 +3,7 @@ import { NavbarData } from './navbar.schema';
 
 export interface NavbarRootProps {
   data?: NavbarData;
+  sectionKey?: string;
   children: ReactNode;
   className?: string;
   sticky?: boolean;

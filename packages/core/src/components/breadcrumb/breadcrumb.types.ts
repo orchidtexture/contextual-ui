@@ -2,7 +2,8 @@ import { ReactNode } from 'react';
 import { BreadcrumbData, BreadcrumbItem } from './breadcrumb.schema';
 
 export interface BreadcrumbRootProps {
-  data: BreadcrumbData;
+  data?: BreadcrumbData;
+  sectionKey?: string;
   children: ReactNode;
   className?: string;
   baseUrl?: string;

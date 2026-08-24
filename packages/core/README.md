@@ -60,28 +60,62 @@ export const siteApp = createContextualApp({
 export type SiteData = InferData<typeof siteSchema>;
 ```
 
-### 3. Consume in Server Components (`app/page.tsx`)
-Fetch data with zero manual hydration boilerplate and complete type safety:
+### 3. Render with `ContextualPage` Wrapper (`app/page.tsx`)
+Wrap your page with `ContextualPage` to automatically provide data to child components and inject a single, unified Schema.org `@graph` `<script>` tag:
 
 ```tsx
 import { siteApp } from '@/data/site.server';
-import { Faq } from '@contextual-ui/core';
+import { siteSchema } from '@/data/site.schema';
+import { ContextualPage, Navbar, Faq } from '@contextual-ui/core';
 
 export default async function Page() {
   const data = await siteApp.fetchData();
 
   return (
-    <Faq.Root data={data.faq}>
-      {data.faq.map((item) => (
-        <Faq.Item key={item.id} id={item.id}>
-          <Faq.Trigger>{item.question}</Faq.Trigger>
-          <Faq.Content>{item.answer}</Faq.Content>
-        </Faq.Item>
-      ))}
-    </Faq.Root>
+    <ContextualPage schema={siteSchema} data={data} options={{ baseUrl: 'https://example.com' }}>
+      {/* Navbar automatically consumes data.navbar from context */}
+      <Navbar.Root>
+        <Navbar.Brand />
+      </Navbar.Root>
+
+      <main>
+        {/* Faq automatically consumes data.faq from context */}
+        <Faq.Root>
+          {data.faq.map((item) => (
+            <Faq.Item key={item.id} id={item.id}>
+              <Faq.Trigger>{item.question}</Faq.Trigger>
+              <Faq.Content>{item.answer}</Faq.Content>
+            </Faq.Item>
+          ))}
+        </Faq.Root>
+      </main>
+    </ContextualPage>
   );
 }
 ```
+
+> **Note:** Child components can also be used standalone (outside `ContextualPage`), in which case you pass `data={...}` explicitly and they will render their own local `<script type="application/ld+json">` tag. When wrapped in `ContextualPage`, inline script tags are automatically suppressed in favor of the unified page graph.
+
+---
+
+## 🏛️ Page Wrapper: `<ContextualPage />`
+
+`ContextualPage` coordinates data distribution and Schema.org graph generation across your entire page:
+
+* **Unified `@graph` Generation:** Compiles all schema sections into a single Schema.org `@graph` object, deduplicating shared entities (e.g. `@id: 'website'`).
+* **Contextual Data Distribution:** Child components (`Navbar.Root`, `Faq.Root`, `Breadcrumb.Root`) automatically retrieve their respective data slice from context without manual prop passing.
+* **Custom Section Keys:** Use `sectionKey="myCustomKey"` on child components if your schema uses custom section names.
+* **Slot / Layout Support:** Supports `asChild` via Radix UI Slot, allowing you to attach page context directly onto existing container elements.
+
+### Props
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `schema` | `SchemaDefinition` | Schema definition returned by `defineSchema(...)`. |
+| `data` | `SiteData \| HydratedContext` | Data object matching the schema or a hydrated context. |
+| `options` | `ContextualPageOptions` | Graph configuration (e.g., `baseUrl`, `dedupeStrategy`, `disableJsonLdScript`). |
+| `asChild` | `boolean` | If true, merges props onto the immediate child element instead of rendering a `<div>`. |
+| `className` | `string` | CSS class name for the wrapper element. |
 
 ---
 

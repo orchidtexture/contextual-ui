@@ -2,7 +2,8 @@ import { ReactNode } from 'react';
 import { FaqData, FaqItem } from './faq.schema';
 
 export interface FaqRootProps {
-  data: FaqData;
+  data?: FaqData;
+  sectionKey?: string;
   children: ReactNode;
   /**
    * If true, allows multiple items to be open at once.

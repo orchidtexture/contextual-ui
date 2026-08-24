@@ -4,6 +4,7 @@ import { useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { BreadcrumbDataSchema } from './breadcrumb.schema';
 import { BreadcrumbContext, BreadcrumbItemContext } from './breadcrumb.context';
+import { useContextualPageContext, useIsContextualPage } from '../page/page.context';
 import {
   BreadcrumbRootProps,
   BreadcrumbListProps,
@@ -16,11 +17,17 @@ import {
 import { generateBreadcrumbJsonLd } from './breadcrumb.utils';
 
 export function Root({
-  data: rawData,
+  data: explicitData,
+  sectionKey = 'breadcrumb',
   children,
   className,
   baseUrl = '',
 }: BreadcrumbRootProps) {
+  const pageContext = useContextualPageContext();
+  const isInsidePage = useIsContextualPage();
+
+  const rawData = explicitData ?? pageContext?.data?.[sectionKey] ?? [];
+
   const data = useMemo(() => {
     const result = BreadcrumbDataSchema.safeParse(rawData);
     if (!result.success) {
@@ -46,7 +53,10 @@ export function Root({
     [data, getItemData]
   );
 
-  const jsonLd = useMemo(() => generateBreadcrumbJsonLd(data, baseUrl), [data, baseUrl]);
+  const jsonLd = useMemo(
+    () => (!isInsidePage ? generateBreadcrumbJsonLd(data, baseUrl) : null),
+    [data, baseUrl, isInsidePage]
+  );
 
   return (
     <BreadcrumbContext.Provider value={contextValue}>
@@ -55,10 +65,12 @@ export function Root({
         data-contextual="breadcrumb-root"
         className={className}
       >
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
         {children}
       </nav>
     </BreadcrumbContext.Provider>

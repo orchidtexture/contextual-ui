@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { NavbarDataSchema } from './navbar.schema';
 import { NavbarContext } from './navbar.context';
+import { useContextualPageContext, useIsContextualPage } from '../page/page.context';
 import {
   NavbarRootProps,
   NavbarBrandProps,
@@ -15,11 +16,17 @@ import {
 import { generateNavbarJsonLd } from './navbar.utils';
 
 export function Root({
-  data: rawData,
+  data: explicitData,
+  sectionKey = 'navbar',
   children,
   className,
   sticky = false,
 }: NavbarRootProps) {
+  const pageContext = useContextualPageContext();
+  const isInsidePage = useIsContextualPage();
+
+  const rawData = explicitData ?? pageContext?.data?.[sectionKey];
+
   const data = useMemo(() => {
     if (!rawData) return undefined;
     const result = NavbarDataSchema.safeParse(rawData);
@@ -33,7 +40,10 @@ export function Root({
     return result.data;
   }, [rawData]);
 
-  const jsonLd = useMemo(() => (data ? generateNavbarJsonLd(data) : null), [data]);
+  const jsonLd = useMemo(
+    () => (!isInsidePage && data ? generateNavbarJsonLd(data) : null),
+    [data, isInsidePage]
+  );
 
   const [isOpen, setIsOpen] = useState(false);
 

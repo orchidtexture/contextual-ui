@@ -4,6 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { FaqDataSchema } from './faq.schema';
 import { FaqContext, FaqItemContext } from './faq.context';
+import { useContextualPageContext, useIsContextualPage } from '../page/page.context';
 import { 
   FaqRootProps, 
   FaqItemProps, 
@@ -14,11 +15,17 @@ import {
 import { generateFaqJsonLd } from './faq.utils';
 
 export function Root({ 
-  data: rawData, 
+  data: explicitData,
+  sectionKey = 'faq',
   children, 
   allowMultiple = false,
   className 
 }: FaqRootProps) {
+  const pageContext = useContextualPageContext();
+  const isInsidePage = useIsContextualPage();
+
+  const rawData = explicitData ?? pageContext?.data?.[sectionKey] ?? [];
+
   // Validate data with Zod
   const data = useMemo(() => {
     const result = FaqDataSchema.safeParse(rawData);
@@ -58,15 +65,17 @@ export function Root({
     getItemData,
   }), [data, openItemIds, toggleItem, isItemOpen, getItemData]);
 
-  const jsonLd = useMemo(() => generateFaqJsonLd(data), [data]);
+  const jsonLd = useMemo(() => (!isInsidePage ? generateFaqJsonLd(data) : null), [data, isInsidePage]);
 
   return (
     <FaqContext.Provider value={contextValue}>
       <div data-contextual="faq-root" className={className}>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {jsonLd && (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        )}
         {children}
       </div>
     </FaqContext.Provider>
