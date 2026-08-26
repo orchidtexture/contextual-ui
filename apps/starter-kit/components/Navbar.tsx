@@ -18,11 +18,11 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
           <div className="flex justify-between items-center w-full">
             <Navbar.Brand className="font-semibold font-mono text-base no-underline flex items-center gap-2.5">
               <img
-                src="/images/contextual-ui-logo.png"
-                alt="Contextual Site Logo"
-                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
+                src={data?.navbar?.brand?.logo || '/images/onigiri_logo.svg'}
+                alt={data?.navbar?.brand?.name || 'Contextual Site Logo'}
+                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950"
               />
-              Contextual
+              {data?.navbar?.brand?.name || 'Contextual'}
             </Navbar.Brand>
             <Navbar.Content className="hidden md:flex gap-6 items-center">
               {data?.navbar?.links.map((link) => (

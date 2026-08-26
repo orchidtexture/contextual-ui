@@ -20,9 +20,9 @@ export function Footer({ data: explicitData }: CustomFooterProps = {}) {
           <div className="md:col-span-2 space-y-3">
             <ContextualFooter.Brand className="font-semibold font-mono text-base no-underline flex items-center gap-2.5 text-zinc-100">
               <img
-                src={footerData?.brand?.logo || '/images/contextual-ui-logo.png'}
+                src={footerData?.brand?.logo || '/images/onigiri_logo.svg'}
                 alt={footerData?.brand?.name || 'Contextual UI'}
-                className="w-7 h-7 rounded-md object-contain border border-base bg-zinc-950 shadow-sm"
+                className="w-7 h-7 rounded-md object-contain bg-zinc-950 shadow-sm"
               />
               <span>{footerData?.brand?.name || 'Contextual UI'}</span>
             </ContextualFooter.Brand>

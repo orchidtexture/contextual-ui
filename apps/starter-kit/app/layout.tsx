@@ -1,8 +1,19 @@
+import type { Metadata } from 'next';
 import './globals.css';
 import { siteApp } from '@/data/site.server';
 import { ContextualSite } from '@contextual-ui/core';
 import { CustomNavbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
+
+export const metadata: Metadata = {
+  title: 'Contextual UI Starter Kit',
+  description: 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
+  icons: {
+    icon: '/images/onigiri_logo.svg',
+    shortcut: '/images/onigiri_logo.svg',
+    apple: '/images/onigiri_logo.svg',
+  },
+};
 
 export default async function RootLayout({
   children,

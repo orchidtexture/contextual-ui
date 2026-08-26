@@ -606,7 +606,7 @@ export function DocsClient({ data }: { data: SiteData }) {
     brand: {
       name: data.navbar?.brand?.name || 'Contextual UI',
       href: data.navbar?.brand?.href || '/',
-      logo: data.navbar?.brand?.logo || '/images/contextual-ui-logo.png',
+      logo: data.navbar?.brand?.logo || '/images/onigiri_logo.svg',
     },
     links: data.navbar?.links && data.navbar.links.length > 0
       ? data.navbar.links
@@ -622,7 +622,7 @@ export function DocsClient({ data }: { data: SiteData }) {
   const initialFooter = {
     brand: {
       name: data.footer?.brand?.name || 'Contextual UI',
-      logo: '/images/contextual-ui-logo.png',
+      logo: '/images/onigiri_logo.svg',
       href: data.footer?.brand?.href || '/',
       description: data.footer?.brand?.description || 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
     },
@@ -832,7 +832,7 @@ export default async function RootLayout({
     <div className="md:col-span-2 space-y-3">
       <Footer.Brand className="font-bold text-base no-underline flex items-center gap-2.5 text-zinc-100">
         <img
-          src="${footerData.brand?.logo || '/images/contextual-ui-logo.png'}"
+          src="${footerData.brand?.logo || '/images/onigiri_logo.svg'}"
           alt="${footerData.brand?.name || 'Contextual UI'}"
           className="w-6 h-6 rounded object-contain border border-base bg-zinc-950"
         />
@@ -2073,7 +2073,7 @@ export default async function RootLayout({
               <div className="flex justify-between items-center w-full">
                 <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
                   <img
-                    src={navbarData.brand?.logo || '/images/contextual-ui-logo.png'}
+                    src={navbarData.brand?.logo || '/images/onigiri_logo.svg'}
                     alt="Contextual UI Logo"
                     className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
                   />

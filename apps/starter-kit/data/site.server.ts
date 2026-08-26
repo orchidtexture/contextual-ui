@@ -15,7 +15,7 @@ const connector = staticConnector({
     { id: '4', question: 'Why use Contextual UI for building websites when AI is getting better and better?', answer: 'Well, libraries like Contextual UI are the kind of thing that make AI better, so lets use it!' },
   ],
   navbar: {
-    brand: { name: 'Contextual UI', href: '/' },
+    brand: { name: 'Contextual UI', href: '/', logo: '/images/onigiri_logo.svg' },
     links: [
       { id: '1', label: 'Home', href: '/' },
       { id: '2', label: 'Docs', href: '/docs' },
@@ -26,7 +26,7 @@ const connector = staticConnector({
   footer: {
     brand: {
       name: 'Contextual UI',
-      logo: '/images/contextual-ui-logo.png',
+      logo: '/images/onigiri_logo.svg',
       href: '/',
       description: 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
     },
