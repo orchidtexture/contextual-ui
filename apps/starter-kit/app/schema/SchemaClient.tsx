@@ -28,8 +28,8 @@ export function SchemaClient({ schemaSource, graphJson }: SchemaClientProps) {
   };
 
   return (
-    <div className="pt-12 pb-32">
-      <main className="min-h-screen p-16 mx-auto space-y-12">
+    <div>
+      <main className="min-h-screen pt-24 pb-28 px-6 mx-auto space-y-12">
         <div className="mb-6">
           <h1 className="text-2xl font-bold tracking-tight mb-4">Schema & Knowledge Graph</h1>
           <p className="text-zinc-400">

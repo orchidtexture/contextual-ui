@@ -22,7 +22,7 @@ export function Footer({ data: explicitData }: CustomFooterProps = {}) {
               <img
                 src={footerData?.brand?.logo || '/images/onigiri_logo.svg'}
                 alt={footerData?.brand?.name || 'Contextual UI'}
-                className="w-7 h-7 rounded-md object-contain bg-zinc-950 shadow-sm"
+                className="w-7 h-7 rounded-md object-contain shadow-sm"
               />
               <span>{footerData?.brand?.name || 'Contextual UI'}</span>
             </ContextualFooter.Brand>

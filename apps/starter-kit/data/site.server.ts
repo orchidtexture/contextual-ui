@@ -15,7 +15,7 @@ const connector = staticConnector({
     { id: '4', question: 'Why use Contextual UI for building websites when AI is getting better and better?', answer: 'Well, libraries like Contextual UI are the kind of thing that make AI better, so lets use it!' },
   ],
   navbar: {
-    brand: { name: 'Contextual UI', href: '/', logo: '/images/onigiri_logo.svg' },
+    brand: { name: 'Contextual', href: '/', logo: '/images/onigiri_logo.svg' },
     links: [
       { id: '1', label: 'Home', href: '/' },
       { id: '2', label: 'Docs', href: '/docs' },
@@ -25,7 +25,7 @@ const connector = staticConnector({
   },
   footer: {
     brand: {
-      name: 'Contextual UI',
+      name: 'Contextual',
       logo: '/images/onigiri_logo.svg',
       href: '/',
       description: 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
@@ -44,8 +44,7 @@ const connector = staticConnector({
         id: 'community',
         title: 'Community',
         links: [
-          { id: '4', label: 'GitHub', href: 'https://github.com/tasuku-io', external: true },
-          { id: '5', label: 'Tasuku Studio', href: 'https://tasuku.io', external: true },
+          { id: '4', label: 'Tasuku Studio', href: 'https://tasuku.io', external: true },
         ],
       },
     ],
@@ -59,12 +58,12 @@ const connector = staticConnector({
       { id: 'l2', label: 'Terms of Service', href: '/terms' },
     ],
     socials: [
-      { id: 's1', platform: 'GitHub', href: 'https://github.com/tasuku-io', label: 'GitHub' },
-      { id: 's2', platform: 'Twitter', href: 'https://twitter.com/tasuku_io', label: 'Twitter / X' },
+      { id: 's1', platform: 'GitHub', href: 'https://github.com/orchidtexture', label: 'GitHub' },
+      { id: 's2', platform: 'Twitter', href: 'https://twitter.com/orchidtexture', label: 'Twitter / X' },
     ],
     copyright: {
       holder: 'Tasuku Studio',
-      year: 2025,
+      year: 2026,
       text: 'Maintained by Tasuku Studio. Open-source under MIT license.',
     },
   },

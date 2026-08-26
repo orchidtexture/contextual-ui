@@ -20,7 +20,7 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
               <img
                 src={data?.navbar?.brand?.logo || '/images/onigiri_logo.svg'}
                 alt={data?.navbar?.brand?.name || 'Contextual Site Logo'}
-                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950"
+                className="w-8 h-8 rounded-md object-contain shadow-sm text-silver"
               />
               {data?.navbar?.brand?.name || 'Contextual'}
             </Navbar.Brand>
@@ -38,7 +38,7 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
             <Navbar.Toggle className="md:hidden p-2 text-zinc-400 hover:text-zinc-100 focus:outline-none cursor-pointer" />
           </div>
 
-          <Navbar.Menu className="absolute top-16 left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl">
+          <Navbar.Menu className="absolute left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl">
             {data?.navbar?.links.map((link) => (
               <a
                 key={link.id}

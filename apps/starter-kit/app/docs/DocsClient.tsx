@@ -297,8 +297,8 @@ export function ContactDemo() {
               <span className="text-xs font-mono text-zinc-300">ContactForm.tsx</span>
             </div>
           </div>
-          <div className="p-4 overflow-x-auto text-[13px] leading-relaxed">
-            <pre className="!m-0 !bg-transparent !p-0">
+          <div className="p-0 overflow-x-auto text-[13px] leading-relaxed">
+            <pre className="!bg-zinc-900 !text-zinc-100 p-6 text-xs font-mono overflow-x-auto shadow-inner">
               <code
                 className="language-tsx"
                 dangerouslySetInnerHTML={{
@@ -1912,7 +1912,7 @@ export default async function RootLayout({
   return (
     <div className="pt-24 pb-28 max-w-7xl mx-auto px-6">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold tracking-tight mb-2">Docs & Components</h1>
+        <h1 className="text-2xl font-bold tracking-tight mb-2">Docs</h1>
         <p className="text-zinc-400 text-sm">
           Explore Contextual UI site providers and components designed for humans, search engines, and AI agents.
           Use the interactive data source controls to customize component mock data, add or remove items, and see real-time UI rendering and Schema.org JSON-LD graph generation.
