@@ -26,16 +26,46 @@ const connector = staticConnector({
   footer: {
     brand: {
       name: 'Contextual UI',
+      logo: '/images/contextual-ui-logo.png',
       href: '/',
       description: 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
     },
+    columns: [
+      {
+        id: 'resources',
+        title: 'Resources',
+        links: [
+          { id: '1', label: 'Docs', href: '/docs' },
+          { id: '2', label: 'Schema Graph', href: '/schema' },
+          { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
+        ],
+      },
+      {
+        id: 'community',
+        title: 'Community',
+        links: [
+          { id: '4', label: 'GitHub', href: 'https://github.com/tasuku-io', external: true },
+          { id: '5', label: 'Tasuku Studio', href: 'https://tasuku.io', external: true },
+        ],
+      },
+    ],
     links: [
       { id: '1', label: 'Docs', href: '/docs' },
       { id: '2', label: 'Schema Graph', href: '/schema' },
       { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
     ],
+    legalLinks: [
+      { id: 'l1', label: 'Privacy Policy', href: '/privacy' },
+      { id: 'l2', label: 'Terms of Service', href: '/terms' },
+    ],
+    socials: [
+      { id: 's1', platform: 'GitHub', href: 'https://github.com/tasuku-io', label: 'GitHub' },
+      { id: 's2', platform: 'Twitter', href: 'https://twitter.com/tasuku_io', label: 'Twitter / X' },
+    ],
     copyright: {
       holder: 'Tasuku Studio',
+      year: 2025,
+      text: 'Maintained by Tasuku Studio. Open-source under MIT license.',
     },
   },
   announcement: {

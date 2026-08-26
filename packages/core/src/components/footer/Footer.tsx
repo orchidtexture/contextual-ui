@@ -158,7 +158,26 @@ export function Content({ children, asChild, className, ...props }: FooterConten
 }
 
 export function Columns({ children, asChild, className, ...props }: FooterColumnsProps) {
+  const { data } = useFooter();
   const Comp = asChild ? Slot : 'div';
+
+  if (!children && data?.columns) {
+    return (
+      <Comp
+        data-contextual="footer-columns"
+        className={className}
+        {...props}
+      >
+        {data.columns.map((column) => (
+          <Column key={column.id} column={column}>
+            <ColumnTitle />
+            <Links />
+          </Column>
+        ))}
+      </Comp>
+    );
+  }
+
   return (
     <Comp
       data-contextual="footer-columns"
@@ -432,7 +451,24 @@ export function Copyright({
 }
 
 export function Bottom({ children, asChild, className, ...props }: FooterBottomProps) {
+  const { data } = useFooter();
   const Comp = asChild ? Slot : 'div';
+
+  if (!children && (data?.copyright || data?.legalLinks)) {
+    return (
+      <Comp
+        data-contextual="footer-bottom"
+        className={className}
+        {...props}
+      >
+        <Copyright />
+        {data.legalLinks && data.legalLinks.length > 0 && (
+          <Links links={data.legalLinks} />
+        )}
+      </Comp>
+    );
+  }
+
   return (
     <Comp
       data-contextual="footer-bottom"

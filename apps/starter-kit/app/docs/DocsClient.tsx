@@ -55,7 +55,7 @@ function SchemaFieldsTable({ fields }: { fields: SchemaField[] }) {
               <th className="py-2.5 px-3.5 font-semibold">Description</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-base/60 font-mono">
+          <tbody className="divide-y divide-zinc-800 font-mono">
             {fields.map((field) => (
               <tr key={field.name} className="hover:bg-zinc-900/40 transition-colors">
                 <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
@@ -487,17 +487,49 @@ export function DocsClient({ data }: { data: SiteData }) {
   const initialFooter = {
     brand: {
       name: data.footer?.brand?.name || 'Contextual UI',
+      logo: '/images/contextual-ui-logo.png',
       href: data.footer?.brand?.href || '/',
       description: data.footer?.brand?.description || 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
     },
+    columns: [
+      {
+        id: 'resources',
+        title: 'Resources',
+        links: [
+          { id: 'c1', label: 'Docs', href: '/docs' },
+          { id: 'c2', label: 'Schema Graph', href: '/schema' },
+          { id: 'c3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
+        ],
+      },
+      {
+        id: 'ecosystem',
+        title: 'Ecosystem',
+        links: [
+          { id: 'c4', label: 'Core Package', href: 'https://github.com/tasuku-io', external: true },
+          { id: 'c5', label: 'Static Connector', href: 'https://github.com/tasuku-io', external: true },
+          { id: 'c6', label: 'Dashboard CMS', href: 'https://github.com/tasuku-io', external: true },
+        ],
+      },
+    ],
     links: data.footer?.links || [
       { id: '1', label: 'Docs', href: '/docs' },
       { id: '2', label: 'Schema Graph', href: '/schema' },
       { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
     ],
+    legalLinks: [
+      { id: 'l1', label: 'Privacy Policy', href: '/privacy' },
+      { id: 'l2', label: 'Terms of Service', href: '/terms' },
+      { id: 'l3', label: 'MIT License', href: 'https://opensource.org/licenses/MIT', external: true },
+    ],
+    socials: [
+      { id: 's1', platform: 'GitHub', href: 'https://github.com/tasuku-io', label: 'GitHub' },
+      { id: 's2', platform: 'Twitter', href: 'https://twitter.com/tasuku_io', label: 'Twitter / X' },
+      { id: 's3', platform: 'Discord', href: 'https://discord.gg', label: 'Discord' },
+    ],
     copyright: {
       holder: data.footer?.copyright?.holder || 'Tasuku Studio',
       year: data.footer?.copyright?.year || new Date().getFullYear(),
+      text: 'Maintained by Tasuku Studio. Open-source under MIT license.',
     },
   };
   const [footerData, setFooterData] = useState(initialFooter);
@@ -649,44 +681,107 @@ export default async function RootLayout({
     }))
   }, null, 2);
 
-  const footerCode = `<Footer.Root data={data.footer} className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-400">
-  <div className="flex items-center gap-2">
-    <span>Maintained by</span>
-    <a
-      href="https://tasuku.io"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-accent"
-    >
-      ${footerData.copyright?.holder || 'Tasuku Studio'}
-    </a>
+  const allFooterLinks = [
+    ...(footerData.columns?.flatMap((col) => col.links) || []),
+    ...(footerData.links || []),
+    ...(footerData.legalLinks || []),
+  ];
+
+  const footerCode = `<Footer.Root data={data.footer} className="w-full space-y-8">
+  {/* Top Section: Brand & Multi-Column Navigation */}
+  <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div className="md:col-span-2 space-y-3">
+      <Footer.Brand className="font-bold text-base no-underline flex items-center gap-2.5 text-zinc-100">
+        <img
+          src="${footerData.brand?.logo || '/images/contextual-ui-logo.png'}"
+          alt="${footerData.brand?.name || 'Contextual UI'}"
+          className="w-6 h-6 rounded object-contain border border-base bg-zinc-950"
+        />
+        <span>${footerData.brand?.name || 'Contextual UI'}</span>
+      </Footer.Brand>
+      <Footer.Description className="text-xs text-zinc-400 max-w-sm leading-relaxed">
+        ${footerData.brand?.description || ''}
+      </Footer.Description>
+      <Footer.Socials className="flex flex-wrap gap-2 pt-2">
+        {data.footer?.socials?.map((social) => (
+          <Footer.SocialLink
+            key={social.id}
+            item={social}
+            className="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-accent transition-colors"
+          />
+        ))}
+      </Footer.Socials>
+    </div>
+
+    <Footer.Columns className="md:col-span-2 grid grid-cols-2 gap-6">
+      {data.footer?.columns?.map((col) => (
+        <Footer.Column key={col.id} column={col} className="space-y-3">
+          <Footer.ColumnTitle className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
+            {col.title}
+          </Footer.ColumnTitle>
+          <Footer.Links className="space-y-2 list-none p-0 m-0">
+            {col.links.map((link) => (
+              <li key={link.id}>
+                <Footer.Link
+                  item={link}
+                  className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                />
+              </li>
+            ))}
+          </Footer.Links>
+        </Footer.Column>
+      ))}
+    </Footer.Columns>
   </div>
-  <div className="flex items-center gap-6">
-    {data.footer?.links?.map((link) => (
-      <Footer.Link
-        key={link.id}
-        item={link}
-        className="hover:text-zinc-200 transition-colors"
-      />
-    ))}
-  </div>
+
+  {/* Bottom Bar: Copyright & Legal Policies */}
+  <Footer.Bottom className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+    <Footer.Copyright
+      holder="${footerData.copyright?.holder || 'Tasuku Studio'}"
+      year={${footerData.copyright?.year || new Date().getFullYear()}}
+      className="text-zinc-400 text-xs"
+    />
+    <div className="flex items-center gap-4 text-xs">
+      {data.footer?.legalLinks?.map((link) => (
+        <Footer.Link
+          key={link.id}
+          item={link}
+          className="hover:text-zinc-200 transition-colors"
+        />
+      ))}
+    </div>
+  </Footer.Bottom>
 </Footer.Root>`;
 
   const footerSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WPFooter",
-    "name": footerData.brand?.name || "Contextual UI",
-    "url": footerData.brand?.href || "/",
-    "copyrightHolder": {
-      "@type": "Organization",
-      "name": footerData.copyright?.holder || "Tasuku Studio"
-    },
+    "@id": "https://contextual.site/#footer",
+    "isPartOf": { "@id": "https://contextual.site/#website" },
+    ...(footerData.brand?.name ? { "name": footerData.brand.name } : {}),
+    ...(footerData.brand?.description ? { "description": footerData.brand.description } : {}),
+    ...(footerData.brand?.href ? { "url": footerData.brand.href } : {}),
+    ...(footerData.copyright?.holder
+      ? {
+          "copyrightHolder": {
+            "@type": "Organization",
+            "name": footerData.copyright.holder,
+          },
+        }
+      : {}),
     "copyrightYear": footerData.copyright?.year || new Date().getFullYear(),
-    "hasPart": (footerData.links || []).map(link => ({
-      "@type": "SiteNavigationElement",
-      "name": link.label,
-      "url": link.href
-    }))
+    ...(footerData.socials && footerData.socials.length > 0
+      ? { "sameAs": footerData.socials.map((s) => s.href) }
+      : {}),
+    ...(allFooterLinks.length > 0
+      ? {
+          "hasPart": allFooterLinks.map((link) => ({
+            "@type": "SiteNavigationElement",
+            "name": link.label,
+            "url": link.href,
+          })),
+        }
+      : {}),
   }, null, 2);
 
   const breadcrumbCode = `<Breadcrumb.Root data={breadcrumbData} baseUrl="${baseUrl}">
@@ -855,6 +950,13 @@ export default async function RootLayout({
       description: 'Brand title displayed in footer.',
     },
     {
+      name: 'brand.logo',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WPFooter.logo',
+      description: 'Image URL for the brand logo.',
+    },
+    {
       name: 'brand.href',
       type: 'string',
       required: false,
@@ -869,53 +971,46 @@ export default async function RootLayout({
       description: 'Short brand mission statement or summary.',
     },
     {
-      name: 'links',
-      type: 'FooterLinkItem[]',
-      required: false,
-      schemaOrgMapping: 'WPFooter.hasPart',
-      description: 'Flat list of primary footer navigation links.',
-    },
-    {
-      name: 'links[].id',
-      type: 'string',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'Unique item identifier.',
-    },
-    {
-      name: 'links[].label',
-      type: 'string',
-      required: true,
-      schemaOrgMapping: 'SiteNavigationElement.name',
-      description: 'Link text label.',
-    },
-    {
-      name: 'links[].href',
-      type: 'string',
-      required: true,
-      schemaOrgMapping: 'SiteNavigationElement.url',
-      description: 'Target route or external URL.',
-    },
-    {
-      name: 'links[].external',
-      type: 'boolean',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Opens in a new tab when true.',
-    },
-    {
       name: 'columns',
       type: 'FooterColumn[]',
       required: false,
       schemaOrgMapping: 'WPFooter.hasPart',
-      description: 'Grouped multi-column link structures.',
+      description: 'Grouped multi-column link structures for site discovery.',
+    },
+    {
+      name: 'columns[].title',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Header title for the column group.',
+    },
+    {
+      name: 'columns[].links',
+      type: 'FooterLinkItem[]',
+      required: true,
+      schemaOrgMapping: 'SiteNavigationElement[]',
+      description: 'Array of link items belonging to this column.',
+    },
+    {
+      name: 'links',
+      type: 'FooterLinkItem[]',
+      required: false,
+      schemaOrgMapping: 'WPFooter.hasPart',
+      description: 'Flat list of primary/secondary footer navigation links.',
+    },
+    {
+      name: 'legalLinks',
+      type: 'FooterLinkItem[]',
+      required: false,
+      schemaOrgMapping: 'WPFooter.hasPart',
+      description: 'Utility and legal policy links (Privacy, Terms, Licenses).',
     },
     {
       name: 'socials',
       type: 'FooterSocialLink[]',
       required: false,
-      schemaOrgMapping: 'sameAs',
-      description: 'Social media profile links (GitHub, Twitter/X, Discord, etc.).',
+      schemaOrgMapping: 'WPFooter.sameAs[]',
+      description: 'Verified social media and community profile links.',
     },
     {
       name: 'copyright.holder',
@@ -1137,6 +1232,7 @@ export default async function RootLayout({
       title="Interactive Data Source · Footer"
       onReset={() => setFooterData(initialFooter)}
     >
+      {/* Brand & Copyright Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
@@ -1189,22 +1285,173 @@ export default async function RootLayout({
         />
       </div>
 
+      {/* Column Groups */}
       <div>
         <div className="flex items-center justify-between mb-2">
           <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
-            Footer Links ({footerData.links?.length || 0})
+            Navigation Columns ({footerData.columns?.length || 0})
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              setFooterData((prev) => {
+                const colNum = (prev.columns?.length || 0) + 1;
+                return {
+                  ...prev,
+                  columns: [
+                    ...(prev.columns || []),
+                    {
+                      id: `col-${Date.now()}`,
+                      title: `Column ${colNum}`,
+                      links: [
+                        { id: `c-${Date.now()}-1`, label: 'Link 1', href: '/link-1' },
+                        { id: `c-${Date.now()}-2`, label: 'Link 2', href: '/link-2' },
+                      ],
+                    },
+                  ],
+                };
+              })
+            }
+            className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Column</span>
+          </button>
+        </div>
+        <div className="space-y-3">
+          {(footerData.columns || []).map((col, colIdx) => (
+            <div
+              key={col.id || colIdx}
+              className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 space-y-2"
+            >
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Column Title"
+                  value={col.title}
+                  onChange={(e) =>
+                    setFooterData((prev) => {
+                      const columns = [...(prev.columns || [])];
+                      columns[colIdx] = { ...columns[colIdx], title: e.target.value };
+                      return { ...prev, columns };
+                    })
+                  }
+                  className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 font-semibold focus:border-accent focus:outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setFooterData((prev) => {
+                      const columns = [...(prev.columns || [])];
+                      const newLinkId = `c-${Date.now()}`;
+                      columns[colIdx] = {
+                        ...columns[colIdx],
+                        links: [
+                          ...columns[colIdx].links,
+                          { id: newLinkId, label: `Link ${columns[colIdx].links.length + 1}`, href: `/new-link` },
+                        ],
+                      };
+                      return { ...prev, columns };
+                    })
+                  }
+                  className="text-xs font-mono text-zinc-400 hover:text-accent flex items-center gap-1 px-2 py-1 rounded border border-zinc-700 hover:border-accent/40 bg-zinc-900 transition-colors cursor-pointer"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>Link</span>
+                </button>
+                <button
+                  type="button"
+                  disabled={(footerData.columns?.length || 0) <= 1}
+                  onClick={() =>
+                    setFooterData((prev) => ({
+                      ...prev,
+                      columns: (prev.columns || []).filter((_, i) => i !== colIdx),
+                    }))
+                  }
+                  className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1 transition-colors cursor-pointer text-xs"
+                  title="Delete column"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="pl-2 space-y-1.5 border-l border-zinc-800">
+                {col.links.map((link, linkIdx) => (
+                  <div key={link.id || linkIdx} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      placeholder="Label"
+                      value={link.label}
+                      onChange={(e) =>
+                        setFooterData((prev) => {
+                          const columns = [...(prev.columns || [])];
+                          const links = [...columns[colIdx].links];
+                          links[linkIdx] = { ...links[linkIdx], label: e.target.value };
+                          columns[colIdx] = { ...columns[colIdx], links };
+                          return { ...prev, columns };
+                        })
+                      }
+                      className="w-36 bg-zinc-900 text-zinc-100 text-xs px-2 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Href"
+                      value={link.href}
+                      onChange={(e) =>
+                        setFooterData((prev) => {
+                          const columns = [...(prev.columns || [])];
+                          const links = [...columns[colIdx].links];
+                          links[linkIdx] = { ...links[linkIdx], href: e.target.value };
+                          columns[colIdx] = { ...columns[colIdx], links };
+                          return { ...prev, columns };
+                        })
+                      }
+                      className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      disabled={col.links.length <= 1}
+                      onClick={() =>
+                        setFooterData((prev) => {
+                          const columns = [...(prev.columns || [])];
+                          columns[colIdx] = {
+                            ...columns[colIdx],
+                            links: columns[colIdx].links.filter((_, i) => i !== linkIdx),
+                          };
+                          return { ...prev, columns };
+                        })
+                      }
+                      className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1 transition-colors cursor-pointer text-xs"
+                      title="Delete link"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Social Profiles */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
+            Social Profiles ({footerData.socials?.length || 0})
           </label>
           <button
             type="button"
             onClick={() =>
               setFooterData((prev) => ({
                 ...prev,
-                links: [
-                  ...(prev.links || []),
+                socials: [
+                  ...(prev.socials || []),
                   {
-                    id: String(Date.now()),
-                    label: `Link ${(prev.links?.length || 0) + 1}`,
-                    href: `/link-${(prev.links?.length || 0) + 1}`,
+                    id: `s-${Date.now()}`,
+                    platform: 'Social',
+                    label: 'Platform',
+                    href: 'https://example.com',
                   },
                 ],
               }))
@@ -1212,53 +1459,130 @@ export default async function RootLayout({
             className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Add Link</span>
+            <span>Add Social</span>
           </button>
         </div>
         <div className="space-y-2">
-          {(footerData.links || []).map((link, idx) => (
+          {(footerData.socials || []).map((social, idx) => (
             <div
-              key={link.id || idx}
+              key={social.id || idx}
               className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/60 border border-zinc-800"
             >
-              <span className="text-[11px] font-mono text-zinc-500 w-5">{idx + 1}.</span>
               <input
                 type="text"
-                placeholder="Label"
-                value={link.label}
+                placeholder="Platform / Label"
+                value={social.label || social.platform}
                 onChange={(e) =>
                   setFooterData((prev) => {
-                    const links = [...(prev.links || [])];
-                    links[idx] = { ...links[idx], label: e.target.value };
-                    return { ...prev, links };
+                    const socials = [...(prev.socials || [])];
+                    socials[idx] = { ...socials[idx], label: e.target.value, platform: e.target.value };
+                    return { ...prev, socials };
                   })
                 }
-                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+                className="w-36 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
               />
               <input
                 type="text"
-                placeholder="Href"
-                value={link.href}
+                placeholder="URL"
+                value={social.href}
                 onChange={(e) =>
                   setFooterData((prev) => {
-                    const links = [...(prev.links || [])];
-                    links[idx] = { ...links[idx], href: e.target.value };
-                    return { ...prev, links };
+                    const socials = [...(prev.socials || [])];
+                    socials[idx] = { ...socials[idx], href: e.target.value };
+                    return { ...prev, socials };
                   })
                 }
                 className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
               />
               <button
                 type="button"
-                disabled={(footerData.links?.length || 0) <= 1}
+                disabled={(footerData.socials?.length || 0) <= 1}
                 onClick={() =>
                   setFooterData((prev) => ({
                     ...prev,
-                    links: (prev.links || []).filter((_, i) => i !== idx),
+                    socials: (prev.socials || []).filter((_, i) => i !== idx),
                   }))
                 }
                 className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 transition-colors cursor-pointer text-xs"
-                title="Delete item"
+                title="Delete social"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Legal Links */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
+            Legal & Policy Links ({footerData.legalLinks?.length || 0})
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              setFooterData((prev) => ({
+                ...prev,
+                legalLinks: [
+                  ...(prev.legalLinks || []),
+                  {
+                    id: `l-${Date.now()}`,
+                    label: 'Policy',
+                    href: '/policy',
+                  },
+                ],
+              }))
+            }
+            className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Legal Link</span>
+          </button>
+        </div>
+        <div className="space-y-2">
+          {(footerData.legalLinks || []).map((legal, idx) => (
+            <div
+              key={legal.id || idx}
+              className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/60 border border-zinc-800"
+            >
+              <input
+                type="text"
+                placeholder="Label"
+                value={legal.label}
+                onChange={(e) =>
+                  setFooterData((prev) => {
+                    const legalLinks = [...(prev.legalLinks || [])];
+                    legalLinks[idx] = { ...legalLinks[idx], label: e.target.value };
+                    return { ...prev, legalLinks };
+                  })
+                }
+                className="w-36 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Href"
+                value={legal.href}
+                onChange={(e) =>
+                  setFooterData((prev) => {
+                    const legalLinks = [...(prev.legalLinks || [])];
+                    legalLinks[idx] = { ...legalLinks[idx], href: e.target.value };
+                    return { ...prev, legalLinks };
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={(footerData.legalLinks?.length || 0) <= 1}
+                onClick={() =>
+                  setFooterData((prev) => ({
+                    ...prev,
+                    legalLinks: (prev.legalLinks || []).filter((_, i) => i !== idx),
+                  }))
+                }
+                className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 transition-colors cursor-pointer text-xs"
+                title="Delete legal link"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
@@ -1616,35 +1940,88 @@ export default async function RootLayout({
           <ShowcaseSection
             id="footer"
             title="Footer"
-            description="The Footer component organizes structured site links, brand metadata, and legal attribution with automatic Schema.org WPFooter structured data injection."
+            description="The Footer component organizes structured site links, brand metadata, columnar resources, social profiles, and legal attribution with automatic Schema.org WPFooter structured data injection."
             controls={footerControls}
             fields={footerFields}
             codeString={footerCode}
             schemaString={footerSchema}
-            exampleDescription="Accessible footer layout with links and copyright."
+            exampleDescription="Accessible, schema-driven multi-column footer layout."
             schemaDescription="Schema.org WPFooter automatically injected in the DOM."
           >
-            <Footer.Root data={footerData} className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-400">
-              <div className="flex items-center gap-2">
-                <span>Maintained by</span>
-                <a
-                  href="https://tasuku.io"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-accent"
-                >
-                  {footerData.copyright?.holder || 'Tasuku Studio'}
-                </a>
+            <Footer.Root data={footerData} className="w-full space-y-8">
+              {/* Top Section: Brand & Multi-Column Navigation */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div className="md:col-span-2 space-y-3">
+                  <Footer.Brand className="font-bold text-base no-underline flex items-center gap-2.5 text-zinc-100">
+                    {footerData.brand?.logo && (
+                      <img
+                        src={footerData.brand.logo}
+                        alt={footerData.brand.name || 'Contextual UI'}
+                        className="w-6 h-6 rounded object-contain border border-base bg-zinc-950"
+                      />
+                    )}
+                    <span>{footerData.brand?.name || 'Contextual UI'}</span>
+                  </Footer.Brand>
+                  {footerData.brand?.description && (
+                    <Footer.Description className="text-xs text-zinc-400 max-w-sm leading-relaxed">
+                      {footerData.brand.description}
+                    </Footer.Description>
+                  )}
+                  {footerData.socials && footerData.socials.length > 0 && (
+                    <Footer.Socials className="flex flex-wrap gap-2 pt-2">
+                      {footerData.socials.map((social) => (
+                        <Footer.SocialLink
+                          key={social.id}
+                          item={social}
+                          className="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-accent hover:border-accent/40 transition-colors"
+                        >
+                          {social.label || social.platform}
+                        </Footer.SocialLink>
+                      ))}
+                    </Footer.Socials>
+                  )}
+                </div>
+
+                <Footer.Columns className="md:col-span-2 grid grid-cols-2 gap-6">
+                  {footerData.columns?.map((col) => (
+                    <Footer.Column key={col.id} column={col} className="space-y-3">
+                      <Footer.ColumnTitle className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
+                        {col.title}
+                      </Footer.ColumnTitle>
+                      <Footer.Links className="space-y-2 list-none p-0 m-0">
+                        {col.links.map((link) => (
+                          <li key={link.id}>
+                            <Footer.Link
+                              item={link}
+                              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                            />
+                          </li>
+                        ))}
+                      </Footer.Links>
+                    </Footer.Column>
+                  ))}
+                </Footer.Columns>
               </div>
-              <div className="flex items-center gap-6">
-                {(footerData.links || []).map((link) => (
-                  <Footer.Link
-                    key={link.id}
-                    item={link}
-                    className="hover:text-zinc-200 transition-colors"
-                  />
-                ))}
-              </div>
+
+              {/* Bottom Bar: Copyright & Legal Policies */}
+              <Footer.Bottom className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+                <Footer.Copyright
+                  holder={footerData.copyright?.holder}
+                  year={footerData.copyright?.year}
+                  className="text-zinc-400 text-xs"
+                />
+                {footerData.legalLinks && footerData.legalLinks.length > 0 && (
+                  <div className="flex items-center gap-4 text-xs">
+                    {footerData.legalLinks.map((link) => (
+                      <Footer.Link
+                        key={link.id}
+                        item={link}
+                        className="hover:text-zinc-200 transition-colors"
+                      />
+                    ))}
+                  </div>
+                )}
+              </Footer.Bottom>
             </Footer.Root>
           </ShowcaseSection>
 
