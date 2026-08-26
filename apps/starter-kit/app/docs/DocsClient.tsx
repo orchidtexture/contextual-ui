@@ -4,15 +4,387 @@ import { useState, useEffect } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-jsx';
 import 'prismjs/components/prism-json';
+import 'prismjs/components/prism-typescript';
 import 'prismjs/themes/prism-okaidia.css';
-import { ContextualSite, Breadcrumb, Navbar, Faq, Footer } from '@contextual-ui/core';
+import {
+  Plug,
+  RotateCcw,
+  Plus,
+  Trash2,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Code2,
+  FileJson,
+  Sparkles,
+  RefreshCw,
+  Server,
+  Database,
+  FileCode,
+} from 'lucide-react';
+import { Breadcrumb, Navbar, Faq, Footer } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
+
+export interface SchemaField {
+  name: string;
+  type: string;
+  required?: boolean;
+  schemaOrgMapping?: string;
+  description: string;
+}
+
+function SchemaFieldsTable({ fields }: { fields: SchemaField[] }) {
+  return (
+    <div className="mt-8">
+      <div className="flex items-center justify-between mb-2.5">
+        <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400">
+          Schema Reference & Contract
+        </h3>
+        <span className="text-[11px] font-mono text-zinc-500">
+          {fields.length} {fields.length === 1 ? 'field' : 'fields'}
+        </span>
+      </div>
+      <div className="overflow-x-auto rounded-xl border border-base bg-zinc-950/70 shadow-inner">
+        <table className="w-full text-left text-xs border-collapse">
+          <thead>
+            <tr className="border-b border-base bg-zinc-900/80 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
+              <th className="py-2.5 px-3.5 font-semibold">Field</th>
+              <th className="py-2.5 px-3.5 font-semibold">Type</th>
+              <th className="py-2.5 px-3.5 font-semibold">Requirement</th>
+              <th className="py-2.5 px-3.5 font-semibold">Schema.org Mapping</th>
+              <th className="py-2.5 px-3.5 font-semibold">Description</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-base/60 font-mono">
+            {fields.map((field) => (
+              <tr key={field.name} className="hover:bg-zinc-900/40 transition-colors">
+                <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
+                  {field.name}
+                </td>
+                <td className="py-2.5 px-3.5 whitespace-nowrap">
+                  <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
+                    {field.type}
+                  </span>
+                </td>
+                <td className="py-2.5 px-3.5 whitespace-nowrap">
+                  {field.required ? (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
+                      Required
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
+                      Optional
+                    </span>
+                  )}
+                </td>
+                <td className="py-2.5 px-3.5 whitespace-nowrap text-[11px]">
+                  {field.schemaOrgMapping && field.schemaOrgMapping !== '—' ? (
+                    <span className="text-silver">
+                      {field.schemaOrgMapping}
+                    </span>
+                  ) : (
+                    <span className="text-zinc-600">—</span>
+                  )}
+                </td>
+                <td className="py-2.5 px-3.5 font-sans text-zinc-300 text-xs min-w-[200px] leading-relaxed">
+                  {field.description}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function InspectorCard({
+  title = 'Interactive Data Source',
+  onReset,
+  children,
+}: {
+  title?: string;
+  onReset?: () => void;
+  children: React.ReactNode;
+}) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <div className="rounded-xl border border-base bg-zinc-950/70 overflow-hidden mb-6 shadow-sm transition-all">
+      {/* Clickable Header Bar */}
+      <div
+        onClick={() => setIsExpanded(!isExpanded)}
+        className="flex items-center justify-between px-4 py-3 cursor-pointer select-none hover:bg-zinc-900/40 transition-colors"
+      >
+        {/* Left: Title & Sub-badge */}
+        <div className="flex items-center gap-2.5 min-w-0">
+          <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-200 truncate">
+            {title}
+          </span>
+          <span className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-mono text-zinc-400 bg-zinc-900 border border-zinc-800 shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse"></span>
+            Mock Connector
+          </span>
+        </div>
+
+        {/* Right: Actions & Far-Right Chevron */}
+        <div className="flex items-center gap-3 shrink-0">
+          <a
+            href="#connectors"
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+              document.getElementById('connectors')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="hidden md:inline-flex items-center gap-1 text-[11px] font-mono text-zinc-400 hover:text-accent transition-colors underline underline-offset-2 decoration-zinc-700 hover:decoration-accent"
+          >
+            <span>How Connectors work</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+
+          {onReset && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReset();
+              }}
+              type="button"
+              className="text-[11px] font-mono text-zinc-400 hover:text-accent transition-colors flex items-center gap-1.5 cursor-pointer bg-zinc-900 hover:bg-zinc-800 px-2.5 py-1 rounded-md border border-base"
+              title="Reset values to defaults"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
+          )}
+
+          {/* Far-Right Chevron Toggle Button */}
+          <div className="p-1 rounded text-zinc-400 hover:text-zinc-100 transition-colors">
+            {isExpanded ? (
+              <ChevronDown className="w-4 h-4" />
+            ) : (
+              <ChevronRight className="w-4 h-4" />
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Expanded Content Area */}
+      {isExpanded && (
+        <div className="p-4 pt-0 border-t border-base mt-1">
+          <p className="text-[11px] text-zinc-400 my-3 leading-relaxed">
+            Simulates data ingested through a Contextual UI connector. Modifying these values updates both the live UI component and the generated Schema.org JSON-LD graph.
+          </p>
+          <div className="space-y-4 pt-1">{children}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ConnectorsSection() {
+  const [activeTab, setActiveTab] = useState<'static' | 'cms' | 'database'>('static');
+
+  useEffect(() => {
+    Prism.highlightAll();
+  }, [activeTab]);
+
+  const staticCode = `import { staticConnector } from '@contextual-ui/connector-static';
+import { createContextualApp } from '@contextual-ui/core/server';
+import { siteSchema } from './site.schema';
+
+// 1. Static Configuration Connector (Built-in)
+const connector = staticConnector({
+  website: {
+    name: 'Contextual UI Starter Kit',
+    url: 'https://contextual.site',
+    description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
+  },
+  navbar: {
+    brand: { name: 'Contextual UI', href: '/' },
+    links: [
+      { id: '1', label: 'Home', href: '/' },
+      { id: '2', label: 'Docs', href: '/docs' },
+    ],
+  },
+  faq: [
+    { id: '1', question: 'What is Contextual UI?', answer: 'A headless UI + SEO Knowledge Graph library.' },
+  ],
+});
+
+export const siteApp = createContextualApp({
+  schema: siteSchema,
+  connector,
+});`;
+
+  const cmsCode = `import { createContextualApp } from '@contextual-ui/core/server';
+import { siteSchema } from './site.schema';
+import { createClient } from 'next-sanity';
+
+const sanityClient = createClient({
+  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+  dataset: 'production',
+  useCdn: false,
+});
+
+// 2. Custom Headless CMS Connector (Sanity, Strapi, Contentful)
+export function sanityConnector(client: typeof sanityClient) {
+  return {
+    async fetchData() {
+      // Fetch site settings and navigation from Sanity CMS
+      const rawData = await client.fetch(\`*[_type == "siteSettings"][0]{
+        website,
+        navbar,
+        footer,
+        faq
+      }\`);
+      return rawData;
+    },
+  };
+}
+
+// Zero UI rewrites: swap connector in 1 line
+export const siteApp = createContextualApp({
+  schema: siteSchema,
+  connector: sanityConnector(sanityClient),
+});`;
+
+  const databaseCode = `import { createContextualApp } from '@contextual-ui/core/server';
+import { siteSchema } from './site.schema';
+import { prisma } from '@/lib/prisma';
+
+// 3. Custom Database / ORM Connector (Prisma, Drizzle, Supabase)
+export function prismaConnector(db: typeof prisma) {
+  return {
+    async fetchData() {
+      const siteConfig = await db.siteConfig.findFirst({
+        include: {
+          navLinks: true,
+          faqItems: true,
+        },
+      });
+
+      return {
+        website: { name: siteConfig?.name, url: siteConfig?.url },
+        navbar: { links: siteConfig?.navLinks },
+        faq: siteConfig?.faqItems,
+      };
+    },
+  };
+}
+
+export const siteApp = createContextualApp({
+  schema: siteSchema,
+  connector: prismaConnector(prisma),
+});`;
+
+  return (
+    <section id="connectors" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+      <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+        <span>Connectors & Data Layer</span>
+      </h2>
+      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+        Connectors decouple your data sources (Static JSON, Headless CMS, Database ORMs, or REST APIs) from your React UI components and SEO knowledge graphs. Any source that fulfills the simple <code className="code-short">{`{ fetchData: () => Promise<T> }`}</code> contract can be plugged into <code className="code-short">createContextualApp</code>.
+      </p>
+
+      {/* Feature Pillars */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+        <div className="p-3.5 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
+            <Plug className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-0.5">1. Decoupled Ingestion</span>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Write a 5-line connector function to load data from any headless CMS, database, or API.
+            </p>
+          </div>
+        </div>
+        <div className="p-3.5 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-0.5">2. Runtime Hydration</span>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Raw connector payloads are verified and typed through your Zod schema at runtime.
+            </p>
+          </div>
+        </div>
+        <div className="p-3.5 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
+            <RefreshCw className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-0.5">3. Zero UI Rewrites</span>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Switch from static files to a live CMS without modifying any React components or SEO schemas.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
+        <div className="flex ml-auto border border-base rounded-md overflow-hidden">
+          <button
+            onClick={() => setActiveTab('static')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'static'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileCode className="w-3.5 h-3.5" />
+            <span>Static Config</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('cms')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'cms'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Headless CMS</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('database')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'database'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Database className="w-3.5 h-3.5" />
+            <span>Database / ORM</span>
+          </button>
+        </div>
+        <span className="text-sm text-zinc-400 font-medium">
+          {activeTab === 'static' && 'Built-in static connector for hardcoded configs or JSON files.'}
+          {activeTab === 'cms' && 'Custom connector fetching site configuration from a Headless CMS (Sanity / Strapi / Contentful).'}
+          {activeTab === 'database' && 'Custom connector loading schema data from PostgreSQL/MySQL via Prisma or Drizzle ORM.'}
+        </span>
+      </div>
+
+      <pre className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
+        <code className="language-typescript">
+          {activeTab === 'static' ? staticCode : activeTab === 'cms' ? cmsCode : databaseCode}
+        </code>
+      </pre>
+    </section>
+  );
+}
 
 function ShowcaseSection({
   id,
   title,
   description,
   children,
+  controls,
+  fields,
   codeString,
   schemaString,
   exampleDescription,
@@ -22,6 +394,8 @@ function ShowcaseSection({
   title: string;
   description: string;
   children?: React.ReactNode;
+  controls?: React.ReactNode;
+  fields?: SchemaField[];
   codeString: string;
   schemaString: string;
   exampleDescription: string;
@@ -31,7 +405,7 @@ function ShowcaseSection({
 
   useEffect(() => {
     Prism.highlightAll();
-  }, [activeTab]);
+  }, [activeTab, codeString, schemaString]);
 
   return (
     <section id={id} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
@@ -44,29 +418,33 @@ function ShowcaseSection({
         </div>
       )}
 
+      {controls}
+
       <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
-        <div className="flex ml-auto border border-base">
+        <div className="flex ml-auto border border-base rounded-md overflow-hidden">
           <button
             onClick={() => setActiveTab('example')}
-            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer ${
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
               activeTab === 'example'
                 ? 'bg-zinc-800 text-accent'
-                : ' hover:bg-zinc-900'
+                : ' hover:bg-zinc-900 text-zinc-400'
             }`}
             type="button"
           >
-            Example Code
+            <Code2 className="w-3.5 h-3.5" />
+            <span>Example Code</span>
           </button>
           <button
             onClick={() => setActiveTab('schema')}
-            className={`p-1.5 text-xs font-semibold transition-colors cursor-pointer ${
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
               activeTab === 'schema'
                 ? 'bg-zinc-800 text-accent'
-                : ' hover:bg-zinc-900'
+                : ' hover:bg-zinc-900 text-zinc-400'
             }`}
             type="button"
           >
-            JSONLD
+            <FileJson className="w-3.5 h-3.5" />
+            <span>JSONLD</span>
           </button>
         </div>
         <span className="text-sm text-zinc-400 font-medium">
@@ -79,12 +457,79 @@ function ShowcaseSection({
           {activeTab === 'example' ? codeString : schemaString}
         </code>
       </pre>
+
+      {fields && fields.length > 0 && <SchemaFieldsTable fields={fields} />}
     </section>
   );
 }
 
 export function DocsClient({ data }: { data: SiteData }) {
   const [activeId, setActiveId] = useState<string>('contextual-site');
+
+  // Interactive Dynamic State: Navbar
+  const initialNavbar = {
+    brand: {
+      name: data.navbar?.brand?.name || 'Contextual UI',
+      href: data.navbar?.brand?.href || '/',
+      logo: data.navbar?.brand?.logo || '/images/contextual-ui-logo.png',
+    },
+    links: data.navbar?.links && data.navbar.links.length > 0
+      ? data.navbar.links
+      : [
+          { id: '1', label: 'Home', href: '/' },
+          { id: '2', label: 'Docs', href: '/docs' },
+          { id: '3', label: 'Schema Graph', href: '/schema' },
+        ],
+  };
+  const [navbarData, setNavbarData] = useState(initialNavbar);
+
+  // Interactive Dynamic State: Footer
+  const initialFooter = {
+    brand: {
+      name: data.footer?.brand?.name || 'Contextual UI',
+      href: data.footer?.brand?.href || '/',
+      description: data.footer?.brand?.description || 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
+    },
+    links: data.footer?.links || [
+      { id: '1', label: 'Docs', href: '/docs' },
+      { id: '2', label: 'Schema Graph', href: '/schema' },
+      { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
+    ],
+    copyright: {
+      holder: data.footer?.copyright?.holder || 'Tasuku Studio',
+      year: data.footer?.copyright?.year || new Date().getFullYear(),
+    },
+  };
+  const [footerData, setFooterData] = useState(initialFooter);
+
+  // Interactive Dynamic State: Breadcrumb
+  const initialBreadcrumb = [
+    { id: '1', label: 'Home', url: '/' },
+    { id: '2', label: 'Docs', url: '/docs' },
+    { id: '3', label: 'Showcase', url: '/docs#showcase' },
+  ];
+  const [breadcrumbList, setBreadcrumbList] = useState(initialBreadcrumb);
+  const [baseUrl, setBaseUrl] = useState('https://contextual.site');
+
+  // Interactive Dynamic State: FAQ
+  const initialFaq = [
+    { id: '1', question: 'What kind of bear is best?', answer: 'Black bear.' },
+    { id: '2', question: 'What do bears eat?', answer: 'Beets.' },
+    { id: '3', question: 'Is identity theft a joke?', answer: "It's not. Millions of families suffer every year!" }
+  ];
+  const [faqList, setFaqList] = useState(initialFaq);
+
+  const componentNavItems = [
+    { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & Graph' },
+    { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
+    { id: 'footer', label: 'Footer', desc: 'Footer & Attribution' },
+    { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
+    { id: 'faq', label: 'FAQ', desc: 'FAQ & Accordion' },
+  ];
+
+  const connectorNavItems = [
+    { id: 'connectors', label: 'Connectors', desc: 'Data Ingestion & Adapters' },
+  ];
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -98,7 +543,7 @@ export function DocsClient({ data }: { data: SiteData }) {
       { rootMargin: '-120px 0px -50% 0px' }
     );
 
-    const sections = ['contextual-site', 'navbar', 'footer', 'breadcrumb', 'faq'];
+    const sections = ['contextual-site', 'navbar', 'footer', 'breadcrumb', 'faq', 'connectors'];
     sections.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -112,18 +557,9 @@ export function DocsClient({ data }: { data: SiteData }) {
     };
   }, []);
 
-  const breadcrumbData = [
-    { id: '1', label: 'Home', url: '/' },
-    { id: '2', label: 'Docs', url: '/docs' },
-    { id: '3', label: 'Showcase', url: '/docs#showcase' },
-  ];
-
-  const faqData = [
-    { id: '1', question: 'What kind of bear is best?', answer: 'Black bear.' },
-    { id: '2', question: 'What do bears eat?', answer: 'Beets.' },
-    { id: '3', question: 'Is identity theft a joke?', answer: "It's not. Millions of families suffer every year!" }
-  ];
-
+  // ---------------------------------------------------------------------------
+  // ContextualSite Code & Schema
+  // ---------------------------------------------------------------------------
   const contextualSiteCode = `import { siteApp } from '@/data/site.server';
 import { ContextualSite, Navbar, Faq } from '@contextual-ui/core';
 
@@ -165,7 +601,7 @@ export default async function RootLayout({
         "@id": "https://contextual.site/#navbar",
         "name": "Navigation Bar",
         "isPartOf": { "@id": "https://contextual.site/#website" },
-        "hasPart": data.navbar?.links.map(link => ({
+        "hasPart": (data.navbar?.links || []).map(link => ({
           "@type": "WebPage",
           "name": link.label,
           "url": link.href
@@ -189,7 +625,7 @@ export default async function RootLayout({
 
   const navbarCode = `<Navbar.Root data={data.navbar} className="flex justify-between items-center w-full">
   <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
-    <span>気</span> Contextual UI
+    <span>気</span> ${navbarData.brand?.name || 'Contextual UI'}
   </Navbar.Brand>
   <Navbar.Content className="flex gap-6 items-center">
     {data.navbar?.links.map((link) => (
@@ -203,10 +639,10 @@ export default async function RootLayout({
     "name": "Navigation Bar",
     "brand": {
       "@type": "Brand",
-      "name": "Contextual UI",
-      "url": "/"
+      "name": navbarData.brand?.name || "Contextual UI",
+      "url": navbarData.brand?.href || "/"
     },
-    "hasPart": data.navbar?.links.map(link => ({
+    "hasPart": navbarData.links.map(link => ({
       "@type": "WebPage",
       "name": link.label,
       "url": link.href
@@ -220,9 +656,9 @@ export default async function RootLayout({
       href="https://tasuku.io"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4"
+      className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-accent"
     >
-      {data.footer?.copyright?.holder || 'Tasuku Studio'}
+      ${footerData.copyright?.holder || 'Tasuku Studio'}
     </a>
   </div>
   <div className="flex items-center gap-6">
@@ -239,21 +675,21 @@ export default async function RootLayout({
   const footerSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WPFooter",
-    "name": data.footer?.brand?.name || "Contextual UI",
-    "url": data.footer?.brand?.href || "/",
+    "name": footerData.brand?.name || "Contextual UI",
+    "url": footerData.brand?.href || "/",
     "copyrightHolder": {
       "@type": "Organization",
-      "name": data.footer?.copyright?.holder || "Tasuku Studio"
+      "name": footerData.copyright?.holder || "Tasuku Studio"
     },
-    "copyrightYear": new Date().getFullYear(),
-    "hasPart": (data.footer?.links || []).map(link => ({
+    "copyrightYear": footerData.copyright?.year || new Date().getFullYear(),
+    "hasPart": (footerData.links || []).map(link => ({
       "@type": "SiteNavigationElement",
       "name": link.label,
       "url": link.href
     }))
   }, null, 2);
 
-  const breadcrumbCode = `<Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual.site">
+  const breadcrumbCode = `<Breadcrumb.Root data={breadcrumbData} baseUrl="${baseUrl}">
   <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
     {breadcrumbData.map((item, index) => (
       <Breadcrumb.Item key={item.id}>
@@ -266,11 +702,11 @@ export default async function RootLayout({
   const breadcrumbSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    "itemListElement": breadcrumbData.map((item, index) => ({
+    "itemListElement": breadcrumbList.map((item, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "name": item.label,
-      "item": `https://contextual.site${item.url}`
+      "item": item.url ? `${baseUrl}${item.url}` : undefined
     }))
   }, null, 2);
 
@@ -286,7 +722,7 @@ export default async function RootLayout({
   const faqSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    "mainEntity": faqData.map(item => ({
+    "mainEntity": faqList.map(item => ({
       "@type": "Question",
       "name": item.question,
       "acceptedAnswer": {
@@ -296,52 +732,795 @@ export default async function RootLayout({
     }))
   }, null, 2);
 
+  // ---------------------------------------------------------------------------
+  // Schema Contract Field Definitions (Clean API Reference)
+  // ---------------------------------------------------------------------------
+  const contextualSiteFields: SchemaField[] = [
+    {
+      name: 'data',
+      type: 'SiteData',
+      required: true,
+      schemaOrgMapping: '@graph',
+      description: 'Domain-level data object providing website, navbar, footer, and FAQ configurations.',
+    },
+    {
+      name: 'data.website',
+      type: 'WebsiteData',
+      required: false,
+      schemaOrgMapping: 'WebSite',
+      description: 'Site-level metadata including name, url, and meta description.',
+    },
+    {
+      name: 'data.navbar',
+      type: 'NavbarData',
+      required: false,
+      schemaOrgMapping: 'SiteNavigationElement',
+      description: 'Navigation brand and menu links automatically inferred by <Navbar.Root />.',
+    },
+    {
+      name: 'data.footer',
+      type: 'FooterData',
+      required: false,
+      schemaOrgMapping: 'WPFooter',
+      description: 'Footer structure, copyright, and social links automatically inferred by <Footer.Root />.',
+    },
+    {
+      name: 'data.faq',
+      type: 'FaqItem[]',
+      required: false,
+      schemaOrgMapping: 'FAQPage',
+      description: 'FAQ question-answer pairs automatically inferred by <Faq.Root />.',
+    },
+    {
+      name: 'graph',
+      type: 'ContextualGraph',
+      required: false,
+      schemaOrgMapping: '@graph',
+      description: 'Pre-compiled Schema.org JSON-LD graph produced by siteApp.getGraph().',
+    },
+    {
+      name: 'children',
+      type: 'ReactNode',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Child components rendered within ContextualSite context.',
+    },
+  ];
+
+  const navbarFields: SchemaField[] = [
+    {
+      name: 'brand.name',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'Brand.name',
+      description: 'Brand or application display title.',
+    },
+    {
+      name: 'brand.logo',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'Brand.logo',
+      description: 'Brand logo image URL or asset path.',
+    },
+    {
+      name: 'brand.href',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'Brand.url',
+      description: 'Home link destination (defaults to "/").',
+    },
+    {
+      name: 'links',
+      type: 'NavItem[]',
+      required: true,
+      schemaOrgMapping: 'hasPart: WebPage[]',
+      description: 'Array of top-level navigation items.',
+    },
+    {
+      name: 'links[].id',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Unique identifier for item keying and accessibility.',
+    },
+    {
+      name: 'links[].label',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: 'WebPage.name',
+      description: 'Visible link label text.',
+    },
+    {
+      name: 'links[].href',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WebPage.url',
+      description: 'Destination target URL.',
+    },
+    {
+      name: 'links[].children',
+      type: 'NavItem[]',
+      required: false,
+      schemaOrgMapping: 'hasPart: WebPage[]',
+      description: 'Nested navigation items for dropdown submenus.',
+    },
+  ];
+
+  const footerFields: SchemaField[] = [
+    {
+      name: 'brand.name',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WPFooter.name',
+      description: 'Brand title displayed in footer.',
+    },
+    {
+      name: 'brand.href',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WPFooter.url',
+      description: 'Brand home URL destination.',
+    },
+    {
+      name: 'brand.description',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WPFooter.description',
+      description: 'Short brand mission statement or summary.',
+    },
+    {
+      name: 'links',
+      type: 'FooterLinkItem[]',
+      required: false,
+      schemaOrgMapping: 'WPFooter.hasPart',
+      description: 'Flat list of primary footer navigation links.',
+    },
+    {
+      name: 'links[].id',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Unique item identifier.',
+    },
+    {
+      name: 'links[].label',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: 'SiteNavigationElement.name',
+      description: 'Link text label.',
+    },
+    {
+      name: 'links[].href',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: 'SiteNavigationElement.url',
+      description: 'Target route or external URL.',
+    },
+    {
+      name: 'links[].external',
+      type: 'boolean',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Opens in a new tab when true.',
+    },
+    {
+      name: 'columns',
+      type: 'FooterColumn[]',
+      required: false,
+      schemaOrgMapping: 'WPFooter.hasPart',
+      description: 'Grouped multi-column link structures.',
+    },
+    {
+      name: 'socials',
+      type: 'FooterSocialLink[]',
+      required: false,
+      schemaOrgMapping: 'sameAs',
+      description: 'Social media profile links (GitHub, Twitter/X, Discord, etc.).',
+    },
+    {
+      name: 'copyright.holder',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'copyrightHolder (Organization)',
+      description: 'Legal entity or company holding copyright.',
+    },
+    {
+      name: 'copyright.year',
+      type: 'number | string',
+      required: false,
+      schemaOrgMapping: 'copyrightYear',
+      description: 'Copyright year (defaults to current year).',
+    },
+    {
+      name: 'copyright.text',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Custom copyright disclaimer text.',
+    },
+  ];
+
+  const breadcrumbFields: SchemaField[] = [
+    {
+      name: 'data',
+      type: 'BreadcrumbItem[]',
+      required: true,
+      schemaOrgMapping: 'itemListElement: ListItem[]',
+      description: 'Hierarchical array of breadcrumb step objects.',
+    },
+    {
+      name: 'data[].id',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Unique item identifier.',
+    },
+    {
+      name: 'data[].label',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: 'ListItem.name',
+      description: 'Display text for the breadcrumb item.',
+    },
+    {
+      name: 'data[].url',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'ListItem.item',
+      description: 'Destination URL (omitted for the active leaf page).',
+    },
+    {
+      name: 'baseUrl',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'ListItem.item (origin prefix)',
+      description: 'Origin prefix (e.g. "https://contextual.site") for canonical Schema.org URLs.',
+    },
+  ];
+
+  const faqFields: SchemaField[] = [
+    {
+      name: 'data',
+      type: 'FaqItem[]',
+      required: true,
+      schemaOrgMapping: 'mainEntity: Question[]',
+      description: 'Array of FAQ question and answer items.',
+    },
+    {
+      name: 'data[].id',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Unique identifier for the FAQ item.',
+    },
+    {
+      name: 'data[].question',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: 'Question.name',
+      description: 'The question string for users and search indexing.',
+    },
+    {
+      name: 'data[].answer',
+      type: 'string',
+      required: true,
+      schemaOrgMapping: 'Question.acceptedAnswer.text',
+      description: 'The accepted answer text content.',
+    },
+  ];
+
+  // ---------------------------------------------------------------------------
+  // Interactive Data Source Controls (Dynamic Connector Simulators)
+  // ---------------------------------------------------------------------------
+  const navbarControls = (
+    <InspectorCard
+      title="Interactive Data Source · Navbar"
+      onReset={() => setNavbarData(initialNavbar)}
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
+            Brand Name
+          </label>
+          <input
+            type="text"
+            value={navbarData.brand?.name || ''}
+            onChange={(e) =>
+              setNavbarData((prev) => ({
+                ...prev,
+                brand: { ...prev.brand, name: e.target.value },
+              }))
+            }
+            className="w-full bg-zinc-900 text-zinc-100 text-xs px-3 py-1.5 rounded-lg border border-zinc-700/80 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none font-sans"
+          />
+        </div>
+        <div>
+          <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
+            Brand Target Href
+          </label>
+          <input
+            type="text"
+            value={navbarData.brand?.href || ''}
+            onChange={(e) =>
+              setNavbarData((prev) => ({
+                ...prev,
+                brand: { ...prev.brand, href: e.target.value },
+              }))
+            }
+            className="w-full bg-zinc-900 text-zinc-100 text-xs px-3 py-1.5 rounded-lg border border-zinc-700/80 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none font-sans"
+          />
+        </div>
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
+            Navigation Items ({navbarData.links.length})
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              setNavbarData((prev) => ({
+                ...prev,
+                links: [
+                  ...prev.links,
+                  {
+                    id: String(Date.now()),
+                    label: `Link ${prev.links.length + 1}`,
+                    href: `/page-${prev.links.length + 1}`,
+                  },
+                ],
+              }))
+            }
+            className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Link</span>
+          </button>
+        </div>
+        <div className="space-y-2">
+          {navbarData.links.map((link, idx) => (
+            <div
+              key={link.id || idx}
+              className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/60 border border-zinc-800"
+            >
+              <span className="text-[11px] font-mono text-zinc-500 w-5">{idx + 1}.</span>
+              <input
+                type="text"
+                placeholder="Label"
+                value={link.label}
+                onChange={(e) =>
+                  setNavbarData((prev) => {
+                    const links = [...prev.links];
+                    links[idx] = { ...links[idx], label: e.target.value };
+                    return { ...prev, links };
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Href"
+                value={link.href || ''}
+                onChange={(e) =>
+                  setNavbarData((prev) => {
+                    const links = [...prev.links];
+                    links[idx] = { ...links[idx], href: e.target.value };
+                    return { ...prev, links };
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={navbarData.links.length <= 1}
+                onClick={() =>
+                  setNavbarData((prev) => ({
+                    ...prev,
+                    links: prev.links.filter((_, i) => i !== idx),
+                  }))
+                }
+                className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 transition-colors cursor-pointer text-xs"
+                title="Delete item"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </InspectorCard>
+  );
+
+  const footerControls = (
+    <InspectorCard
+      title="Interactive Data Source · Footer"
+      onReset={() => setFooterData(initialFooter)}
+    >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
+            Brand Name
+          </label>
+          <input
+            type="text"
+            value={footerData.brand?.name || ''}
+            onChange={(e) =>
+              setFooterData((prev) => ({
+                ...prev,
+                brand: { ...prev.brand, name: e.target.value },
+              }))
+            }
+            className="w-full bg-zinc-900 text-zinc-100 text-xs px-3 py-1.5 rounded-lg border border-zinc-700/80 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none font-sans"
+          />
+        </div>
+        <div>
+          <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
+            Copyright Holder
+          </label>
+          <input
+            type="text"
+            value={footerData.copyright?.holder || ''}
+            onChange={(e) =>
+              setFooterData((prev) => ({
+                ...prev,
+                copyright: { ...prev.copyright, holder: e.target.value },
+              }))
+            }
+            className="w-full bg-zinc-900 text-zinc-100 text-xs px-3 py-1.5 rounded-lg border border-zinc-700/80 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none font-sans"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
+          Brand Description
+        </label>
+        <input
+          type="text"
+          value={footerData.brand?.description || ''}
+          onChange={(e) =>
+            setFooterData((prev) => ({
+              ...prev,
+              brand: { ...prev.brand, description: e.target.value },
+            }))
+          }
+          className="w-full bg-zinc-900 text-zinc-100 text-xs px-3 py-1.5 rounded-lg border border-zinc-700/80 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none font-sans"
+        />
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
+            Footer Links ({footerData.links?.length || 0})
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              setFooterData((prev) => ({
+                ...prev,
+                links: [
+                  ...(prev.links || []),
+                  {
+                    id: String(Date.now()),
+                    label: `Link ${(prev.links?.length || 0) + 1}`,
+                    href: `/link-${(prev.links?.length || 0) + 1}`,
+                  },
+                ],
+              }))
+            }
+            className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Link</span>
+          </button>
+        </div>
+        <div className="space-y-2">
+          {(footerData.links || []).map((link, idx) => (
+            <div
+              key={link.id || idx}
+              className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/60 border border-zinc-800"
+            >
+              <span className="text-[11px] font-mono text-zinc-500 w-5">{idx + 1}.</span>
+              <input
+                type="text"
+                placeholder="Label"
+                value={link.label}
+                onChange={(e) =>
+                  setFooterData((prev) => {
+                    const links = [...(prev.links || [])];
+                    links[idx] = { ...links[idx], label: e.target.value };
+                    return { ...prev, links };
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="Href"
+                value={link.href}
+                onChange={(e) =>
+                  setFooterData((prev) => {
+                    const links = [...(prev.links || [])];
+                    links[idx] = { ...links[idx], href: e.target.value };
+                    return { ...prev, links };
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={(footerData.links?.length || 0) <= 1}
+                onClick={() =>
+                  setFooterData((prev) => ({
+                    ...prev,
+                    links: (prev.links || []).filter((_, i) => i !== idx),
+                  }))
+                }
+                className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 transition-colors cursor-pointer text-xs"
+                title="Delete item"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </InspectorCard>
+  );
+
+  const breadcrumbControls = (
+    <InspectorCard
+      title="Interactive Data Source · Breadcrumb"
+      onReset={() => {
+        setBreadcrumbList(initialBreadcrumb);
+        setBaseUrl('https://contextual.site');
+      }}
+    >
+      <div>
+        <label className="text-[11px] font-mono text-zinc-400 block mb-1 uppercase tracking-wider">
+          Canonical Base URL
+        </label>
+        <input
+          type="text"
+          value={baseUrl}
+          onChange={(e) => setBaseUrl(e.target.value)}
+          className="w-full bg-zinc-900 text-zinc-100 text-xs px-3 py-1.5 rounded-lg border border-zinc-700/80 focus:border-accent focus:ring-1 focus:ring-accent focus:outline-none font-sans"
+        />
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
+            Trail Steps ({breadcrumbList.length})
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              setBreadcrumbList((prev) => [
+                ...prev,
+                {
+                  id: String(Date.now()),
+                  label: `Step ${prev.length + 1}`,
+                  url: `/step-${prev.length + 1}`,
+                },
+              ])
+            }
+            className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Step</span>
+          </button>
+        </div>
+        <div className="space-y-2">
+          {breadcrumbList.map((item, idx) => (
+            <div
+              key={item.id || idx}
+              className="flex items-center gap-2 p-2 rounded-lg bg-zinc-900/60 border border-zinc-800"
+            >
+              <span className="text-[11px] font-mono text-zinc-500 w-5">{idx + 1}.</span>
+              <input
+                type="text"
+                placeholder="Step Label"
+                value={item.label}
+                onChange={(e) =>
+                  setBreadcrumbList((prev) => {
+                    const list = [...prev];
+                    list[idx] = { ...list[idx], label: e.target.value };
+                    return list;
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <input
+                type="text"
+                placeholder="URL (optional for leaf)"
+                value={item.url || ''}
+                onChange={(e) =>
+                  setBreadcrumbList((prev) => {
+                    const list = [...prev];
+                    list[idx] = { ...list[idx], url: e.target.value };
+                    return list;
+                  })
+                }
+                className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+              />
+              <button
+                type="button"
+                disabled={breadcrumbList.length <= 1}
+                onClick={() =>
+                  setBreadcrumbList((prev) => prev.filter((_, i) => i !== idx))
+                }
+                className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 transition-colors cursor-pointer text-xs"
+                title="Delete step"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </InspectorCard>
+  );
+
+  const faqControls = (
+    <InspectorCard
+      title="Interactive Data Source · FAQ"
+      onReset={() => setFaqList(initialFaq)}
+    >
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-[11px] font-mono text-zinc-400 block uppercase tracking-wider">
+            Questions & Answers ({faqList.length})
+          </label>
+          <button
+            type="button"
+            onClick={() =>
+              setFaqList((prev) => [
+                ...prev,
+                {
+                  id: String(Date.now()),
+                  question: `Question ${prev.length + 1}?`,
+                  answer: `Answer for question ${prev.length + 1}.`,
+                },
+              ])
+            }
+            className="text-xs font-mono text-accent hover:text-accent/80 flex items-center gap-1 px-2.5 py-1 rounded border border-accent/30 hover:border-accent/60 bg-accent/5 hover:bg-accent/10 transition-colors cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add FAQ</span>
+          </button>
+        </div>
+        <div className="space-y-3">
+          {faqList.map((item, idx) => (
+            <div
+              key={item.id || idx}
+              className="p-3 rounded-lg bg-zinc-900/60 border border-zinc-800 space-y-2"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] font-mono text-zinc-500 font-semibold">
+                  Q{idx + 1}.
+                </span>
+                <input
+                  type="text"
+                  placeholder="Question"
+                  value={item.question}
+                  onChange={(e) =>
+                    setFaqList((prev) => {
+                      const list = [...prev];
+                      list[idx] = { ...list[idx], question: e.target.value };
+                      return list;
+                    })
+                  }
+                  className="flex-1 bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none"
+                />
+                <button
+                  type="button"
+                  disabled={faqList.length <= 1}
+                  onClick={() =>
+                    setFaqList((prev) => prev.filter((_, i) => i !== idx))
+                  }
+                  className="text-zinc-500 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed p-1.5 transition-colors cursor-pointer text-xs"
+                  title="Delete question"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <textarea
+                placeholder="Answer"
+                rows={2}
+                value={item.answer}
+                onChange={(e) =>
+                  setFaqList((prev) => {
+                    const list = [...prev];
+                    list[idx] = { ...list[idx], answer: e.target.value };
+                    return list;
+                  })
+                }
+                className="w-full bg-zinc-900 text-zinc-100 text-xs px-2.5 py-1 rounded border border-zinc-700/60 focus:border-accent focus:outline-none font-sans resize-y"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </InspectorCard>
+  );
+
   return (
     <div className="pt-24 pb-28 max-w-7xl mx-auto px-6">
       <div className="mb-8">
         <h1 className="text-2xl font-bold tracking-tight mb-2">Docs & Components</h1>
         <p className="text-zinc-400 text-sm">
           Explore Contextual UI site providers and components designed for humans, search engines, and AI agents.
+          Use the interactive data source controls to customize component mock data, add or remove items, and see real-time UI rendering and Schema.org JSON-LD graph generation.
         </p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12 items-start relative">
         {/* Left Side Menu */}
         <aside className="hidden lg:block lg:sticky lg:top-24 w-64 shrink-0 space-y-6">
-          <div className="backdrop-blur-sm shadow-sm space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 px-2 pt-2">
-              Documentation
-            </h3>
-            <nav className="space-y-1">
-              {[
-                { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & Graph' },
-                { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
-                { id: 'footer', label: 'Footer', desc: 'Footer & Attribution' },
-                { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
-                { id: 'faq', label: 'FAQ', desc: 'FAQ & Questions' },
-              ].map((item) => {
-                const isActive = activeId === item.id;
-                return (
-                  <a
-                    key={item.id}
-                    href={`#${item.id}`}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                      setActiveId(item.id);
-                    }}
-                    className={`flex flex-col px-3 py-2.5 rounded-xl text-sm transition-colors no-underline ${
-                      isActive
-                        ? 'text-accent border border-base shadow-sm font-medium'
-                        : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/50'
-                    }`}
-                  >
-                    <span className="font-semibold">{item.label}</span>
-                    <span className="text-[11px] text-zinc-400">{item.desc}</span>
-                  </a>
-                );
-              })}
-            </nav>
+          <div className="backdrop-blur-sm shadow-sm space-y-6">
+            {/* Subsection 1: Components */}
+            <div className="space-y-2">
+              <h3 className="text-[11px] font-mono uppercase tracking-wider font-semibold text-zinc-400 px-3 pt-1">
+                Components
+              </h3>
+              <nav className="space-y-1">
+                {componentNavItems.map((item) => {
+                  const isActive = activeId === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        setActiveId(item.id);
+                      }}
+                      className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
+                        isActive
+                          ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/30'
+                      }`}
+                    >
+                      <span className="font-semibold text-xs leading-snug">{item.label}</span>
+                      <span className="text-[11px] text-zinc-500 truncate">{item.desc}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Subsection 2: Connectors */}
+            <div className="space-y-2 pt-3 border-t border-base">
+              <h3 className="text-[11px] font-mono uppercase tracking-wider font-semibold text-zinc-400 px-3 pt-1">
+                Connectors
+              </h3>
+              <nav className="space-y-1">
+                {connectorNavItems.map((item) => {
+                  const isActive = activeId === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        setActiveId(item.id);
+                      }}
+                      className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
+                        isActive
+                          ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/30'
+                      }`}
+                    >
+                      <span className="font-semibold text-xs leading-snug">{item.label}</span>
+                      <span className="text-[11px] text-zinc-500 truncate">{item.desc}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
           </div>
         </aside>
 
@@ -349,13 +1528,7 @@ export default async function RootLayout({
         <div className="flex-1 min-w-0 space-y-12 w-full">
           {/* Mobile Navigation Pills */}
           <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 border-b border-base w-full">
-            {[
-              { id: 'contextual-site', label: 'ContextualSite' },
-              { id: 'navbar', label: 'Navbar' },
-              { id: 'footer', label: 'Footer' },
-              { id: 'breadcrumb', label: 'Breadcrumb' },
-              { id: 'faq', label: 'FAQ' },
-            ].map((item) => {
+            {[...componentNavItems, ...connectorNavItems].map((item) => {
               const isActive = activeId === item.id;
               return (
                 <a
@@ -383,6 +1556,7 @@ export default async function RootLayout({
             id="contextual-site"
             title="<ContextualSite /> Provider"
             description="The root provider that coordinates domain-level data distribution to all contextual UI components and consolidates their schema data into a single, unified Schema.org JSON-LD @graph."
+            fields={contextualSiteFields}
             codeString={contextualSiteCode}
             schemaString={contextualSiteSchema}
             exampleDescription="Wrap your root layout with ContextualSite to provide data and unified @graph script."
@@ -394,23 +1568,25 @@ export default async function RootLayout({
             id="navbar"
             title="Navbar"
             description="The Navbar component renders accessible navigation structures with full semantic support."
+            controls={navbarControls}
+            fields={navbarFields}
             codeString={navbarCode}
             schemaString={navbarSchema}
             exampleDescription="React component implementation using Navbar subcomponents."
             schemaDescription="Schema.org SiteNavigationElement automatically injected in the DOM."
           >
-            <Navbar.Root data={data.navbar} className="w-full relative">
+            <Navbar.Root data={navbarData} className="w-full relative">
               <div className="flex justify-between items-center w-full">
                 <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
                   <img
-                    src="/images/contextual-ui-logo.png"
+                    src={navbarData.brand?.logo || '/images/contextual-ui-logo.png'}
                     alt="Contextual UI Logo"
                     className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
                   />
-                  Contextual UI
+                  {navbarData.brand?.name || 'Contextual UI'}
                 </Navbar.Brand>
                 <Navbar.Content className="hidden md:flex gap-6 items-center">
-                  {data.navbar?.links.map((link) => (
+                  {navbarData.links.map((link) => (
                     <a
                       key={link.id}
                       href={link.href}
@@ -423,7 +1599,7 @@ export default async function RootLayout({
                 <Navbar.Toggle className="md:hidden p-2 text-zinc-400 hover:text-zinc-100 focus:outline-none cursor-pointer" />
               </div>
               <Navbar.Menu className="absolute top-16 left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl">
-                {data.navbar?.links.map((link) => (
+                {navbarData.links.map((link) => (
                   <a
                     key={link.id}
                     href={link.href}
@@ -441,12 +1617,14 @@ export default async function RootLayout({
             id="footer"
             title="Footer"
             description="The Footer component organizes structured site links, brand metadata, and legal attribution with automatic Schema.org WPFooter structured data injection."
+            controls={footerControls}
+            fields={footerFields}
             codeString={footerCode}
             schemaString={footerSchema}
             exampleDescription="Accessible footer layout with links and copyright."
             schemaDescription="Schema.org WPFooter automatically injected in the DOM."
           >
-            <Footer.Root data={data.footer} className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-400">
+            <Footer.Root data={footerData} className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-400">
               <div className="flex items-center gap-2">
                 <span>Maintained by</span>
                 <a
@@ -455,11 +1633,11 @@ export default async function RootLayout({
                   rel="noopener noreferrer"
                   className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-accent"
                 >
-                  {data.footer?.copyright?.holder || 'Tasuku Studio'}
+                  {footerData.copyright?.holder || 'Tasuku Studio'}
                 </a>
               </div>
               <div className="flex items-center gap-6">
-                {data.footer?.links?.map((link) => (
+                {(footerData.links || []).map((link) => (
                   <Footer.Link
                     key={link.id}
                     item={link}
@@ -475,15 +1653,17 @@ export default async function RootLayout({
             id="breadcrumb"
             title="Breadcrumb"
             description="The Breadcrumb component automatically injects Schema.org BreadcrumbList JSON-LD for search engine indexing while enforcing accessible semantic navigation."
+            controls={breadcrumbControls}
+            fields={breadcrumbFields}
             codeString={breadcrumbCode}
             schemaString={breadcrumbSchema}
             exampleDescription="Accessible breadcrumb trail implementation with list items and separators."
             schemaDescription="Schema.org BreadcrumbList automatically injected in the DOM."
           >
-            <Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual.site">
+            <Breadcrumb.Root data={breadcrumbList} baseUrl={baseUrl}>
               <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
-                {breadcrumbData.map((item, index) => {
-                  const isLast = index === breadcrumbData.length - 1;
+                {breadcrumbList.map((item, index) => {
+                  const isLast = index === breadcrumbList.length - 1;
                   return (
                     <Breadcrumb.Item key={item.id} id={item.id} className="flex items-center gap-2">
                       {isLast ? (
@@ -512,16 +1692,18 @@ export default async function RootLayout({
             id="faq"
             title="FAQ"
             description="The FAQ component organizes collapsible question-and-answer pairs with automatic Schema.org FAQPage structured data injection."
+            controls={faqControls}
+            fields={faqFields}
             codeString={faqCode}
             schemaString={faqSchema}
             exampleDescription="Collapsible FAQ layout with trigger buttons and content sections."
             schemaDescription="Schema.org FAQPage automatically injected in the DOM."
           >
-            <Faq.Root data={faqData}>
-              {faqData.map((item) => (
+            <Faq.Root data={faqList}>
+              {faqList.map((item, index) => (
                 <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-base last:border-b-0 pb-4 last:pb-0">
                   <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
-                    {`${item.id}. ${item.question}`}
+                    {`${index + 1}. ${item.question}`}
                   </Faq.Trigger>
                   <Faq.Content className="mt-2 text-zinc-400 text-sm leading-relaxed">
                     {item.answer}
@@ -530,6 +1712,9 @@ export default async function RootLayout({
               ))}
             </Faq.Root>
           </ShowcaseSection>
+
+          {/* Connectors Section */}
+          <ConnectorsSection />
         </div>
       </div>
     </div>
