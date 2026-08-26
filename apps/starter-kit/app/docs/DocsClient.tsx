@@ -3,8 +3,9 @@
 import { useState, useEffect } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-jsx';
-import 'prismjs/components/prism-json';
 import 'prismjs/components/prism-typescript';
+import 'prismjs/components/prism-tsx';
+import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
 import {
   Plug,
@@ -22,8 +23,23 @@ import {
   Database,
   FileCode,
 } from 'lucide-react';
-import { Breadcrumb, Navbar, Faq, Footer } from '@contextual-ui/core';
+import { Breadcrumb, Navbar, Faq, Footer, createForm } from '@contextual-ui/core';
+import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
+
+const contactSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+});
+
+const ContactForm = createForm(contactSchema);
+
+function highlightCode(code: string, lang: 'tsx' | 'jsx' | 'typescript' | 'json') {
+  const grammar = Prism.languages[lang] || Prism.languages.typescript || Prism.languages.javascript;
+  if (!grammar) return code;
+  return Prism.highlight(code, grammar, lang);
+}
 
 export interface SchemaField {
   name: string;
@@ -181,12 +197,124 @@ function InspectorCard({
   );
 }
 
+function FormFactorySection() {
+  const formExampleCode = `import { z } from 'zod';
+import { createForm } from '@contextual-ui/core';
+
+const contactSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
+});
+
+const ContactForm = createForm(contactSchema);
+
+export function ContactDemo() {
+  return (
+    <ContactForm.Root 
+      onSubmit={(data) => alert(JSON.stringify(data, null, 2))}
+      className="space-y-4 max-w-md mx-auto"
+    >
+      <div className="flex gap-4">
+        <ContactForm.Field name="name" className="flex-1">
+          <ContactForm.Label className="block text-sm text-zinc-300 mb-1">Name</ContactForm.Label>
+          <ContactForm.Input className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white" />
+          <ContactForm.ErrorMessage className="text-red-400 text-xs mt-1 block" />
+        </ContactForm.Field>
+
+        <ContactForm.Field name="email" className="flex-1">
+          <ContactForm.Label className="block text-sm text-zinc-300 mb-1">Email</ContactForm.Label>
+          <ContactForm.Input type="email" className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white" />
+          <ContactForm.ErrorMessage className="text-red-400 text-xs mt-1 block" />
+        </ContactForm.Field>
+      </div>
+
+      <ContactForm.Field name="message">
+        <ContactForm.Label className="block text-sm text-zinc-300 mb-1">Message</ContactForm.Label>
+        <ContactForm.TextArea rows={2} className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white" />
+        <ContactForm.ErrorMessage className="text-red-400 text-xs mt-1 block" />
+      </ContactForm.Field>
+
+      <ContactForm.Submit className="w-full py-2 bg-accent hover:bg-accent-hover text-white font-medium rounded-lg transition-colors">
+        Send Message
+      </ContactForm.Submit>
+    </ContactForm.Root>
+  );
+}`;
+
+  return (
+    <div id="form-factory" className="scroll-mt-32">
+      <div className="mb-6">
+        <h2 className="text-2xl font-bold tracking-tight mb-2">Form Factory</h2>
+        <p className="text-zinc-400 max-w-2xl text-sm leading-relaxed">
+          The <code className="code-short">createForm</code> factory provides a fully type-safe, Zod-powered form solution. 
+          It generates context-aware components for your schema without boilerplate.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-6">
+        {/* Live Demo */}
+        <div className="p-6 bg-zinc-900/50 rounded-2xl border border-zinc-800/50 backdrop-blur-sm relative group overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          
+          <ContactForm.Root 
+            onSubmit={async (data) => {
+              alert(JSON.stringify(data, null, 2));
+            }}
+            className="space-y-4 max-w-md mx-auto relative z-10"
+          >
+            <div className="flex gap-4">
+              <ContactForm.Field name="name" className="flex-1">
+                <ContactForm.Label className="block text-sm text-zinc-300 mb-1">Name</ContactForm.Label>
+                <ContactForm.Input className="w-full px-3 py-2 bg-zinc-900/80 border border-zinc-700/50 rounded-lg text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all" />
+                <ContactForm.ErrorMessage className="text-red-400 text-xs mt-1 block" />
+              </ContactForm.Field>
+
+              <ContactForm.Field name="email" className="flex-1">
+                <ContactForm.Label className="block text-sm text-zinc-300 mb-1">Email</ContactForm.Label>
+                <ContactForm.Input type="email" className="w-full px-3 py-2 bg-zinc-900/80 border border-zinc-700/50 rounded-lg text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all" />
+                <ContactForm.ErrorMessage className="text-red-400 text-xs mt-1 block" />
+              </ContactForm.Field>
+            </div>
+
+            <ContactForm.Field name="message">
+              <ContactForm.Label className="block text-sm text-zinc-300 mb-1">Message</ContactForm.Label>
+              <ContactForm.TextArea rows={2} className="w-full px-3 py-2 bg-zinc-900/80 border border-zinc-700/50 rounded-lg text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all" />
+              <ContactForm.ErrorMessage className="text-red-400 text-xs mt-1 block" />
+            </ContactForm.Field>
+
+            <ContactForm.Submit className="w-full py-2 bg-accent hover:bg-accent-hover text-white font-medium rounded-lg transition-colors">
+              Send Message
+            </ContactForm.Submit>
+          </ContactForm.Root>
+        </div>
+
+        {/* Code Snippet */}
+        <div className="rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 shadow-xl">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/50">
+            <div className="flex items-center gap-2">
+              <FileCode className="w-4 h-4 text-zinc-400" />
+              <span className="text-xs font-mono text-zinc-300">ContactForm.tsx</span>
+            </div>
+          </div>
+          <div className="p-4 overflow-x-auto text-[13px] leading-relaxed">
+            <pre className="!m-0 !bg-transparent !p-0">
+              <code
+                className="language-tsx"
+                dangerouslySetInnerHTML={{
+                  __html: highlightCode(formExampleCode, 'tsx'),
+                }}
+              />
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ConnectorsSection() {
   const [activeTab, setActiveTab] = useState<'static' | 'cms' | 'database'>('static');
-
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [activeTab]);
 
   const staticCode = `import { staticConnector } from '@contextual-ui/connector-static';
 import { createContextualApp } from '@contextual-ui/core/server';
@@ -370,9 +498,15 @@ export const siteApp = createContextualApp({
       </div>
 
       <pre className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
-        <code className="language-typescript">
-          {activeTab === 'static' ? staticCode : activeTab === 'cms' ? cmsCode : databaseCode}
-        </code>
+        <code
+          className="language-typescript"
+          dangerouslySetInnerHTML={{
+            __html: highlightCode(
+              activeTab === 'static' ? staticCode : activeTab === 'cms' ? cmsCode : databaseCode,
+              'typescript'
+            ),
+          }}
+        />
       </pre>
     </section>
   );
@@ -402,10 +536,8 @@ function ShowcaseSection({
   schemaDescription: string;
 }) {
   const [activeTab, setActiveTab] = useState<'example' | 'schema'>('example');
-
-  useEffect(() => {
-    Prism.highlightAll();
-  }, [activeTab, codeString, schemaString]);
+  const currentCode = activeTab === 'example' ? codeString : schemaString;
+  const currentLang = activeTab === 'example' ? 'jsx' : 'json';
 
   return (
     <section id={id} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
@@ -453,9 +585,12 @@ function ShowcaseSection({
       </div>
 
       <pre className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
-        <code className={activeTab === 'example' ? 'language-jsx' : 'language-json'}>
-          {activeTab === 'example' ? codeString : schemaString}
-        </code>
+        <code
+          className={`language-${currentLang}`}
+          dangerouslySetInnerHTML={{
+            __html: highlightCode(currentCode, currentLang),
+          }}
+        />
       </pre>
 
       {fields && fields.length > 0 && <SchemaFieldsTable fields={fields} />}
@@ -557,6 +692,10 @@ export function DocsClient({ data }: { data: SiteData }) {
     { id: 'footer', label: 'Footer', desc: 'Footer & Attribution' },
     { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
     { id: 'faq', label: 'FAQ', desc: 'FAQ & Accordion' },
+  ];
+
+  const factoryNavItems = [
+    { id: 'form-factory', label: 'Form Factory', desc: 'Type-safe Forms' },
   ];
 
   const connectorNavItems = [
@@ -1815,7 +1954,38 @@ export default async function RootLayout({
               </nav>
             </div>
 
-            {/* Subsection 2: Connectors */}
+            {/* Subsection 2: Factories */}
+            <div className="space-y-2 pt-3 border-t border-base">
+              <h3 className="text-[11px] font-mono uppercase tracking-wider font-semibold text-zinc-400 px-3 pt-1">
+                Factories
+              </h3>
+              <nav className="space-y-1">
+                {factoryNavItems.map((item) => {
+                  const isActive = activeId === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        setActiveId(item.id);
+                      }}
+                      className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
+                        isActive
+                          ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/30'
+                      }`}
+                    >
+                      <span className="font-semibold text-xs leading-snug">{item.label}</span>
+                      <span className="text-[11px] text-zinc-500 truncate">{item.desc}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Subsection 3: Connectors */}
             <div className="space-y-2 pt-3 border-t border-base">
               <h3 className="text-[11px] font-mono uppercase tracking-wider font-semibold text-zinc-400 px-3 pt-1">
                 Connectors
@@ -1852,7 +2022,7 @@ export default async function RootLayout({
         <div className="flex-1 min-w-0 space-y-12 w-full">
           {/* Mobile Navigation Pills */}
           <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 border-b border-base w-full">
-            {[...componentNavItems, ...connectorNavItems].map((item) => {
+            {[...componentNavItems, ...factoryNavItems, ...connectorNavItems].map((item) => {
               const isActive = activeId === item.id;
               return (
                 <a
@@ -2089,6 +2259,9 @@ export default async function RootLayout({
               ))}
             </Faq.Root>
           </ShowcaseSection>
+
+          {/* Form Factory Section */}
+          <FormFactorySection />
 
           {/* Connectors Section */}
           <ConnectorsSection />
