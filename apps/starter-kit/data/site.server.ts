@@ -23,6 +23,21 @@ const connector = staticConnector({
       // { id: '4', label: 'CMS Dashboard', href: '/cms' },
     ]
   },
+  footer: {
+    brand: {
+      name: 'Contextual UI',
+      href: '/',
+      description: 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
+    },
+    links: [
+      { id: '1', label: 'Docs', href: '/docs' },
+      { id: '2', label: 'Schema Graph', href: '/schema' },
+      { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
+    ],
+    copyright: {
+      holder: 'Tasuku Studio',
+    },
+  },
   announcement: {
     enabled: true,
     message: '🚀 Welcome to the Contextual UI implementation reference website!',

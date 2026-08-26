@@ -22,7 +22,7 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
                 alt="Contextual Site Logo"
                 className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
               />
-              ContextualSite
+              Contextual
             </Navbar.Brand>
             <Navbar.Content className="hidden md:flex gap-6 items-center">
               {data?.navbar?.links.map((link) => (

@@ -260,7 +260,54 @@ export function Header() {
 }
 ```
 
-### 4. Breadcrumb (`breadcrumbRegistry` & `<Breadcrumb />`)
+### 4. Footer (`footerRegistry` & `<Footer />`)
+Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph.
+
+```tsx
+import { Footer } from '@contextual-ui/core';
+
+const footerData = {
+  brand: {
+    name: 'Contextual UI',
+    description: 'Headless UI with built-in Agentic AI and Schema.org SEO.',
+  },
+  columns: [
+    {
+      id: 'resources',
+      title: 'Resources',
+      links: [
+        { id: '1', label: 'Docs', href: '/docs' },
+        { id: '2', label: 'Schema Graph', href: '/schema' },
+      ],
+    },
+  ],
+  socials: [
+    { id: '1', platform: 'github', href: 'https://github.com/tasuku-io' },
+  ],
+  copyright: {
+    holder: 'Tasuku Studio',
+  },
+};
+
+export function SiteFooter() {
+  return (
+    <Footer.Root data={footerData} className="p-8 border-t">
+      <Footer.Brand />
+      <Footer.Description />
+      <Footer.Columns>
+        <Footer.Column id="resources">
+          <Footer.ColumnTitle />
+          <Footer.Links />
+        </Footer.Column>
+      </Footer.Columns>
+      <Footer.Socials />
+      <Footer.Copyright />
+    </Footer.Root>
+  );
+}
+```
+
+### 5. Breadcrumb (`breadcrumbRegistry` & `<Breadcrumb />`)
 Renders accessible breadcrumb hierarchy and emits Schema.org `BreadcrumbList` JSON-LD directly into the page DOM.
 
 ```tsx
@@ -303,7 +350,7 @@ export function PageBreadcrumbs() {
 }
 ```
 
-### 5. Form Factory (`createForm`)
+### 6. Form Factory (`createForm`)
 Type-safe form builder generated directly from standard Zod schemas.
 
 ```tsx

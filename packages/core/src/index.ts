@@ -22,6 +22,26 @@ export type * from './components/navbar/navbar.types';
 export { NavbarDataSchema, NavItemSchema } from './components/navbar/navbar.schema';
 export { generateNavbarJsonLd, exportAgentData as exportNavbarAgentData, navbarRegistry } from './components/navbar/navbar.utils';
 
+export { Footer, useFooter, useFooterColumn } from './components/footer';
+export type {
+  FooterData,
+  FooterColumn,
+  FooterLinkItem,
+  FooterSocialLink,
+  FooterBrand,
+  FooterCopyright,
+} from './components/footer/footer.schema';
+export type * from './components/footer/footer.types';
+export {
+  FooterDataSchema,
+  FooterColumnSchema,
+  FooterLinkItemSchema,
+  FooterSocialLinkSchema,
+  FooterBrandSchema,
+  FooterCopyrightSchema,
+} from './components/footer/footer.schema';
+export { generateFooterJsonLd, exportAgentData as exportFooterAgentData, footerRegistry } from './components/footer/footer.utils';
+
 export type { WebsiteData } from './components/website/website.schema';
 export { WebsiteDataSchema } from './components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from './components/website/website.utils';

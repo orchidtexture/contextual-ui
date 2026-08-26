@@ -5,7 +5,7 @@ import Prism from 'prismjs';
 import 'prismjs/components/prism-jsx';
 import 'prismjs/components/prism-json';
 import 'prismjs/themes/prism-okaidia.css';
-import { ContextualSite, Breadcrumb, Navbar, Faq } from '@contextual-ui/core';
+import { ContextualSite, Breadcrumb, Navbar, Faq, Footer } from '@contextual-ui/core';
 import type { SiteData } from '@/data/site.server';
 
 function ShowcaseSection({
@@ -98,7 +98,7 @@ export function DocsClient({ data }: { data: SiteData }) {
       { rootMargin: '-120px 0px -50% 0px' }
     );
 
-    const sections = ['contextual-site', 'navbar', 'breadcrumb', 'faq'];
+    const sections = ['contextual-site', 'navbar', 'footer', 'breadcrumb', 'faq'];
     sections.forEach((id) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
@@ -213,6 +213,46 @@ export default async function RootLayout({
     }))
   }, null, 2);
 
+  const footerCode = `<Footer.Root data={data.footer} className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-400">
+  <div className="flex items-center gap-2">
+    <span>Maintained by</span>
+    <a
+      href="https://tasuku.io"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4"
+    >
+      {data.footer?.copyright?.holder || 'Tasuku Studio'}
+    </a>
+  </div>
+  <div className="flex items-center gap-6">
+    {data.footer?.links?.map((link) => (
+      <Footer.Link
+        key={link.id}
+        item={link}
+        className="hover:text-zinc-200 transition-colors"
+      />
+    ))}
+  </div>
+</Footer.Root>`;
+
+  const footerSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WPFooter",
+    "name": data.footer?.brand?.name || "Contextual UI",
+    "url": data.footer?.brand?.href || "/",
+    "copyrightHolder": {
+      "@type": "Organization",
+      "name": data.footer?.copyright?.holder || "Tasuku Studio"
+    },
+    "copyrightYear": new Date().getFullYear(),
+    "hasPart": (data.footer?.links || []).map(link => ({
+      "@type": "SiteNavigationElement",
+      "name": link.label,
+      "url": link.href
+    }))
+  }, null, 2);
+
   const breadcrumbCode = `<Breadcrumb.Root data={breadcrumbData} baseUrl="https://contextual.site">
   <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
     {breadcrumbData.map((item, index) => (
@@ -276,6 +316,7 @@ export default async function RootLayout({
               {[
                 { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & Graph' },
                 { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
+                { id: 'footer', label: 'Footer', desc: 'Footer & Attribution' },
                 { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
                 { id: 'faq', label: 'FAQ', desc: 'FAQ & Questions' },
               ].map((item) => {
@@ -311,6 +352,7 @@ export default async function RootLayout({
             {[
               { id: 'contextual-site', label: 'ContextualSite' },
               { id: 'navbar', label: 'Navbar' },
+              { id: 'footer', label: 'Footer' },
               { id: 'breadcrumb', label: 'Breadcrumb' },
               { id: 'faq', label: 'FAQ' },
             ].map((item) => {
@@ -392,6 +434,40 @@ export default async function RootLayout({
                 ))}
               </Navbar.Menu>
             </Navbar.Root>
+          </ShowcaseSection>
+
+          {/* Footer Showcase */}
+          <ShowcaseSection
+            id="footer"
+            title="Footer"
+            description="The Footer component organizes structured site links, brand metadata, and legal attribution with automatic Schema.org WPFooter structured data injection."
+            codeString={footerCode}
+            schemaString={footerSchema}
+            exampleDescription="Accessible footer layout with links and copyright."
+            schemaDescription="Schema.org WPFooter automatically injected in the DOM."
+          >
+            <Footer.Root data={data.footer} className="flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-mono text-zinc-400">
+              <div className="flex items-center gap-2">
+                <span>Maintained by</span>
+                <a
+                  href="https://tasuku.io"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-zinc-200 hover:text-accent font-semibold transition-colors underline underline-offset-4 decoration-zinc-700 hover:decoration-accent"
+                >
+                  {data.footer?.copyright?.holder || 'Tasuku Studio'}
+                </a>
+              </div>
+              <div className="flex items-center gap-6">
+                {data.footer?.links?.map((link) => (
+                  <Footer.Link
+                    key={link.id}
+                    item={link}
+                    className="hover:text-zinc-200 transition-colors"
+                  />
+                ))}
+              </div>
+            </Footer.Root>
           </ShowcaseSection>
 
           {/* Breadcrumb Showcase */}
