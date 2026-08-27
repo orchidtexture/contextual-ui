@@ -47,7 +47,11 @@ export function SchemaClient({ schemaSource, graphJson }: SchemaClientProps) {
             <p className="my-6 text-sm leading-relaxed text-zinc-300">
               Central schema definition combining standard Zod types with pre-built schema registries ( <code className="code-short">websiteRegistry</code>, <code className="code-short">faqRegistry</code>, <code className="code-short">navbarRegistry</code> ) that power both runtime UI and semantic metadata.
             </p>
-            <pre className="!bg-zinc-900 !text-zinc-100 p-4 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner">
+            <pre
+              tabIndex={0}
+              suppressHydrationWarning
+              className="!bg-zinc-900 !text-zinc-100 p-4 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner"
+            >
               <code className="language-typescript">
                 {schemaSource}
               </code>
@@ -63,7 +67,11 @@ export function SchemaClient({ schemaSource, graphJson }: SchemaClientProps) {
               The generated Schema.org <code className="code-short">@graph</code> compiled from the SSOT schema and connector data, served sitewide for search crawlers and AI agents. It can be consumed directly from the auto-generated endpoint
               <a href="/api/graph.json" target="_blank" className="text-silver hover:bg-zinc-900 w-auto underline">  /api/graph.json</a>
             </p>
-            <pre className="!bg-zinc-900 !text-zinc-100 p-4 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner max-h-[300px]">
+            <pre
+              tabIndex={0}
+              suppressHydrationWarning
+              className="!bg-zinc-900 !text-zinc-100 p-4 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner max-h-[300px]"
+            >
               <code className="language-json">
                 {graphString}
               </code>
