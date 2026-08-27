@@ -7,10 +7,10 @@ This document outlines the critical flaws, semantic inconsistencies, and concret
 ## 📋 Progress Checklist
 
 - [x] **Step 1**: Fix URL Canonicalization in `jsonld-graph-builder` (`canonicalize.ts` & `flatten.ts`)
-- [ ] **Step 2**: Introduce `Organization` Component in `packages/core` (`schema`, `utils`, `registry`)
-- [ ] **Step 3**: Fix `WPFooter` Semantics & Deduplication in `packages/core/src/components/footer`
-- [ ] **Step 4**: Unify `SiteNavigationElement` Types in `packages/core/src/components/navbar`
-- [ ] **Step 5**: Fix `WebSite` and `FAQPage` Linkages in `packages/core`
+- [x] **Step 2**: Introduce `Organization` Component in `packages/core` (`schema`, `utils`, `registry`)
+- [x] **Step 3**: Fix `WPFooter` Semantics & Deduplication in `packages/core/src/components/footer`
+- [x] **Step 4**: Unify `SiteNavigationElement` Types in `packages/core/src/components/navbar`
+- [x] **Step 5**: Fix `WebSite` and `FAQPage` Linkages in `packages/core`
 - [ ] **Step 6**: Update Starter Kit Data & Verification in `apps/starter-kit`
 
 ---

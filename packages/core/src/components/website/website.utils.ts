@@ -16,10 +16,11 @@ export function generateWebsiteJsonLd(data: WebsiteData, ctx?: Partial<JsonLdCon
     name: data.name,
     ...(data.url ? { url: data.url } : {}),
     ...(data.description ? { description: data.description } : {}),
+    publisher: data.publisher ? refer(data.publisher) : refer('organization'),
     hasPart:
       data.hasPart && data.hasPart.length > 0
         ? data.hasPart.map((part) => refer(part))
-        : [refer('navbar'), refer('faq')],
+        : [refer('navbar'), refer('faq'), refer('footer')],
   };
 }
 

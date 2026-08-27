@@ -28,3 +28,13 @@ export type {
 export { generateFooterJsonLd, exportAgentData as exportFooterAgentData, footerRegistry } from '../components/footer/footer.utils';
 export { WebsiteDataSchema } from '../components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from '../components/website/website.utils';
+export {
+  OrganizationDataSchema,
+} from '../components/organization/organization.schema';
+export type { OrganizationData } from '../components/organization/organization.schema';
+export {
+  generateOrganizationJsonLd,
+  exportAgentData as exportOrganizationAgentData,
+  organizationRegistry,
+} from '../components/organization/organization.utils';
+

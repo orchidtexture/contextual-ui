@@ -12,11 +12,35 @@ export function generateFooterJsonLd(data: FooterData, ctx?: Partial<JsonLdConte
   const currentYear = new Date().getFullYear();
   const year = data.copyright?.year ?? currentYear;
 
-  const columnLinks = data.columns?.flatMap((col) => col.links) ?? [];
-  const flatLinks = data.links ?? [];
-  const legalLinks = data.legalLinks ?? [];
-  const allLinks = [...columnLinks, ...flatLinks, ...legalLinks];
+  const linksMap = new Map<string, { id: string; label: string; href: string }>();
 
+  if (data.columns) {
+    for (const col of data.columns) {
+      for (const link of col.links) {
+        const scopedId = `${col.id}-${link.id}`;
+        linksMap.set(scopedId, { id: scopedId, label: link.label, href: link.href });
+      }
+    }
+  }
+
+  if (data.links) {
+    for (const link of data.links) {
+      if (!linksMap.has(link.id)) {
+        linksMap.set(link.id, { id: link.id, label: link.label, href: link.href });
+      }
+    }
+  }
+
+  if (data.legalLinks) {
+    for (const link of data.legalLinks) {
+      const scopedId = link.id.startsWith('legal-') ? link.id : `legal-${link.id}`;
+      if (!linksMap.has(scopedId)) {
+        linksMap.set(scopedId, { id: scopedId, label: link.label, href: link.href });
+      }
+    }
+  }
+
+  const allLinks = Array.from(linksMap.values());
   const copyrightHolderName = data.copyright?.holder || data.brand?.name;
 
   return {
@@ -26,19 +50,13 @@ export function generateFooterJsonLd(data: FooterData, ctx?: Partial<JsonLdConte
     isPartOf: refer('website'),
     ...(data.brand?.name ? { name: data.brand.name } : {}),
     ...(data.brand?.description ? { description: data.brand.description } : {}),
-    ...(data.brand?.href ? { url: data.brand.href } : {}),
+    url: data.brand?.href || '/',
     ...(copyrightHolderName
       ? {
-          copyrightHolder: {
-            '@type': 'Organization',
-            name: copyrightHolderName,
-          },
+          copyrightHolder: refer('organization'),
         }
       : {}),
     copyrightYear: typeof year === 'string' ? parseInt(year, 10) || year : year,
-    ...(data.socials && data.socials.length > 0
-      ? { sameAs: data.socials.map((s) => s.href) }
-      : {}),
     ...(allLinks.length > 0
       ? {
           hasPart: allLinks.map((link) => ({
@@ -80,3 +98,4 @@ export function footerRegistry() {
     generateJsonLd: generateFooterJsonLd,
   };
 }
+

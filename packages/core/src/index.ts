@@ -46,6 +46,10 @@ export type { WebsiteData } from './components/website/website.schema';
 export { WebsiteDataSchema } from './components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from './components/website/website.utils';
 
+export type { OrganizationData } from './components/organization/organization.schema';
+export { OrganizationDataSchema } from './components/organization/organization.schema';
+export { generateOrganizationJsonLd, exportAgentData as exportOrganizationAgentData, organizationRegistry } from './components/organization/organization.utils';
+
 export { defineSchema, cx, getFieldMetadata } from './registry';
 export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata, JsonLdContext } from './registry';
 

@@ -1,6 +1,20 @@
 import { createId, refersTo } from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../../registry/defineSchema';
-import { NavbarDataSchema, NavbarData } from './navbar.schema';
+import { NavbarDataSchema, NavbarData, NavItem } from './navbar.schema';
+
+function mapNavLink(link: NavItem, create: typeof createId): any {
+  return {
+    '@type': 'SiteNavigationElement',
+    '@id': create('nav', link.id),
+    name: link.label,
+    ...(link.href ? { url: link.href } : {}),
+    ...(link.children && link.children.length > 0
+      ? {
+          hasPart: link.children.map((child) => mapNavLink(child, create)),
+        }
+      : {}),
+  };
+}
 
 /**
  * Generates a Schema.org SiteNavigationElement / WPHeader JSON-LD object with full @id references.
@@ -16,12 +30,7 @@ export function generateNavbarJsonLd(data: NavbarData, ctx?: Partial<JsonLdConte
     isPartOf: refer('website'),
     name: data.brand?.name || 'Navigation',
     url: data.brand?.href || '/',
-    hasPart: data.links.map((link) => ({
-      '@type': 'WebPage',
-      '@id': create('nav', link.id),
-      name: link.label,
-      url: link.href,
-    })),
+    hasPart: data.links.map((link) => mapNavLink(link, create)),
   };
 }
 
@@ -46,3 +55,4 @@ export function navbarRegistry() {
     generateJsonLd: generateNavbarJsonLd,
   };
 }
+
