@@ -28,6 +28,7 @@ export function Root({
   sectionKey = 'footer',
   children,
   className,
+  injectJsonLd,
   ...props
 }: FooterRootProps) {
   const siteContext = useContextualSiteContext();
@@ -48,9 +49,10 @@ export function Root({
     return result.data;
   }, [rawData]);
 
+  const shouldInject = injectJsonLd ?? (!isInsideSite || explicitData !== undefined);
   const jsonLd = useMemo(
-    () => (!isInsideSite && data ? generateFooterJsonLd(data) : null),
-    [data, isInsideSite]
+    () => (shouldInject && data ? generateFooterJsonLd(data) : null),
+    [data, shouldInject]
   );
 
   const getColumnData = useCallback(

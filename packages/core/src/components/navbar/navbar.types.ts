@@ -7,6 +7,7 @@ export interface NavbarRootProps {
   children: ReactNode;
   className?: string;
   sticky?: boolean;
+  injectJsonLd?: boolean;
 }
 
 export interface NavbarBrandProps {

@@ -4,7 +4,7 @@ import { useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { BreadcrumbDataSchema } from './breadcrumb.schema';
 import { BreadcrumbContext, BreadcrumbItemContext } from './breadcrumb.context';
-import { useContextualSiteContext, useIsContextualSite } from '../site/site.context';
+import { useContextualSiteContext } from '../site/site.context';
 import {
   BreadcrumbRootProps,
   BreadcrumbListProps,
@@ -22,9 +22,9 @@ export function Root({
   children,
   className,
   baseUrl = '',
+  injectJsonLd,
 }: BreadcrumbRootProps) {
   const siteContext = useContextualSiteContext();
-  const isInsideSite = useIsContextualSite();
 
   const rawData = explicitData ?? siteContext?.data?.[sectionKey] ?? [];
 
@@ -53,9 +53,10 @@ export function Root({
     [data, getItemData]
   );
 
+  const shouldInject = injectJsonLd ?? true;
   const jsonLd = useMemo(
-    () => (!isInsideSite ? generateBreadcrumbJsonLd(data, baseUrl) : null),
-    [data, baseUrl, isInsideSite]
+    () => (shouldInject ? generateBreadcrumbJsonLd(data, baseUrl) : null),
+    [data, baseUrl, shouldInject]
   );
 
   return (

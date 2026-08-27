@@ -21,6 +21,7 @@ export function Root({
   children,
   className,
   sticky = false,
+  injectJsonLd,
 }: NavbarRootProps) {
   const siteContext = useContextualSiteContext();
   const isInsideSite = useIsContextualSite();
@@ -40,9 +41,10 @@ export function Root({
     return result.data;
   }, [rawData]);
 
+  const shouldInject = injectJsonLd ?? (!isInsideSite || explicitData !== undefined);
   const jsonLd = useMemo(
-    () => (!isInsideSite && data ? generateNavbarJsonLd(data) : null),
-    [data, isInsideSite]
+    () => (shouldInject && data ? generateNavbarJsonLd(data) : null),
+    [data, shouldInject]
   );
 
   const [isOpen, setIsOpen] = useState(false);

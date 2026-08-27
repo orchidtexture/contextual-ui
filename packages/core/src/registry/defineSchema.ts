@@ -35,6 +35,7 @@ export interface SchemaSection<T extends z.ZodTypeAny = z.ZodTypeAny> {
   exportAgentData?: (data: z.infer<T>) => any;
   type?: string;
   generateJsonLd?: (data: z.infer<T>, ctx: JsonLdContext) => any;
+  isGlobal?: boolean;
 }
 
 export type SchemaConfig = Record<string, SchemaSection<any>>;

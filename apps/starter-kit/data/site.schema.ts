@@ -12,8 +12,8 @@ export const siteSchema = defineSchema({
   organization: organizationRegistry(),
   website: websiteRegistry(),
   navbar: navbarRegistry(),
-  faq: faqRegistry(),
   footer: footerRegistry(),
+  faq: faqRegistry(),
   announcement: {
     schema: z.object({
       enabled: z.boolean(),

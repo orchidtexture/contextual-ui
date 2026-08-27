@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { FaqDataSchema } from './faq.schema';
 import { FaqContext, FaqItemContext } from './faq.context';
-import { useContextualSiteContext, useIsContextualSite } from '../site/site.context';
+import { useContextualSiteContext } from '../site/site.context';
 import { 
   FaqRootProps, 
   FaqItemProps, 
@@ -19,10 +19,10 @@ export function Root({
   sectionKey = 'faq',
   children, 
   allowMultiple = false,
-  className 
+  className,
+  injectJsonLd 
 }: FaqRootProps) {
   const pageContext = useContextualSiteContext();
-  const isInsideSite = useIsContextualSite();
 
   const rawData = explicitData ?? pageContext?.data?.[sectionKey] ?? [];
 
@@ -65,7 +65,8 @@ export function Root({
     getItemData,
   }), [data, openItemIds, toggleItem, isItemOpen, getItemData]);
 
-  const jsonLd = useMemo(() => (!isInsideSite ? generateFaqJsonLd(data) : null), [data, isInsideSite]);
+  const shouldInject = injectJsonLd ?? true;
+  const jsonLd = useMemo(() => (shouldInject ? generateFaqJsonLd(data) : null), [data, shouldInject]);
 
   return (
     <FaqContext.Provider value={contextValue}>

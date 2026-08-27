@@ -10,6 +10,11 @@ export interface ContextualAppOptions<
   connector: TConnector;
 }
 
+export type GetGraphOptions = GraphRouteHandlerOptions & {
+  includeKeys?: string[];
+  excludeKeys?: string[];
+};
+
 export function createContextualApp<
   TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any },
   TConnector extends { fetchData: () => Promise<any> }
@@ -26,13 +31,33 @@ export function createContextualApp<
       const raw = await options.connector.fetchData();
       return options.schema.hydrate(raw).raw as InferData<TSchema>;
     },
-    async getGraph(handlerOptions?: GraphRouteHandlerOptions) {
+    async getGraph(handlerOptions?: GetGraphOptions) {
       const hydrated = await getHydrated();
-      if (typeof hydrated.generateGraph === 'function') {
-        return hydrated.generateGraph({ ...handlerOptions?.graphOptions, jsonLdContext: handlerOptions?.jsonLdContext });
-      }
       const generated = hydrated.generateJsonLd(handlerOptions?.jsonLdContext);
-      const entities = Object.values(generated).filter(Boolean) as JsonLdObject[];
+      const config = hydrated.config || options.schema.config || {};
+      
+      const filteredGenerated: Record<string, any> = {};
+      const includeKeys = handlerOptions?.includeKeys;
+      const excludeKeys = handlerOptions?.excludeKeys;
+
+      for (const [key, val] of Object.entries(generated)) {
+        if (excludeKeys?.includes(key)) continue;
+        
+        if (includeKeys) {
+          if (includeKeys.includes(key)) {
+            filteredGenerated[key] = val;
+          }
+          continue;
+        }
+
+        // If not strictly included/excluded, fallback to registry default behavior
+        const isGlobal = config[key]?.isGlobal !== false;
+        if (isGlobal) {
+          filteredGenerated[key] = val;
+        }
+      }
+
+      const entities = Object.values(filteredGenerated).filter(Boolean) as JsonLdObject[];
       return buildGraph(entities, handlerOptions?.graphOptions);
     },
     createGraphHandler(handlerOptions?: GraphRouteHandlerOptions) {

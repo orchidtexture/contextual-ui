@@ -11,6 +11,7 @@ export interface FooterRootProps {
   sectionKey?: string;
   children: ReactNode;
   className?: string;
+  injectJsonLd?: boolean;
   [key: string]: any;
 }
 

@@ -7,6 +7,7 @@ export interface BreadcrumbRootProps {
   children: ReactNode;
   className?: string;
   baseUrl?: string;
+  injectJsonLd?: boolean;
 }
 
 export interface BreadcrumbListProps {

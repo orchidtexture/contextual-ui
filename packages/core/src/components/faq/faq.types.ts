@@ -11,6 +11,7 @@ export interface FaqRootProps {
    */
   allowMultiple?: boolean;
   className?: string;
+  injectJsonLd?: boolean;
 }
 
 export type FaqProps = FaqRootProps;

@@ -53,5 +53,6 @@ export function breadcrumbRegistry() {
     exportAgentData,
     generateJsonLd: (data: BreadcrumbData, ctx?: Partial<JsonLdContext>) =>
       generateBreadcrumbJsonLd(data, '', ctx),
+    isGlobal: false,
   };
 }
