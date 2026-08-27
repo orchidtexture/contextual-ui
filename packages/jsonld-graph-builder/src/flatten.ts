@@ -1,4 +1,4 @@
-import { canonicalizeId } from './canonicalize';
+import { canonicalizeId, canonicalizeUrl, isUrlProperty } from './canonicalize';
 import { JsonLdObject, JsonLdValue } from './types';
 
 /**
@@ -21,11 +21,11 @@ export function extractAndFlattenEntities(
   const extractedNodes: JsonLdObject[] = [];
   const rawEntities = Array.isArray(input) ? input : [input];
 
-  function processValue(val: JsonLdValue | undefined): JsonLdValue | undefined {
+  function processValue(val: JsonLdValue | undefined, currentKey?: string): JsonLdValue | undefined {
     if (val === undefined || val === null) return val;
 
     if (Array.isArray(val)) {
-      return val.map((item) => processValue(item) as JsonLdValue);
+      return val.map((item) => processValue(item, currentKey) as JsonLdValue);
     }
 
     if (typeof val === 'object') {
@@ -43,7 +43,7 @@ export function extractAndFlattenEntities(
         // Recursively process children of this nested entity
         const processedNested: JsonLdObject = {};
         for (const [k, v] of Object.entries(obj)) {
-          processedNested[k] = processValue(v);
+          processedNested[k] = processValue(v, k);
         }
 
         // Add to top-level pool
@@ -56,9 +56,13 @@ export function extractAndFlattenEntities(
       // If not flattening or is a simple sub-object without @id / is a pointer
       const processedObj: JsonLdObject = {};
       for (const [k, v] of Object.entries(obj)) {
-        processedObj[k] = processValue(v);
+        processedObj[k] = processValue(v, k);
       }
       return processedObj;
+    }
+
+    if (typeof val === 'string' && currentKey && isUrlProperty(currentKey)) {
+      return canonicalizeUrl(val, baseUrl);
     }
 
     return val;
@@ -76,7 +80,7 @@ export function extractAndFlattenEntities(
 
     const processedRoot: JsonLdObject = {};
     for (const [k, v] of Object.entries(rootCopy)) {
-      processedRoot[k] = processValue(v);
+      processedRoot[k] = processValue(v, k);
     }
 
     extractedNodes.push(processedRoot);
@@ -84,3 +88,4 @@ export function extractAndFlattenEntities(
 
   return extractedNodes;
 }
+

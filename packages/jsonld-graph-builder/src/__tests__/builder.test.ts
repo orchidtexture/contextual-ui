@@ -135,6 +135,76 @@ describe('JSON-LD Graph Builder', () => {
     expect(result['@graph'][0].name).toBe('Second Org');
   });
 
+  it('canonicalizes relative url and standard URI properties against baseUrl', () => {
+    const nav = {
+      '@type': 'SiteNavigationElement',
+      '@id': '#navbar',
+      url: '/',
+      hasPart: [
+        {
+          '@type': 'SiteNavigationElement',
+          '@id': '#nav:1',
+          name: 'Home',
+          url: '/',
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          '@id': '#nav:2',
+          name: 'Docs',
+          url: '/docs',
+        },
+      ],
+    };
+
+    const org = {
+      '@type': 'Organization',
+      '@id': '#organization',
+      logo: '/images/logo.svg',
+      sameAs: ['https://github.com/tasuku', '/about'],
+    };
+
+    const breadcrumbs = {
+      '@type': 'BreadcrumbList',
+      '@id': '#breadcrumb',
+      itemListElement: [
+        {
+          '@type': 'ListItem',
+          '@id': '#breadcrumb-1',
+          position: 1,
+          name: 'Home',
+          item: '/',
+        },
+        {
+          '@type': 'ListItem',
+          '@id': '#breadcrumb-2',
+          position: 2,
+          name: 'Docs',
+          item: '/docs',
+        },
+      ],
+    };
+
+    const result = buildGraph([nav, org, breadcrumbs], {
+      baseUrl: 'https://example.com',
+      flatten: true,
+    });
+
+    const navbarNode = result['@graph'].find((n) => n['@id'] === 'https://example.com/#navbar');
+    const navHomeNode = result['@graph'].find((n) => n['@id'] === 'https://example.com/#nav:1');
+    const navDocsNode = result['@graph'].find((n) => n['@id'] === 'https://example.com/#nav:2');
+    const orgNode = result['@graph'].find((n) => n['@id'] === 'https://example.com/#organization');
+    const bcHomeNode = result['@graph'].find((n) => n['@id'] === 'https://example.com/#breadcrumb-1');
+    const bcDocsNode = result['@graph'].find((n) => n['@id'] === 'https://example.com/#breadcrumb-2');
+
+    expect(navbarNode?.url).toBe('https://example.com/');
+    expect(navHomeNode?.url).toBe('https://example.com/');
+    expect(navDocsNode?.url).toBe('https://example.com/docs');
+    expect(orgNode?.logo).toBe('https://example.com/images/logo.svg');
+    expect(orgNode?.sameAs).toEqual(['https://github.com/tasuku', 'https://example.com/about']);
+    expect(bcHomeNode?.item).toBe('https://example.com/');
+    expect(bcDocsNode?.item).toBe('https://example.com/docs');
+  });
+
   it('handles createId and refersTo helpers seamlessly', () => {
     const id = createId('article', 'seo-post');
     const ref = refersTo('organization', 'main');
