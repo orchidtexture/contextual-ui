@@ -13,13 +13,22 @@ export default async function SchemaPage() {
   const response = await handler.GET(new Request('http://localhost/api/graph.json'));
   const graphJson = await response.json();
 
-  const schemaSourceCode = `import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry } from 'contextual-ui/server';
+  const schemaSourceCode = `import {
+  defineSchema,
+  organizationRegistry,
+  websiteRegistry,
+  navbarRegistry,
+  faqRegistry,
+  footerRegistry,
+} from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
+  organization: organizationRegistry(),
   website: websiteRegistry(),
-  faq: faqRegistry(),
   navbar: navbarRegistry(),
+  faq: faqRegistry(),
+  footer: footerRegistry(),
   announcement: {
     schema: z.object({
       enabled: z.boolean(),

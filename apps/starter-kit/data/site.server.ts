@@ -3,9 +3,19 @@ import { staticConnector } from 'contextual-ui-connector-static';
 import { createContextualApp, InferData } from 'contextual-ui/server';
 
 const connector = staticConnector({
+  organization: {
+    name: 'Tasuku Studio',
+    url: 'https://tasuku.io',
+    logo: '/images/onigiri_logo.svg',
+    description: 'Creator and maintainer of Contextual UI.',
+    sameAs: [
+      'https://github.com/orchidtexture',
+      'https://twitter.com/orchidtexture',
+    ],
+  },
   website: {
     name: 'Contextual UI Starter Kit',
-    url: 'https://contextual.site',
+    url: 'https://example.com',
     description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
   },
   faq: [
@@ -47,11 +57,6 @@ const connector = staticConnector({
           { id: '4', label: 'Tasuku Studio', href: 'https://tasuku.io', external: true },
         ],
       },
-    ],
-    links: [
-      { id: '1', label: 'Docs', href: '/docs' },
-      { id: '2', label: 'Schema Graph', href: '/schema' },
-      { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
     ],
     legalLinks: [
       { id: 'l1', label: 'Privacy Policy', href: '/privacy' },

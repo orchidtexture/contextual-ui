@@ -23,6 +23,12 @@ export const initialNodes: Node<FlowNodeData>[] = [
         code: `import { staticConnector } from 'contextual-ui-connector-static';
 
 export const connector = staticConnector({
+  organization: {
+    name: 'Tasuku Studio',
+    url: 'https://tasuku.io',
+    logo: '/images/onigiri_logo.svg',
+    sameAs: ['https://github.com/orchidtexture']
+  },
   website: {
     name: 'Contextual UI Starter Kit',
     url: 'https://example.com',
@@ -66,13 +72,14 @@ export const connector = staticConnector({
       codeSnippet: {
         language: 'typescript',
         filename: 'data/site.schema.ts',
-        code: `import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry } from 'contextual-ui/server';
+        code: `import { defineSchema, organizationRegistry, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
+  organization: organizationRegistry(),
   website: websiteRegistry(),
-  faq: faqRegistry(),
   navbar: navbarRegistry(),
+  faq: faqRegistry(),
   announcement: {
     schema: z.object({
       enabled: z.boolean(),
