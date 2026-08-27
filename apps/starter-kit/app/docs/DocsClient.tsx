@@ -834,7 +834,7 @@ export default async function RootLayout({
         <img
           src="${footerData.brand?.logo || '/images/onigiri_logo.svg'}"
           alt="${footerData.brand?.name || 'Contextual UI'}"
-          className="w-6 h-6 rounded object-contain border border-base bg-zinc-950"
+          className="w-6 h-6 rounded object-contain"
         />
         <span>${footerData.brand?.name || 'Contextual UI'}</span>
       </Footer.Brand>
@@ -2075,7 +2075,7 @@ export default async function RootLayout({
                   <img
                     src={navbarData.brand?.logo || '/images/onigiri_logo.svg'}
                     alt="Contextual UI Logo"
-                    className="w-7 h-7 rounded-md object-contain shadow-sm text-silver bg-zinc-950 border border-base"
+                    className="w-7 h-7 rounded-md object-contain shadow-sm"
                   />
                   {navbarData.brand?.name || 'Contextual UI'}
                 </Navbar.Brand>
@@ -2127,7 +2127,7 @@ export default async function RootLayout({
                       <img
                         src={footerData.brand.logo}
                         alt={footerData.brand.name || 'Contextual UI'}
-                        className="w-6 h-6 rounded object-contain border border-base bg-zinc-950"
+                        className="w-6 h-6 rounded object-contain"
                       />
                     )}
                     <span>{footerData.brand?.name || 'Contextual UI'}</span>

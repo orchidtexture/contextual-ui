@@ -20,7 +20,7 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
               <img
                 src={data?.navbar?.brand?.logo || '/images/onigiri_logo.svg'}
                 alt={data?.navbar?.brand?.name || 'Contextual Site Logo'}
-                className="w-8 h-8 rounded-md object-contain shadow-sm text-silver"
+                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver"
               />
               {data?.navbar?.brand?.name || 'Contextual'}
             </Navbar.Brand>
