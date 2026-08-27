@@ -32,15 +32,6 @@ importers:
 
   apps/starter-kit:
     dependencies:
-      '@contextual-ui/connector-static':
-        specifier: workspace:*
-        version: link:../../connectors/static
-      '@contextual-ui/core':
-        specifier: workspace:*
-        version: link:../../packages/core
-      '@contextual-ui/dashboard':
-        specifier: workspace:*
-        version: link:../../packages/dashboard
       '@react-three/fiber':
         specifier: ^9.7.0
         version: 9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
@@ -53,6 +44,15 @@ importers:
       autoprefixer:
         specifier: ^10.4.18
         version: 10.5.4(postcss@8.5.23)
+      contextual-ui:
+        specifier: workspace:*
+        version: link:../../packages/core
+      contextual-ui-connector-static:
+        specifier: workspace:*
+        version: link:../../connectors/static
+      contextual-ui-dashboard:
+        specifier: workspace:*
+        version: link:../../packages/dashboard
       dagre:
         specifier: ^0.8.5
         version: 0.8.5
@@ -108,7 +108,7 @@ importers:
 
   connectors/static:
     dependencies:
-      '@contextual-ui/core':
+      contextual-ui:
         specifier: workspace:*
         version: link:../../packages/core
     devDependencies:
@@ -124,12 +124,12 @@ importers:
 
   packages/core:
     dependencies:
-      '@contextual-ui/jsonld-graph-builder':
-        specifier: workspace:*
-        version: link:../jsonld-graph-builder
       '@radix-ui/react-slot':
         specifier: ^1.3.3
         version: 1.3.3(@types/react@19.2.18)(react@19.2.8)
+      jsonld-graph-builder:
+        specifier: workspace:*
+        version: link:../jsonld-graph-builder
       schema-dts:
         specifier: ^2.0.0
         version: 2.0.0(typescript@7.0.2)
@@ -158,7 +158,7 @@ importers:
 
   packages/dashboard:
     dependencies:
-      '@contextual-ui/core':
+      contextual-ui:
         specifier: workspace:*
         version: link:../core
     devDependencies:

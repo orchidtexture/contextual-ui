@@ -1,4 +1,4 @@
-import { defineSchema, faqRegistry, navbarRegistry, footerRegistry, websiteRegistry } from '@contextual-ui/core/server';
+import { defineSchema, faqRegistry, navbarRegistry, footerRegistry, websiteRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({

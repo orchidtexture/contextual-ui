@@ -1,6 +1,6 @@
 'use client';
 
-import { Footer as ContextualFooter, useContextualSiteContext } from '@contextual-ui/core';
+import { Footer as ContextualFooter, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 
 interface CustomFooterProps {

@@ -23,7 +23,7 @@ import {
   Database,
   FileCode,
 } from 'lucide-react';
-import { Breadcrumb, Navbar, Faq, Footer, createForm } from '@contextual-ui/core';
+import { Breadcrumb, Navbar, Faq, Footer, createForm } from 'contextual-ui';
 import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
 
@@ -199,7 +199,7 @@ function InspectorCard({
 
 function FormFactorySection() {
   const formExampleCode = `import { z } from 'zod';
-import { createForm } from '@contextual-ui/core';
+import { createForm } from 'contextual-ui';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -316,8 +316,8 @@ export function ContactDemo() {
 function ConnectorsSection() {
   const [activeTab, setActiveTab] = useState<'static' | 'cms' | 'database'>('static');
 
-  const staticCode = `import { staticConnector } from '@contextual-ui/connector-static';
-import { createContextualApp } from '@contextual-ui/core/server';
+  const staticCode = `import { staticConnector } from 'contextual-ui-connector-static';
+import { createContextualApp } from 'contextual-ui/server';
 import { siteSchema } from './site.schema';
 
 // 1. Static Configuration Connector (Built-in)
@@ -344,7 +344,7 @@ export const siteApp = createContextualApp({
   connector,
 });`;
 
-  const cmsCode = `import { createContextualApp } from '@contextual-ui/core/server';
+  const cmsCode = `import { createContextualApp } from 'contextual-ui/server';
 import { siteSchema } from './site.schema';
 import { createClient } from 'next-sanity';
 
@@ -376,7 +376,7 @@ export const siteApp = createContextualApp({
   connector: sanityConnector(sanityClient),
 });`;
 
-  const databaseCode = `import { createContextualApp } from '@contextual-ui/core/server';
+  const databaseCode = `import { createContextualApp } from 'contextual-ui/server';
 import { siteSchema } from './site.schema';
 import { prisma } from '@/lib/prisma';
 
@@ -732,7 +732,7 @@ export function DocsClient({ data }: { data: SiteData }) {
   // ContextualSite Code & Schema
   // ---------------------------------------------------------------------------
   const contextualSiteCode = `import { siteApp } from '@/data/site.server';
-import { ContextualSite, Navbar, Faq } from '@contextual-ui/core';
+import { ContextualSite, Navbar, Faq } from 'contextual-ui';
 
 export default async function RootLayout({
   children,

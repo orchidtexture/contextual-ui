@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { createId, refersTo, buildGraph, GraphBuilderOptions, JsonLdObject, JsonLdGraphResult } from '@contextual-ui/jsonld-graph-builder';
+import { createId, refersTo, buildGraph, GraphBuilderOptions, JsonLdObject, JsonLdGraphResult } from 'jsonld-graph-builder';
 
 export interface UIMetadata {
   label?: string;

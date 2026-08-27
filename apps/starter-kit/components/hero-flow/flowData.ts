@@ -20,7 +20,7 @@ export const initialNodes: Node<FlowNodeData>[] = [
       codeSnippet: {
         language: 'typescript',
         filename: 'data/site.server.ts',
-        code: `import { staticConnector } from '@contextual-ui/connector-static';
+        code: `import { staticConnector } from 'contextual-ui-connector-static';
 
 export const connector = staticConnector({
   website: {
@@ -42,7 +42,7 @@ export const connector = staticConnector({
 });`,
       },
       details: [
-        { label: 'Connector', value: '@contextual-ui/connector-static' },
+        { label: 'Connector', value: 'contextual-ui-connector-static' },
         { label: 'Source Format', value: 'JavaScript Objects / CMS APIs' },
         { label: 'Hydration', value: 'Zero-latency server-side compile' },
       ],
@@ -66,7 +66,7 @@ export const connector = staticConnector({
       codeSnippet: {
         language: 'typescript',
         filename: 'data/site.schema.ts',
-        code: `import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry } from '@contextual-ui/core/server';
+        code: `import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
@@ -98,7 +98,7 @@ export type SiteData = InferData<typeof siteSchema>;`,
       id: 'engine-node',
       stage: 'engine',
       title: 'Contextual Engine',
-      subtitle: '@contextual-ui/core',
+      subtitle: 'contextual-ui',
       badge: '03. ORCHESTRATOR',
       color: '#4fabf0', // accent
       accentClass: 'text-accent',
@@ -108,7 +108,7 @@ export type SiteData = InferData<typeof siteSchema>;`,
       codeSnippet: {
         language: 'typescript',
         filename: 'server/engine.ts',
-        code: `import { createContextualApp } from '@contextual-ui/core/server';
+        code: `import { createContextualApp } from 'contextual-ui/server';
 import { siteSchema } from './site.schema';
 import { connector } from './site.server';
 
@@ -124,8 +124,8 @@ const data = await siteApp.fetchData();
 const graph = await siteApp.generateGraph();`,
       },
       details: [
-        { label: 'Package', value: '@contextual-ui/core/server' },
-        { label: 'Graph Builder', value: '@contextual-ui/jsonld-graph-builder' },
+        { label: 'Package', value: 'contextual-ui/server' },
+        { label: 'Graph Builder', value: 'jsonld-graph-builder' },
         { label: 'Execution', value: 'Build-time SSG & Dynamic SSR' },
       ],
     },

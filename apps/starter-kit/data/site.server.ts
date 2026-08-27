@@ -1,6 +1,6 @@
 import { siteSchema } from './site.schema';
-import { staticConnector } from '@contextual-ui/connector-static';
-import { createContextualApp, InferData } from '@contextual-ui/core/server';
+import { staticConnector } from 'contextual-ui-connector-static';
+import { createContextualApp, InferData } from 'contextual-ui/server';
 
 const connector = staticConnector({
   website: {

@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Faq, useContextualSiteContext } from '@contextual-ui/core';
+import { Faq, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 import { HeroFlowDiagram } from '@/components/hero-flow';
 
@@ -25,7 +25,7 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
           <div className="lg:col-span-7 space-y-6">
             {/* <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-base text-xs font-mono text-accent">
               <span className="w-2 h-2 rounded-full bg-accent animate-pulse"></span>
-              @contextual-ui/core v0.1
+              contextual-ui v0.1
             </div> */}
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight">
               One Schema. UI for Humans, Structured Data for AI & Search Engines.

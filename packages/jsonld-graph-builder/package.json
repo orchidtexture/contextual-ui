@@ -1,7 +1,8 @@
 {
-  "name": "@contextual-ui/jsonld-graph-builder",
+  "name": "jsonld-graph-builder",
   "version": "0.1.0",
   "description": "Zero-dependency, lightweight JSON-LD graph flattener, canonicalizer, and merger.",
+  "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",

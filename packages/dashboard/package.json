@@ -1,7 +1,8 @@
 {
-  "name": "@contextual-ui/dashboard",
+  "name": "contextual-ui-dashboard",
   "version": "0.1.0",
   "description": "CMS Dashboard for Contextual UI",
+  "license": "MIT",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -21,7 +22,7 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
-    "@contextual-ui/core": "workspace:*"
+    "contextual-ui": "workspace:*"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0",

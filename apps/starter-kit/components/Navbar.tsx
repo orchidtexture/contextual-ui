@@ -1,6 +1,6 @@
 'use client';
 
-import { Navbar, useContextualSiteContext } from '@contextual-ui/core';
+import { Navbar, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 
 interface CustomNavbarProps {

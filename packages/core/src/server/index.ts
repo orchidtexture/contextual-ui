@@ -2,7 +2,7 @@ export * from './createRouteHandler';
 export * from './createGraphRouteHandler';
 export * from './createContextualApp';
 export * from '../registry';
-export * from '@contextual-ui/jsonld-graph-builder';
+export * from 'jsonld-graph-builder';
 export { FaqDataSchema, FaqItemSchema } from '../components/faq/faq.schema';
 export { generateFaqJsonLd, exportAgentData as exportFaqAgentData, faqRegistry } from '../components/faq/faq.utils';
 export { BreadcrumbDataSchema, BreadcrumbItemSchema } from '../components/breadcrumb/breadcrumb.schema';

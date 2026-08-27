@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { siteApp } from '@/data/site.server';
-import { ContextualSite } from '@contextual-ui/core';
+import { ContextualSite } from 'contextual-ui';
 import { CustomNavbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { createForm, getFieldMetadata } from '@contextual-ui/core';
+import { createForm, getFieldMetadata } from 'contextual-ui';
 import dashboardCss from './dashboard.css';
 
 export interface ContextualDashboardProps {

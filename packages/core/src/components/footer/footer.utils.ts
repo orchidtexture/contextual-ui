@@ -1,4 +1,4 @@
-import { createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+import { createId, refersTo } from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../../registry/defineSchema';
 import { FooterDataSchema, FooterData } from './footer.schema';
 

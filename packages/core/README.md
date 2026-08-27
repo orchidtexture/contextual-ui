@@ -1,15 +1,15 @@
-# @contextual-ui/core
+# contextual-ui
 
-**Contextual UI Core** is the foundational headless component library designed for the modern web—where your UI isn't just consumed by humans, but also by search engines and AI agents.
+**Contextual UI** is the foundational headless component library designed for the modern web—where your UI isn't just consumed by humans, but also by search engines and AI agents.
 
 Built with **React**, **Zod**, and **Radix UI**, it provides the infrastructure to build accessible, type-safe, and SEO-optimized components with zero design opinion, paired with an integrated Schema.org Knowledge Graph engine.
 
 ## 📦 Installation
 
 ```bash
-npm install @contextual-ui/core zod
+npm install contextual-ui zod
 # or
-pnpm add @contextual-ui/core zod
+pnpm add contextual-ui zod
 ```
 
 ---
@@ -20,7 +20,7 @@ pnpm add @contextual-ui/core zod
 Combine standard Zod schemas with pre-built registries that automatically generate Schema.org JSON-LD:
 
 ```typescript
-import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from '@contextual-ui/core/server';
+import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
@@ -41,8 +41,8 @@ Use `createContextualApp` to combine your schema and data connector into a unifi
 
 ```typescript
 import { siteSchema } from './site.schema';
-import { staticConnector } from '@contextual-ui/connector-static';
-import { createContextualApp, InferData } from '@contextual-ui/core/server';
+import { staticConnector } from 'contextual-ui-connector-static';
+import { createContextualApp, InferData } from 'contextual-ui/server';
 
 const connector = staticConnector({
   website: { name: 'My App', url: 'https://example.com' },
@@ -65,7 +65,7 @@ Wrap your layout or app root with `ContextualSite` to automatically provide data
 
 ```tsx
 import { siteApp } from '@/data/site.server';
-import { ContextualSite, Navbar, Faq } from '@contextual-ui/core';
+import { ContextualSite, Navbar, Faq } from 'contextual-ui';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const data = await siteApp.fetchData();
@@ -126,7 +126,7 @@ Contextual UI components distinguish between two fundamental types of structured
 * **How they are consumed:**
   1. Rendered in React UI for users.
   2. Injected into HTML via `<script type="application/ld+json">`.
-  3. Exported sitewide to `/api/graph.json` via `@contextual-ui/jsonld-graph-builder` for search engine knowledge graphs and AI agent ingestion.
+  3. Exported sitewide to `/api/graph.json` via `jsonld-graph-builder` for search engine knowledge graphs and AI agent ingestion.
 
 ### 2. Ephemeral Route-Level Metadata (Page-Level Hierarchy)
 * **Components & Schemas:** `breadcrumbRegistry` (`BreadcrumbList`), `WebPage`.
@@ -163,7 +163,7 @@ export const { GET } = siteApp.createGraphHandler({
 // app/api/graph.json/route.ts
 import { siteSchema } from '@/data/site.schema';
 import { siteConnector } from '@/data/site.server';
-import { createGraphRouteHandler } from '@contextual-ui/core/server';
+import { createGraphRouteHandler } from 'contextual-ui/server';
 
 export async function GET(req: Request) {
   const rawData = await siteConnector.fetchData();
@@ -189,7 +189,7 @@ export async function GET(req: Request) {
 Defines the root `WebSite` entity that interconnects all child components (`navbar`, `faq`) into a single connected knowledge graph.
 
 ```typescript
-import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from '@contextual-ui/core/server';
+import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
 
 export const siteSchema = defineSchema({
   website: websiteRegistry(),
@@ -202,7 +202,7 @@ export const siteSchema = defineSchema({
 Handles collapsible state, accessible ARIA roles, and automatically generates Schema.org `FAQPage`, `Question`, and `Answer` nodes with linked `@id` identifiers.
 
 ```tsx
-import { Faq } from '@contextual-ui/core';
+import { Faq } from 'contextual-ui';
 
 const data = [
   { id: '1', question: 'What is Contextual UI?', answer: 'A headless library...' }
@@ -230,7 +230,7 @@ export function FaqSection() {
 Provides responsive navigation structure, mobile drawer toggles, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
 
 ```tsx
-import { Navbar } from '@contextual-ui/core';
+import { Navbar } from 'contextual-ui';
 
 const navData = {
   brand: { name: 'Contextual UI', href: '/' },
@@ -264,7 +264,7 @@ export function Header() {
 Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph.
 
 ```tsx
-import { Footer } from '@contextual-ui/core';
+import { Footer } from 'contextual-ui';
 
 const footerData = {
   brand: {
@@ -311,7 +311,7 @@ export function SiteFooter() {
 Renders accessible breadcrumb hierarchy and emits Schema.org `BreadcrumbList` JSON-LD directly into the page DOM.
 
 ```tsx
-import { Breadcrumb } from '@contextual-ui/core';
+import { Breadcrumb } from 'contextual-ui';
 
 const breadcrumbData = [
   { id: '1', label: 'Home', url: '/' },
@@ -355,7 +355,7 @@ Type-safe form builder generated directly from standard Zod schemas.
 
 ```tsx
 'use client';
-import { createForm } from '@contextual-ui/core';
+import { createForm } from 'contextual-ui';
 import { z } from 'zod';
 
 const ContactSchema = z.object({

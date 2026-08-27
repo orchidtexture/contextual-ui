@@ -49,14 +49,14 @@ export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websi
 export { defineSchema, cx, getFieldMetadata } from './registry';
 export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata, JsonLdContext } from './registry';
 
-export { buildGraph, createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+export { buildGraph, createId, refersTo } from 'jsonld-graph-builder';
 export type {
   GraphBuilderOptions,
   DedupeStrategy,
   JsonLdObject,
   JsonLdValue,
   JsonLdGraphResult,
-} from '@contextual-ui/jsonld-graph-builder';
+} from 'jsonld-graph-builder';
 
 export type { Thing, WithContext, Graph } from 'schema-dts';
 

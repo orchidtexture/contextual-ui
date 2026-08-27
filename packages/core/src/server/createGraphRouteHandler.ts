@@ -1,4 +1,4 @@
-import { buildGraph, GraphBuilderOptions, JsonLdObject } from '@contextual-ui/jsonld-graph-builder';
+import { buildGraph, GraphBuilderOptions, JsonLdObject } from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../registry/defineSchema';
 
 export interface GraphRouteHandlerOptions {

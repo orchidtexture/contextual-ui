@@ -1,5 +1,5 @@
 import { ReactNode, HTMLAttributes } from 'react';
-import { GraphBuilderOptions, JsonLdGraphResult } from '@contextual-ui/jsonld-graph-builder';
+import { GraphBuilderOptions, JsonLdGraphResult } from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../../registry/defineSchema';
 
 export interface ContextualSiteOptions extends GraphBuilderOptions {

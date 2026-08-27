@@ -1,6 +1,6 @@
 import { createGraphRouteHandler, GraphRouteHandlerOptions } from './createGraphRouteHandler';
 import { InferData } from '../registry/defineSchema';
-import { buildGraph, JsonLdObject } from '@contextual-ui/jsonld-graph-builder';
+import { buildGraph, JsonLdObject } from 'jsonld-graph-builder';
 
 export interface ContextualAppOptions<
   TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any },

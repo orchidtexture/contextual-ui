@@ -13,7 +13,7 @@ export default async function SchemaPage() {
   const response = await handler.GET(new Request('http://localhost/api/graph.json'));
   const graphJson = await response.json();
 
-  const schemaSourceCode = `import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry } from '@contextual-ui/core/server';
+  const schemaSourceCode = `import { defineSchema, faqRegistry, navbarRegistry, websiteRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({

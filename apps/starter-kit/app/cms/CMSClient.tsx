@@ -1,6 +1,6 @@
 'use client';
 
-import { ContextualDashboard } from '@contextual-ui/dashboard';
+import { ContextualDashboard } from 'contextual-ui-dashboard';
 import { z } from 'zod';
 import { siteSchema } from '@/data/site.schema';
 

@@ -1,4 +1,4 @@
-# @contextual-ui/jsonld-graph-builder
+# jsonld-graph-builder
 
 An ultra-lightweight, zero-dependency, synchronous **Schema.org JSON-LD Graph Engine**.
 
@@ -6,14 +6,14 @@ Designed specifically for modern serverless and edge runtimes (Next.js App Route
 
 ---
 
-## ⚡ Why `@contextual-ui/jsonld-graph-builder`?
+## ⚡ Why `jsonld-graph-builder`?
 
 Most existing JSON-LD tooling falls into one of two extremes:
 
 1. **The W3C `jsonld.js` package:** An enormous, asynchronous library built for full RDF triple parsing that makes remote HTTP requests to fetch external contexts. It is too heavy and slow for modern serverless edge endpoints.
 2. **Naive Array Wrappers:** Libraries that simply place objects into an array and use a basic "first-wins" deduplication (deleting entire nodes if an `@id` repeats).
 
-`@contextual-ui/jsonld-graph-builder` fills the gap:
+`jsonld-graph-builder` fills the gap:
 * **Zero Dependencies:** Pure TypeScript with zero runtime overhead.
 * **Synchronous & Serverless Ready:** Executes in `<1ms`, ideal for Edge Route Handlers and SSG builds.
 * **Recursive Entity Flattening:** Automatically pulls nested entities with `@id` into top-level nodes and replaces them with reference pointers (`{ "@id": "..." }`).
@@ -25,9 +25,9 @@ Most existing JSON-LD tooling falls into one of two extremes:
 ## 📦 Installation
 
 ```bash
-pnpm add @contextual-ui/jsonld-graph-builder
+pnpm add jsonld-graph-builder
 # or
-npm install @contextual-ui/jsonld-graph-builder
+npm install jsonld-graph-builder
 ```
 
 ---
@@ -35,7 +35,7 @@ npm install @contextual-ui/jsonld-graph-builder
 ## 🚀 Quick Start
 
 ```typescript
-import { buildGraph, createId, refersTo } from '@contextual-ui/jsonld-graph-builder';
+import { buildGraph, createId, refersTo } from 'jsonld-graph-builder';
 
 // 1. Root WebSite Entity (The Entry Point)
 const website = {
@@ -187,7 +187,7 @@ When multiple data sources or page components emit schemas sharing the same `@id
 
 ```typescript
 // app/api/graph.json/route.ts
-import { buildGraph } from '@contextual-ui/jsonld-graph-builder';
+import { buildGraph } from 'jsonld-graph-builder';
 import { db } from '@/lib/db';
 
 export async function GET() {

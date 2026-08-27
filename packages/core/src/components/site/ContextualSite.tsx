@@ -2,7 +2,7 @@
 
 import { useMemo } from 'react';
 import { Slot } from '@radix-ui/react-slot';
-import { buildGraph, JsonLdObject } from '@contextual-ui/jsonld-graph-builder';
+import { buildGraph, JsonLdObject } from 'jsonld-graph-builder';
 import { ContextualSiteContext } from './site.context';
 import { ContextualSiteProps, ContextualSiteContextValue } from './site.types';
 

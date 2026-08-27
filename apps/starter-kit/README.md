@@ -8,10 +8,10 @@ This is the official reference implementation for **Contextual UI**. It is a [Ne
 
 This starter kit showcases the **Single Source of Truth (SSOT)** pattern:
 
-- **Frontend UI**: Implementing headless `@contextual-ui/core` components (`Navbar`, `Faq`, `Breadcrumb`, `createForm`) with zero `any` types.
-- **Data Connectors**: Using `@contextual-ui/connector-static` to bind schemas to static data sources.
-- **Sitewide Knowledge Graph**: Exposing an interconnected Schema.org `/api/graph.json` endpoint via `@contextual-ui/jsonld-graph-builder`.
-- **CMS Dashboard**: Rendering `@contextual-ui/dashboard` to inspect raw data, validate JSON-LD, and edit content visually.
+- **Frontend UI**: Implementing headless `contextual-ui` components (`Navbar`, `Faq`, `Breadcrumb`, `createForm`) with zero `any` types.
+- **Data Connectors**: Using `contextual-ui-connector-static` to bind schemas to static data sources.
+- **Sitewide Knowledge Graph**: Exposing an interconnected Schema.org `/api/graph.json` endpoint via `jsonld-graph-builder`.
+- **CMS Dashboard**: Rendering `contextual-ui-dashboard` to inspect raw data, validate JSON-LD, and edit content visually.
 
 ---
 
@@ -37,9 +37,9 @@ Follow these steps to implement Contextual UI in any Next.js App Router project:
 ### Step 1: Install Dependencies
 
 ```bash
-pnpm add @contextual-ui/core @contextual-ui/connector-static zod
+pnpm add contextual-ui contextual-ui-connector-static zod
 # or
-npm install @contextual-ui/core @contextual-ui/connector-static zod
+npm install contextual-ui contextual-ui-connector-static zod
 ```
 
 ---
@@ -50,7 +50,7 @@ Define your data structures using standard Zod schemas combined with Contextual 
 
 ```typescript
 // data/site.schema.ts
-import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from '@contextual-ui/core/server';
+import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
@@ -78,8 +78,8 @@ Bind your schema to a data connector using `createContextualApp`. This automatic
 ```typescript
 // data/site.server.ts
 import { siteSchema } from './site.schema';
-import { staticConnector } from '@contextual-ui/connector-static';
-import { createContextualApp, InferData } from '@contextual-ui/core/server';
+import { staticConnector } from 'contextual-ui-connector-static';
+import { createContextualApp, InferData } from 'contextual-ui/server';
 
 const connector = staticConnector({
   website: {
@@ -132,7 +132,7 @@ export default async function HomePage() {
 // app/HomeClient.tsx (Client Component)
 'use client';
 
-import { Faq } from '@contextual-ui/core';
+import { Faq } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 
 export function HomeClient({ data }: { data: SiteData }) {
@@ -217,10 +217,10 @@ apps/starter-kit/
 
 ## 📚 Related Packages
 
-- [@contextual-ui/core](../../packages/core/README.md) — Headless UI components & schema engine.
-- [@contextual-ui/jsonld-graph-builder](../../packages/jsonld-graph-builder/README.md) — Zero-dependency Schema.org `@graph` flattener and merger.
-- [@contextual-ui/dashboard](../../packages/dashboard/README.md) — Isomorphic CMS dashboard for visual schema management.
-- [@contextual-ui/connector-static](../../connectors/static/README.md) — Static data connector.
+- [contextual-ui](../../packages/core/README.md) — Headless UI components & schema engine.
+- [jsonld-graph-builder](../../packages/jsonld-graph-builder/README.md) — Zero-dependency Schema.org `@graph` flattener and merger.
+- [contextual-ui-dashboard](../../packages/dashboard/README.md) — Isomorphic CMS dashboard for visual schema management.
+- [contextual-ui-connector-static](../../connectors/static/README.md) — Static data connector.
 
 ---
 

@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "pnpm --filter \"@contextual-ui/*\" build && next build",
+    "build": "pnpm -r build && next build",
     "start": "next start"
   },
   "dependencies": {
-    "@contextual-ui/connector-static": "workspace:*",
-    "@contextual-ui/core": "workspace:*",
-    "@contextual-ui/dashboard": "workspace:*",
+    "contextual-ui-connector-static": "workspace:*",
+    "contextual-ui": "workspace:*",
+    "contextual-ui-dashboard": "workspace:*",
     "@react-three/fiber": "^9.7.0",
     "@types/dagre": "^0.7.54",
     "@types/prismjs": "^1.26.6",
