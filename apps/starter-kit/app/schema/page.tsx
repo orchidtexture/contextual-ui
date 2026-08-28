@@ -4,7 +4,6 @@ import { SchemaClient } from './SchemaClient';
 export default async function SchemaPage() {
   const handler = siteApp.createGraphHandler({
     graphOptions: {
-      baseUrl: 'https://example.com',
       flatten: true,
       dedupeStrategy: 'merge',
     },

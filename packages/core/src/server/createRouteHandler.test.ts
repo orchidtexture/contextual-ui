@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { defineSchema } from '../registry/defineSchema';
 import { createRouteHandler } from './createRouteHandler';
 import { z } from 'zod';
@@ -20,18 +21,18 @@ const mockConnector = {
   }
 };
 
-async function testRouteHandler() {
-  const rawData = await mockConnector.fetchData();
-  const hydrated = siteSchema.hydrate(rawData);
-  const handler = createRouteHandler(hydrated);
+describe('createRouteHandler', () => {
+  it('handles GET requests and returns agent data as JSON', async () => {
+    const rawData = await mockConnector.fetchData();
+    const hydrated = siteSchema.hydrate(rawData);
+    const handler = createRouteHandler(hydrated);
 
-  const req = new Request('http://localhost/contextual/api');
-  const res = await handler.GET(req);
-  
-  console.log('Response Status:', res.status);
-  console.log('Response Headers:', Object.fromEntries(res.headers.entries()));
-  const json = await res.json();
-  console.log('Response JSON:', json);
-}
-
-testRouteHandler();
+    const req = new Request('http://localhost/contextual/api');
+    const res = await handler.GET(req);
+    
+    expect(res.status).toBe(200);
+    expect(res.headers.get('content-type')).toBe('application/json');
+    const json = await res.json();
+    expect(json).toEqual({ test: { message: 'Hello AI Agent' } });
+  });
+});

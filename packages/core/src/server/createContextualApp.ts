@@ -8,6 +8,7 @@ export interface ContextualAppOptions<
 > {
   schema: TSchema;
   connector: TConnector;
+  baseUrl?: string;
 }
 
 export type GetGraphOptions = GraphRouteHandlerOptions & {
@@ -63,13 +64,24 @@ export function createContextualApp<
       }
 
       const entities = Object.values(filteredGenerated).filter(Boolean) as JsonLdObject[];
-      return buildGraph(entities, handlerOptions?.graphOptions);
+      const graphOptions = {
+        baseUrl: options.baseUrl,
+        ...handlerOptions?.graphOptions,
+      };
+      return buildGraph(entities, graphOptions);
     },
     createGraphHandler(handlerOptions?: GetGraphOptions) {
       return {
         GET: async (req: Request) => {
           const hydrated = await getHydrated();
-          const graphHandler = createGraphRouteHandler(hydrated, handlerOptions);
+          const effectiveOptions: GetGraphOptions = {
+            ...handlerOptions,
+            graphOptions: {
+              baseUrl: options.baseUrl,
+              ...handlerOptions?.graphOptions,
+            },
+          };
+          const graphHandler = createGraphRouteHandler(hydrated, effectiveOptions);
           return graphHandler.GET(req);
         },
       };

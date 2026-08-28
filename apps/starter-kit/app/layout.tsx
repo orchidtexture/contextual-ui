@@ -21,9 +21,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph({
-    graphOptions: { baseUrl: 'https://contextual.site' },
-  });
+  const graph = await siteApp.getGraph();
 
   return (
     <html lang="en" className="h-full">

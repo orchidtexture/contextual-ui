@@ -31,7 +31,7 @@ export const connector = staticConnector({
   },
   website: {
     name: 'Contextual UI Starter Kit',
-    url: 'https://example.com',
+    url: 'https://contextual.site',
     description: 'A headless UI and semantic SEO Knowledge Graph.'
   },
   faq: [
@@ -200,14 +200,14 @@ const graph = await siteApp.generateGraph();`,
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://example.com/#website",
+      "@id": "https://contextual.site/#website",
       "name": "Contextual UI Starter Kit",
-      "url": "https://example.com"
+      "url": "https://contextual.site"
     },
     {
       "@type": "FAQPage",
-      "@id": "https://example.com/#faq",
-      "isPartOf": { "@id": "https://example.com/#website" },
+      "@id": "https://contextual.site/#faq",
+      "isPartOf": { "@id": "https://contextual.site/#website" },
       "mainEntity": [
         {
           "@type": "Question",

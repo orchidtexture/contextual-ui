@@ -2,6 +2,8 @@ import { siteSchema } from './site.schema';
 import { staticConnector } from 'contextual-ui-connector-static';
 import { createContextualApp, InferData } from 'contextual-ui/server';
 
+const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://contextual.site';
+
 const connector = staticConnector({
   organization: {
     name: 'Tasuku Studio',
@@ -15,7 +17,7 @@ const connector = staticConnector({
   },
   website: {
     name: 'Contextual UI Starter Kit',
-    url: 'https://example.com',
+    url: siteUrl,
     description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
   },
   faq: [
@@ -81,6 +83,7 @@ const connector = staticConnector({
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector: connector,
+  baseUrl: siteUrl,
 });
 
 export type SiteData = InferData<typeof siteSchema>;

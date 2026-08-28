@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { defineSchema, cx } from './defineSchema';
 import { faqRegistry } from '../components/faq/faq.utils';
 import { navbarRegistry } from '../components/navbar/navbar.utils';
@@ -52,24 +53,24 @@ const mockConnector = {
   }
 };
 
-async function runTests() {
-  const rawData = await mockConnector.fetchData();
-  const validated = siteSchema.parse(rawData);
-  const agentData = siteSchema.getAgentData(validated);
-  console.log('Static Connector Agent Data:', JSON.stringify(agentData, null, 2));
+describe('defineSchema', () => {
+  it('parses and extracts agent data and hydrates correctly', async () => {
+    const rawData = await mockConnector.fetchData();
+    const validated = siteSchema.parse(rawData);
+    const agentData = siteSchema.getAgentData(validated);
+    expect(agentData.title).toBe('My Awesome Site');
 
-  // Test client hydration
-  const hydrated = siteSchema.hydrate({
-    faq: faqData,
-    navbar: navbarData,
-    footer: footerData,
-    title: 'My Awesome Site'
+    // Test client hydration
+    const hydrated = siteSchema.hydrate({
+      faq: faqData,
+      navbar: navbarData,
+      footer: footerData,
+      title: 'My Awesome Site'
+    });
+    expect(hydrated.getAgentData().title).toBe('My Awesome Site');
+
+    // Test JSON-LD generation
+    const graph = hydrated.generateGraph({ baseUrl: 'https://example.com' });
+    expect(graph['@graph'].length).toBeGreaterThan(0);
   });
-  console.log('Hydrated Agent Data:', JSON.stringify(hydrated.getAgentData(), null, 2));
-
-  // Test JSON-LD generation
-  const graph = hydrated.generateGraph({ baseUrl: 'https://example.com' });
-  console.log('Generated Graph:', JSON.stringify(graph, null, 2));
-}
-
-runTests();
+});
