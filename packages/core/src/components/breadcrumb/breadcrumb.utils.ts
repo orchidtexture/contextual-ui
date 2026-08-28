@@ -17,7 +17,7 @@ export function generateBreadcrumbJsonLd(
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
     '@id': create('breadcrumb'),
-    isPartOf: refer('website'),
+    isPartOf: refer('webpage'),
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
       '@id': create('breadcrumb-item', item.id || String(index + 1)),

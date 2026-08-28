@@ -27,7 +27,7 @@ export function generateNavbarJsonLd(data: NavbarData, ctx?: Partial<JsonLdConte
     '@context': 'https://schema.org',
     '@type': 'SiteNavigationElement',
     '@id': create('navbar'),
-    isPartOf: refer('website'),
+    isPartOf: refer('webpage'),
     name: data.brand?.name || 'Navigation',
     url: data.brand?.href || '/',
     hasPart: data.links.map((link) => mapNavLink(link, create)),

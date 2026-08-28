@@ -13,7 +13,7 @@ export function generateFaqJsonLd(items: FaqData, ctx?: Partial<JsonLdContext>) 
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
     '@id': create('faq'),
-    isPartOf: refer('website'),
+    isPartOf: refer('webpage'),
     mainEntity: items.map((item) => ({
       '@type': 'Question',
       '@id': create('faq-q', item.id),

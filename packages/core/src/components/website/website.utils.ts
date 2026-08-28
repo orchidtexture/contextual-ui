@@ -17,10 +17,9 @@ export function generateWebsiteJsonLd(data: WebsiteData, ctx?: Partial<JsonLdCon
     ...(data.url ? { url: data.url } : {}),
     ...(data.description ? { description: data.description } : {}),
     publisher: data.publisher ? refer(data.publisher) : refer('organization'),
-    hasPart:
-      data.hasPart && data.hasPart.length > 0
-        ? data.hasPart.map((part) => refer(part))
-        : [refer('navbar'), refer('faq'), refer('footer')],
+    ...(data.hasPart && data.hasPart.length > 0
+      ? { hasPart: data.hasPart.map((part) => refer(part)) }
+      : {}),
   };
 }
 

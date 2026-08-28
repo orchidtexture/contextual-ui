@@ -23,14 +23,16 @@ We will use **Option A** for `FAQPage`, where the FAQ component still generates 
 - [x] Update `packages/core/src/index.ts` to export `webpageRegistry` and `WebpageData`.
 
 ### 2. Update Existing Core Components
-- [ ] Update `packages/core/src/components/website/website.utils.ts`:
+- [x] Update `packages/core/src/components/website/website.utils.ts`:
   - Remove the default `hasPart: [refer('navbar'), refer('faq'), refer('footer')]`.
   - Let it default to pointing to `webpage`? Actually, `WebPage` pointing to `WebSite` via `isPartOf` is sufficient in Schema.org. You can optionally add `hasPart` if `data.hasPart` is provided, but don't hardcode layout components.
-- [ ] Update `packages/core/src/components/navbar/navbar.utils.ts`:
+- [x] Update `packages/core/src/components/navbar/navbar.utils.ts`:
   - Change `isPartOf: refer('website')` to `isPartOf: refer('webpage')`.
-- [ ] Update `packages/core/src/components/footer/footer.utils.ts`:
+- [x] Update `packages/core/src/components/footer/footer.utils.ts`:
   - Change `isPartOf: refer('website')` to `isPartOf: refer('webpage')`.
-- [ ] Update `packages/core/src/components/faq/faq.utils.ts`:
+- [x] Update `packages/core/src/components/faq/faq.utils.ts`:
+  - Change `isPartOf: refer('website')` to `isPartOf: refer('webpage')`.
+- [x] Update `packages/core/src/components/breadcrumb/breadcrumb.utils.ts`:
   - Change `isPartOf: refer('website')` to `isPartOf: refer('webpage')`.
 
 ### 3. Update Starter Kit (`apps/starter-kit`)

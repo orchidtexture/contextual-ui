@@ -47,7 +47,7 @@ export function generateFooterJsonLd(data: FooterData, ctx?: Partial<JsonLdConte
     '@context': 'https://schema.org',
     '@type': 'WPFooter',
     '@id': create('footer'),
-    isPartOf: refer('website'),
+    isPartOf: refer('webpage'),
     ...(data.brand?.name ? { name: data.brand.name } : {}),
     ...(data.brand?.description ? { description: data.brand.description } : {}),
     url: data.brand?.href || '/',
