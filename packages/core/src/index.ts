@@ -46,6 +46,10 @@ export type { WebsiteData } from './components/website/website.schema';
 export { WebsiteDataSchema } from './components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from './components/website/website.utils';
 
+export type { WebpageData } from './components/webpage/webpage.schema';
+export { WebpageDataSchema } from './components/webpage/webpage.schema';
+export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry } from './components/webpage/webpage.utils';
+
 export type { OrganizationData } from './components/organization/organization.schema';
 export { OrganizationDataSchema } from './components/organization/organization.schema';
 export { generateOrganizationJsonLd, exportAgentData as exportOrganizationAgentData, organizationRegistry } from './components/organization/organization.utils';

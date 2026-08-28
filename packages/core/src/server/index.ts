@@ -27,7 +27,11 @@ export type {
 } from '../components/footer/footer.schema';
 export { generateFooterJsonLd, exportAgentData as exportFooterAgentData, footerRegistry } from '../components/footer/footer.utils';
 export { WebsiteDataSchema } from '../components/website/website.schema';
+export type { WebsiteData } from '../components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from '../components/website/website.utils';
+export { WebpageDataSchema } from '../components/webpage/webpage.schema';
+export type { WebpageData } from '../components/webpage/webpage.schema';
+export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry } from '../components/webpage/webpage.utils';
 export {
   OrganizationDataSchema,
 } from '../components/organization/organization.schema';
