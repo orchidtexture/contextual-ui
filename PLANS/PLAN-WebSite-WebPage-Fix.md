@@ -36,14 +36,22 @@ We will use **Option A** for `FAQPage`, where the FAQ component still generates 
   - Change `isPartOf: refer('website')` to `isPartOf: refer('webpage')`.
 
 ### 3. Update Starter Kit (`apps/starter-kit`)
-- [ ] Update `apps/starter-kit/data/site.schema.ts`:
+- [x] Update `apps/starter-kit/data/site.schema.ts`:
   - Import and add `webpage: webpageRegistry()` to `defineSchema`.
-- [ ] Update `apps/starter-kit/data/site.server.ts`:
+- [x] Update `apps/starter-kit/data/site.server.ts`:
   - Provide mock/default data for `webpage` in the `staticConnector` (e.g., `name: 'Contextual UI Starter Kit - Home', url: siteUrl, description: '...'`).
-- [ ] Optionally run `pnpm build` in root to verify `core` compiles and the Next.js app builds properly with the new data contract.
+- [x] Optionally run `pnpm build` in root to verify `core` compiles and the Next.js app builds properly with the new data contract.
 
-### 4. Update Documentation (`docs/`)
+### 4. Route-Specific WebPage Support (`packages/core` & `starter-kit`)
+- [ ] Update `packages/core/src/server/createContextualApp.ts`:
+  - Allow `dataOverrides?: Partial<InferData<TSchema>>` in `GetGraphOptions`.
+  - In `getGraph(handlerOptions)` and `fetchData(overrides?)`, merge `dataOverrides` with raw data before hydration.
+- [ ] Add unit tests in `packages/core/src/server/createContextualApp.test.ts` to test `dataOverrides` for route-specific `webpage` metadata generation.
+- [ ] Update `apps/starter-kit/app/docs/page.tsx`, `apps/starter-kit/app/schema/page.tsx`, and `apps/starter-kit/app/cms/page.tsx` (or their client/server data loaders) to supply their route-specific `webpage` information (e.g., `/docs` has title "Documentation - Contextual UI Starter Kit", url `/docs`, etc.).
+
+### 5. Update Documentation (`docs/`)
 - [ ] Review and update `docs/guides/global-graph-export.md`:
-  - Add `webpageRegistry` where `websiteRegistry` or other core registries are mentioned if appropriate.
-  - Update any structural descriptions mentioning that `WebSite` contains page-level elements to clarify that `WebPage` handles layout components.
-- [ ] Create or update documentation to explain the semantic distinction between `WebSite` and `WebPage` to help users understand why the split exists.
+  - Add `webpageRegistry` where `websiteRegistry` or other core registries are mentioned.
+  - Explain how `WebSite` represents the global domain while `WebPage` represents the current URL document and contains layout elements (`#navbar`, `#footer`, `#faq`).
+  - Document how to use `dataOverrides` in `siteApp.getGraph({ dataOverrides: { webpage: ... } })` for per-route Schema.org generation.
+- [ ] Update starter kit README and core README where architecture graphs or schemas are illustrated.

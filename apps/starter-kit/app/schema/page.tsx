@@ -16,6 +16,7 @@ export default async function SchemaPage() {
   defineSchema,
   organizationRegistry,
   websiteRegistry,
+  webpageRegistry,
   navbarRegistry,
   faqRegistry,
   footerRegistry,
@@ -25,6 +26,7 @@ import { z } from 'zod';
 export const siteSchema = defineSchema({
   organization: organizationRegistry(),
   website: websiteRegistry(),
+  webpage: webpageRegistry(),
   navbar: navbarRegistry(),
   faq: faqRegistry(),
   footer: footerRegistry(),

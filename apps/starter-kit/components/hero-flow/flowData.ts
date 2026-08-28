@@ -72,12 +72,13 @@ export const connector = staticConnector({
       codeSnippet: {
         language: 'typescript',
         filename: 'data/site.schema.ts',
-        code: `import { defineSchema, organizationRegistry, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
+        code: `import { defineSchema, organizationRegistry, websiteRegistry, webpageRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
   organization: organizationRegistry(),
   website: websiteRegistry(),
+  webpage: webpageRegistry(),
   navbar: navbarRegistry(),
   faq: faqRegistry(),
   announcement: {
