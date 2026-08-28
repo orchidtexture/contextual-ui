@@ -5,6 +5,9 @@ export interface GraphRouteHandlerOptions {
   headers?: Record<string, string>;
   graphOptions?: GraphBuilderOptions;
   jsonLdContext?: Partial<JsonLdContext>;
+  includeKeys?: string[];
+  excludeKeys?: string[];
+  includeAll?: boolean;
 }
 
 export function createGraphRouteHandler(
@@ -16,13 +19,37 @@ export function createGraphRouteHandler(
       try {
         let entities: JsonLdObject[] = [];
 
-        if (typeof hydrated.generateJsonLd === 'function') {
-          const generated = await Promise.resolve(hydrated.generateJsonLd());
-          if (Array.isArray(generated)) {
-            entities = generated as JsonLdObject[];
-          } else if (typeof generated === 'object' && generated !== null) {
-            entities = Object.values(generated).filter(Boolean) as JsonLdObject[];
+        // The route handler should also filter based on isGlobal
+        const generated = await Promise.resolve(hydrated.generateJsonLd());
+        const config = hydrated.config || {};
+        
+        const filteredGenerated: Record<string, any> = {};
+        const includeKeys = options.includeKeys;
+        const excludeKeys = options.excludeKeys;
+        const includeAll = options.includeAll;
+
+        for (const [key, val] of Object.entries(generated)) {
+          if (excludeKeys?.includes(key)) continue;
+
+          if (includeKeys?.includes(key)) {
+            filteredGenerated[key] = val;
+            continue;
           }
+
+          if (includeAll) {
+            filteredGenerated[key] = val;
+            continue;
+          }
+
+          // Fallback to registry default behavior for global / route endpoints
+          const isGlobal = config[key]?.isGlobal !== false;
+          if (isGlobal) {
+            filteredGenerated[key] = val;
+          }
+        }
+
+        if (typeof filteredGenerated === 'object' && filteredGenerated !== null) {
+          entities = Object.values(filteredGenerated).filter(Boolean) as JsonLdObject[];
         }
 
         const graph = buildGraph(entities, options.graphOptions);

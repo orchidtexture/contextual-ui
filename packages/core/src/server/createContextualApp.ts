@@ -13,6 +13,7 @@ export interface ContextualAppOptions<
 export type GetGraphOptions = GraphRouteHandlerOptions & {
   includeKeys?: string[];
   excludeKeys?: string[];
+  includeAll?: boolean;
 };
 
 export function createContextualApp<
@@ -39,14 +40,18 @@ export function createContextualApp<
       const filteredGenerated: Record<string, any> = {};
       const includeKeys = handlerOptions?.includeKeys;
       const excludeKeys = handlerOptions?.excludeKeys;
+      const includeAll = handlerOptions?.includeAll;
 
       for (const [key, val] of Object.entries(generated)) {
         if (excludeKeys?.includes(key)) continue;
         
-        if (includeKeys) {
-          if (includeKeys.includes(key)) {
-            filteredGenerated[key] = val;
-          }
+        if (includeKeys?.includes(key)) {
+          filteredGenerated[key] = val;
+          continue;
+        }
+
+        if (includeAll) {
+          filteredGenerated[key] = val;
           continue;
         }
 
@@ -60,7 +65,7 @@ export function createContextualApp<
       const entities = Object.values(filteredGenerated).filter(Boolean) as JsonLdObject[];
       return buildGraph(entities, handlerOptions?.graphOptions);
     },
-    createGraphHandler(handlerOptions?: GraphRouteHandlerOptions) {
+    createGraphHandler(handlerOptions?: GetGraphOptions) {
       return {
         GET: async (req: Request) => {
           const hydrated = await getHydrated();
@@ -69,7 +74,7 @@ export function createContextualApp<
         },
       };
     },
-    createGraphRouteHandler(handlerOptions?: GraphRouteHandlerOptions) {
+    createGraphRouteHandler(handlerOptions?: GetGraphOptions) {
       return this.createGraphHandler(handlerOptions);
     },
   };
