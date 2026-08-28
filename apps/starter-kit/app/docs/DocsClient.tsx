@@ -400,10 +400,11 @@ const connector = staticConnector({
   },
 });
 
-// 3. Initialize the compiled Contextual App instance
+// 3. Initialize the compiled Contextual App instance with baseUrl for canonical @graph IDs
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector,
+  baseUrl: 'https://example.com',
 });
 
 export type SiteData = InferData<typeof siteSchema>;`;
@@ -425,9 +426,7 @@ export default async function RootLayout({
 }) {
   // Fetch validated data and the compiled Schema.org JSON-LD graph on the server
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph({
-    graphOptions: { baseUrl: 'https://example.com' },
-  });
+  const graph = await siteApp.getGraph();
 
   return (
     <html lang="en">
@@ -491,8 +490,8 @@ export default function HomePage() {
 
 // Expose machine-readable Knowledge Graph for AI Agents, Perplexity & Claude
 export const { GET } = siteApp.createGraphHandler({
+  includeAll: true, // Export all schema sections (or use excludeKeys / includeKeys)
   graphOptions: {
-    baseUrl: 'https://example.com',
     flatten: true,
     dedupeStrategy: 'merge',
   },
@@ -638,7 +637,7 @@ export const { GET } = siteApp.createGraphHandler({
                 </span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Expose a machine-readable JSON-LD endpoint at <code className="code-short">app/api/graph.json/route.ts</code> in 4 lines. Search engines and AI agents (Perplexity, ChatGPT, Claude) can consume your site structure directly.
+                Expose a machine-readable JSON-LD endpoint at <code className="code-short">app/api/graph.json/route.ts</code> in 4 lines. Use <code className="code-short">includeAll: true</code> to export all sections (including FAQ), or use <code className="code-short">excludeKeys</code> / <code className="code-short">includeKeys</code> to keep specific parts private.
               </p>
             </div>
           </div>
@@ -837,6 +836,7 @@ const connector = staticConnector({
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector,
+  baseUrl: 'https://contextual.site',
 });`;
 
   const cmsCode = `import { createContextualApp } from 'contextual-ui/server';
@@ -869,6 +869,7 @@ export function sanityConnector(client: typeof sanityClient) {
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector: sanityConnector(sanityClient),
+  baseUrl: 'https://contextual.site',
 });`;
 
   const databaseCode = `import { createContextualApp } from 'contextual-ui/server';
@@ -898,6 +899,7 @@ export function prismaConnector(db: typeof prisma) {
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector: prismaConnector(prisma),
+  baseUrl: 'https://contextual.site',
 });`;
 
   return (
@@ -1256,9 +1258,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph({
-    graphOptions: { baseUrl: 'https://contextual.site' },
-  });
+  const graph = await siteApp.getGraph();
 
   return (
     <html lang="en">

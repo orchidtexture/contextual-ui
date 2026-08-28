@@ -81,10 +81,12 @@ import { siteSchema } from './site.schema';
 import { staticConnector } from 'contextual-ui-connector-static';
 import { createContextualApp, InferData } from 'contextual-ui/server';
 
+const siteUrl = process.env.SITE_URL || 'https://contextual.site';
+
 const connector = staticConnector({
   website: {
     name: 'Contextual UI Starter Kit',
-    url: 'https://example.com',
+    url: siteUrl,
     description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
   },
   faq: [
@@ -106,6 +108,7 @@ const connector = staticConnector({
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector: connector,
+  baseUrl: siteUrl,
 });
 
 export type SiteData = InferData<typeof siteSchema>;
@@ -168,14 +171,17 @@ Export a complete, referentially-linked Schema.org `@graph` for Google, AI agent
 // app/api/graph.json/route.ts
 import { siteApp } from '@/data/site.server';
 
+// Expose the sitewide graph for AI Agents & Search Crawlers
 export const { GET } = siteApp.createGraphHandler({
+  includeAll: true, // Exports all schema sections (including non-global ones like FAQ)
   graphOptions: {
-    baseUrl: 'https://example.com',
     flatten: true,
     dedupeStrategy: 'merge',
   },
 });
 ```
+
+> **Tip:** You can control which schema sections are visible in the graph. Use `includeAll: true` to export all sections, or use `excludeKeys: ['internalSecret']` / `includeKeys: ['website', 'navbar']` to keep specific parts private.
 
 ---
 

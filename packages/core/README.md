@@ -54,6 +54,7 @@ const connector = staticConnector({
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector,
+  baseUrl: 'https://example.com',
 });
 
 // Fully inferred TypeScript types for your components
@@ -69,9 +70,7 @@ import { ContextualSite, Navbar, Faq } from 'contextual-ui';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph({
-    graphOptions: { baseUrl: 'https://example.com' },
-  });
+  const graph = await siteApp.getGraph();
 
   return (
     <html lang="en">
@@ -148,14 +147,28 @@ Contextual UI provides one-line route handler generators to serve a unified, ref
 // app/api/graph.json/route.ts
 import { siteApp } from '@/data/site.server';
 
+// Serves the full Knowledge Graph (inherits baseUrl from createContextualApp)
 export const { GET } = siteApp.createGraphHandler({
+  includeAll: true, // Exports all schema sections (including non-global ones like FAQ)
   graphOptions: {
-    baseUrl: 'https://example.com',
     flatten: true,
     dedupeStrategy: 'merge',
   },
 });
 ```
+
+### Graph Filtering & Privacy Options
+
+You can control which schema sections are exported to the `@graph` or layout script:
+
+| Option | Type | Description |
+| :--- | :--- | :--- |
+| `includeAll` | `boolean` | When `true`, exports all schema sections, bypassing the default `isGlobal: false` filter (e.g. including FAQPage, local page entities). |
+| `includeKeys` | `string[]` | Whitelist specific schema sections to include (e.g. `['website', 'navbar', 'faq']`). |
+| `excludeKeys` | `string[]` | Exclude specific sensitive or private schema sections (e.g. `['internalAnnouncement', 'adminConfig']`). |
+| `graphOptions.baseUrl` | `string` | Override the default `baseUrl` configured in `createContextualApp`. |
+| `graphOptions.flatten` | `boolean` | Flattens nested entities to the root `@graph` array with `@id` pointers (default: `true`). |
+| `graphOptions.dedupeStrategy` | `'merge' \| 'replace' \| 'keep-first'` | Strategy for resolving entities with duplicate `@id`s (default: `'merge'`). |
 
 ### Using Standalone `createGraphRouteHandler`
 
