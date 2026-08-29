@@ -43,15 +43,25 @@ We will use **Option A** for `FAQPage`, where the FAQ component still generates 
 - [x] Optionally run `pnpm build` in root to verify `core` compiles and the Next.js app builds properly with the new data contract.
 
 ### 4. Route-Specific WebPage Support (`packages/core` & `starter-kit`)
-- [ ] Update `packages/core/src/server/createContextualApp.ts`:
+- [x] Update `packages/core/src/server/createContextualApp.ts`:
   - Allow `dataOverrides?: Partial<InferData<TSchema>>` in `GetGraphOptions`.
   - In `getGraph(handlerOptions)` and `fetchData(overrides?)`, merge `dataOverrides` with raw data before hydration.
-- [ ] Add unit tests in `packages/core/src/server/createContextualApp.test.ts` to test `dataOverrides` for route-specific `webpage` metadata generation.
-- [ ] Update `apps/starter-kit/app/docs/page.tsx`, `apps/starter-kit/app/schema/page.tsx`, and `apps/starter-kit/app/cms/page.tsx` (or their client/server data loaders) to supply their route-specific `webpage` information (e.g., `/docs` has title "Documentation - Contextual UI Starter Kit", url `/docs`, etc.).
+- [x] Add unit tests in `packages/core/src/server/createContextualApp.test.ts` to test `dataOverrides` for route-specific `webpage` metadata generation.
 
-### 5. Update Documentation (`docs/`)
-- [ ] Review and update `docs/guides/global-graph-export.md`:
+### 5. Shift JSON-LD Script Injection to Page Level (`WebPage` Component)
+- [x] Create `packages/core/src/components/webpage/WebPage.tsx`:
+  - An async React Server Component (or utility wrapper) that accepts `app`, `name`, `url`, `description`, and `children`.
+  - Inside, it calls `app.getGraph({ dataOverrides: { webpage: { name, url, description } } })` and renders the `<script type="application/ld+json">`.
+- [x] Update `packages/core/src/components/site/ContextualSite.tsx` (if needed) to ensure that the layout's global graph script doesn't conflict. We can disable the automatic script injection when using App Router, or add a `disableJsonLdScript` prop check in `app/layout.tsx`.
+- [x] Refactor starter-kit routes:
+  - `apps/starter-kit/app/layout.tsx`: pass `options={{ disableJsonLdScript: true }}` to `<ContextualSite>`.
+  - `apps/starter-kit/app/page.tsx`: Wrap contents with `<WebPage name="Home" ...>`.
+  - `apps/starter-kit/app/docs/page.tsx`: Wrap contents with `<WebPage name="Documentation" url="/docs" ...>`.
+  - Update `/schema` and `/cms` routes similarly.
+
+### 6. Update Documentation (`docs/`)
+- [x] Review and update `docs/guides/global-graph-export.md`:
   - Add `webpageRegistry` where `websiteRegistry` or other core registries are mentioned.
-  - Explain how `WebSite` represents the global domain while `WebPage` represents the current URL document and contains layout elements (`#navbar`, `#footer`, `#faq`).
-  - Document how to use `dataOverrides` in `siteApp.getGraph({ dataOverrides: { webpage: ... } })` for per-route Schema.org generation.
-- [ ] Update starter kit README and core README where architecture graphs or schemas are illustrated.
+  - Explain how `WebSite` represents the global domain while `WebPage` represents the current URL document.
+  - Document the `<WebPage>` wrapper component and how it handles per-route schema injection without relying on "overrides".
+- [x] Update starter kit README and core README where architecture graphs or schemas are illustrated.

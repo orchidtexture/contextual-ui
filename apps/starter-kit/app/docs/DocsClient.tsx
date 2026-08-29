@@ -378,6 +378,11 @@ const connector = staticConnector({
     url: 'https://example.com',
     description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
   },
+  webpage: {
+    name: 'Acme App - Home',
+    url: 'https://example.com',
+    description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
+  },
   navbar: {
     brand: { name: 'Acme', href: '/', logo: '/images/logo.svg' },
     links: [
@@ -426,15 +431,14 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Fetch validated data and the compiled Schema.org JSON-LD graph on the server
+  // Fetch validated data for global layout elements (Navbar, Footer, etc.)
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph();
 
   return (
     <html lang="en">
       <body>
-        {/* ContextualSite provides React context and injects the JSON-LD <script> */}
-        <ContextualSite data={data} graph={graph}>
+        {/* ContextualSite provides React context to all layout components */}
+        <ContextualSite data={data}>
           {children}
         </ContextualSite>
       </body>
@@ -442,49 +446,55 @@ export default async function RootLayout({
   );
 }`;
 
-  const pageCode = `import { Navbar, Faq, Breadcrumb, Footer } from 'contextual-ui';
+  const pageCode = `import { siteApp } from '@/data/site.server';
+import { WebPage } from 'contextual-ui/server';
+import { Navbar, Faq, Breadcrumb, Footer } from 'contextual-ui';
 
-export default function HomePage() {
+export default async function HomePage() {
+  const data = await siteApp.fetchData();
+
   return (
-    <main className="min-h-screen flex flex-col justify-between">
-      {/* 1. Navbar: Automatically reads navigation & brand from ContextualSite context */}
-      <Navbar.Root className="flex justify-between items-center px-6 py-4 border-b border-zinc-800">
-        <Navbar.Brand className="font-bold text-lg flex items-center gap-2">
-          Acme App
-        </Navbar.Brand>
-        <Navbar.Content className="flex gap-6 items-center">
-          {/* Menu links are automatically bound or customized */}
-        </Navbar.Content>
-      </Navbar.Root>
+    <WebPage app={siteApp} name="Acme App - Home" url="/">
+      <main className="min-h-screen flex flex-col justify-between">
+        {/* 1. Navbar: Automatically reads navigation & brand from ContextualSite context */}
+        <Navbar.Root className="flex justify-between items-center px-6 py-4 border-b border-zinc-800">
+          <Navbar.Brand className="font-bold text-lg flex items-center gap-2">
+            Acme App
+          </Navbar.Brand>
+          <Navbar.Content className="flex gap-6 items-center">
+            {/* Menu links are automatically bound or customized */}
+          </Navbar.Content>
+        </Navbar.Root>
 
-      <div className="max-w-4xl mx-auto px-6 py-12 flex-1 space-y-10 w-full">
-        {/* 2. Breadcrumbs: Injects Schema.org BreadcrumbList automatically */}
-        <Breadcrumb.Root
-          data={[
-            { id: '1', label: 'Home', url: '/' },
-            { id: '2', label: 'Docs', url: '/docs' },
-            { id: '3', label: 'Quickstart' },
-          ]}
-        >
-          <Breadcrumb.List className="flex items-center gap-2 text-sm text-zinc-400">
-            {/* Breadcrumb items & separators */}
-          </Breadcrumb.List>
-        </Breadcrumb.Root>
+        <div className="max-w-4xl mx-auto px-6 py-12 flex-1 space-y-10 w-full">
+          {/* 2. Breadcrumbs: Injects Schema.org BreadcrumbList automatically */}
+          <Breadcrumb.Root
+            data={[
+              { id: '1', label: 'Home', url: '/' },
+              { id: '2', label: 'Docs', url: '/docs' },
+              { id: '3', label: 'Quickstart' },
+            ]}
+          >
+            <Breadcrumb.List className="flex items-center gap-2 text-sm text-zinc-400">
+              {/* Breadcrumb items & separators */}
+            </Breadcrumb.List>
+          </Breadcrumb.Root>
 
-        {/* 3. FAQ: Injects Schema.org FAQPage automatically */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Frequently Asked Questions</h2>
-          <Faq.Root className="space-y-3">
-            {/* Accordion FAQ items automatically bound from schema data */}
-          </Faq.Root>
-        </section>
-      </div>
+          {/* 3. FAQ: Injects Schema.org FAQPage automatically */}
+          <section className="space-y-4">
+            <h2 className="text-xl font-bold">Frequently Asked Questions</h2>
+            <Faq.Root className="space-y-3">
+              {/* Accordion FAQ items automatically bound from schema data */}
+            </Faq.Root>
+          </section>
+        </div>
 
-      {/* 4. Footer: Injects Schema.org WPFooter automatically */}
-      <Footer.Root className="border-t border-zinc-800 px-6 py-8">
-        {/* Brand, columnar links, socials & copyright */}
-      </Footer.Root>
-    </main>
+        {/* 4. Footer: Injects Schema.org WPFooter automatically */}
+        <Footer.Root className="border-t border-zinc-800 px-6 py-8">
+          {/* Brand, columnar links, socials & copyright */}
+        </Footer.Root>
+      </main>
+    </WebPage>
   );
 }`;
 
@@ -596,9 +606,9 @@ export const { GET } = siteApp.createGraphHandler({
               4
             </span>
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">Hydrate Root Layout with ContextualSite</h3>
+              <h3 className="text-base font-semibold text-zinc-100">Wrap Root Layout with ContextualSite</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                In <code className="code-short">app/layout.tsx</code> (Server Component), fetch data and the generated Schema.org graph. Wrap children in <code className="code-short">&lt;ContextualSite&gt;</code> to provide data and automatically inject the JSON-LD script tag.
+                In <code className="code-short">app/layout.tsx</code> (Server Component), fetch shared data and wrap children in <code className="code-short">&lt;ContextualSite&gt;</code> to distribute site context (Navbar, Footer, Brand) to all child components.
               </p>
             </div>
           </div>
@@ -614,9 +624,9 @@ export const { GET } = siteApp.createGraphHandler({
               5
             </span>
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">Render Headless UI Components</h3>
+              <h3 className="text-base font-semibold text-zinc-100">Render WebPage &amp; Headless UI Components</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Render <code className="code-short">&lt;Navbar.Root&gt;</code>, <code className="code-short">&lt;Breadcrumb.Root&gt;</code>, <code className="code-short">&lt;Faq.Root&gt;</code>, and <code className="code-short">&lt;Footer.Root&gt;</code> in your pages. Components automatically resolve schema data from context with zero prop-drilling, while giving you complete styling freedom.
+                Wrap your route in <code className="code-short">&lt;WebPage app=&#123;siteApp&#125; ...&gt;</code> (from <code className="code-short">contextual-ui/server</code>) to compile and inject the route-specific Schema.org JSON-LD graph. Render headless components like <code className="code-short">&lt;Navbar.Root&gt;</code>, <code className="code-short">&lt;Faq.Root&gt;</code>, and <code className="code-short">&lt;Footer.Root&gt;</code> without prop-drilling.
               </p>
             </div>
           </div>
@@ -1198,7 +1208,8 @@ export function DocsClient({ data }: { data: SiteData }) {
   ];
 
   const componentNavItems = [
-    { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & Graph' },
+    { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & SPA Graph' },
+    { id: 'webpage', label: 'WebPage', desc: 'Route Metadata & JSON-LD' },
     { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
     { id: 'footer', label: 'Footer', desc: 'Footer & Attribution' },
     { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
@@ -1228,6 +1239,7 @@ export function DocsClient({ data }: { data: SiteData }) {
     const sections = [
       'quickstart',
       'contextual-site',
+      'webpage',
       'navbar',
       'footer',
       'breadcrumb',
@@ -1252,26 +1264,34 @@ export function DocsClient({ data }: { data: SiteData }) {
   // ContextualSite Code & Schema
   // ---------------------------------------------------------------------------
   const contextualSiteCode = `import { siteApp } from '@/data/site.server';
-import { ContextualSite, Navbar, Faq } from 'contextual-ui';
+import { ContextualSite, Navbar, Faq, Footer } from 'contextual-ui';
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+// 1. Multi-Page Next.js (App Router)
+// In layout.tsx: distributes data down to all pages
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph();
-
   return (
     <html lang="en">
       <body>
-        <ContextualSite data={data} graph={graph}>
-          {/* Child components automatically infer data from context */}
-          <Navbar.Root />
+        <ContextualSite data={data}>
           {children}
         </ContextualSite>
       </body>
     </html>
+  );
+}
+
+// 2. Single Page Applications (SPAs / Landing Pages)
+// In App.tsx: automatically compiles and injects the unified Schema.org JSON-LD graph
+export function SinglePageApp() {
+  return (
+    <ContextualSite schema={siteSchema} data={siteData}>
+      <Navbar.Root />
+      <main>
+        <Faq.Root />
+      </main>
+      <Footer.Root />
+    </ContextualSite>
   );
 }`;
 
@@ -1286,20 +1306,27 @@ export default async function RootLayout({
         "description": data.website?.description || "A headless UI and semantic SEO Knowledge Graph starter kit."
       },
       {
+        "@type": "WebPage",
+        "@id": "https://contextual.site/#webpage",
+        "name": "Home",
+        "url": "https://contextual.site/",
+        "isPartOf": { "@id": "https://contextual.site/#website" },
+        "hasPart": [
+          { "@id": "https://contextual.site/#navbar" },
+          { "@id": "https://contextual.site/#faq" },
+          { "@id": "https://contextual.site/#footer" }
+        ]
+      },
+      {
         "@type": "SiteNavigationElement",
         "@id": "https://contextual.site/#navbar",
         "name": "Navigation Bar",
-        "isPartOf": { "@id": "https://contextual.site/#website" },
-        "hasPart": (data.navbar?.links || []).map(link => ({
-          "@type": "WebPage",
-          "name": link.label,
-          "url": link.href
-        }))
+        "isPartOf": { "@id": "https://contextual.site/#webpage" },
       },
       {
         "@type": "FAQPage",
         "@id": "https://contextual.site/#faq",
-        "isPartOf": { "@id": "https://contextual.site/#website" },
+        "isPartOf": { "@id": "https://contextual.site/#webpage" },
         "mainEntity": (data.faq || []).map(item => ({
           "@type": "Question",
           "name": item.question,
@@ -1308,6 +1335,56 @@ export default async function RootLayout({
             "text": item.answer
           }
         }))
+      }
+    ]
+  }, null, 2);
+
+  const webpageCode = `import { siteApp } from '@/data/site.server';
+import { WebPage } from 'contextual-ui/server';
+import { DocsClient } from './DocsClient';
+
+export default async function DocsPage() {
+  const data = await siteApp.fetchData({
+    webpage: {
+      name: 'Documentation - Contextual UI',
+      url: '/docs',
+      description: 'Learn how to use Contextual UI.'
+    }
+  });
+
+  return (
+    <WebPage
+      app={siteApp}
+      name="Documentation - Contextual UI"
+      url="/docs"
+      description="Learn how to use Contextual UI."
+    >
+      <DocsClient data={data} />
+    </WebPage>
+  );
+}`;
+
+  const webpageSchema = JSON.stringify({
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://contextual.site/#website",
+        "name": "Contextual UI Starter Kit",
+        "url": "https://contextual.site"
+      },
+      {
+        "@type": "WebPage",
+        "@id": "https://contextual.site/#webpage",
+        "name": "Documentation - Contextual UI",
+        "url": "https://contextual.site/docs",
+        "description": "Learn how to use Contextual UI.",
+        "isPartOf": { "@id": "https://contextual.site/#website" },
+        "hasPart": [
+          { "@id": "https://contextual.site/#navbar" },
+          { "@id": "https://contextual.site/#faq" },
+          { "@id": "https://contextual.site/#footer" }
+        ]
       }
     ]
   }, null, 2);
@@ -1536,6 +1613,51 @@ export default async function RootLayout({
       required: true,
       schemaOrgMapping: '—',
       description: 'Child components rendered within ContextualSite context.',
+    },
+  ];
+
+  const webpageFields: SchemaField[] = [
+    {
+      name: 'app',
+      type: 'ContextualApp',
+      required: false,
+      schemaOrgMapping: '@graph',
+      description: 'ContextualApp instance to compile and inject the route-specific Schema.org JSON-LD graph.',
+    },
+    {
+      name: 'name',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WebPage.name',
+      description: 'Route-specific page title/name for search engines and AI agents.',
+    },
+    {
+      name: 'url',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WebPage.url',
+      description: 'Route-specific canonical pathname (e.g. "/docs").',
+    },
+    {
+      name: 'description',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WebPage.description',
+      description: 'Route-specific meta description.',
+    },
+    {
+      name: 'graph',
+      type: 'JsonLdGraphResult',
+      required: false,
+      schemaOrgMapping: '@graph',
+      description: 'Pre-computed Schema.org JSON-LD graph (optional explicit override).',
+    },
+    {
+      name: 'disableJsonLdScript',
+      type: 'boolean',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Disables script tag rendering when set to true.',
     },
   ];
 
@@ -2601,12 +2723,24 @@ export default async function RootLayout({
           <ShowcaseSection
             id="contextual-site"
             title="<ContextualSite /> Provider"
-            description="The root provider that coordinates domain-level data distribution to all contextual UI components and consolidates their schema data into a single, unified Schema.org JSON-LD @graph."
+            description="The root provider that coordinates domain-level data distribution to all contextual UI components. In single-page apps (SPAs), it compiles and injects the unified Schema.org JSON-LD @graph."
             fields={contextualSiteFields}
             codeString={contextualSiteCode}
             schemaString={contextualSiteSchema}
-            exampleDescription="Wrap your root layout with ContextualSite to provide data and unified @graph script."
-            schemaDescription="Unified Schema.org @graph automatically injected in a single script tag."
+            exampleDescription="Wrap your root layout with ContextualSite to provide data across all components."
+            schemaDescription="Unified Schema.org @graph automatically injected in a single script tag for SPAs."
+          />
+
+          {/* WebPage Showcase */}
+          <ShowcaseSection
+            id="webpage"
+            title="<WebPage /> Wrapper"
+            description="The route-level React Server Component that coordinates page-level Schema.org metadata and automatically injects the canonical @graph script tag for that specific URL."
+            fields={webpageFields}
+            codeString={webpageCode}
+            schemaString={webpageSchema}
+            exampleDescription="Wrap individual routes in page.tsx with WebPage from contextual-ui/server."
+            schemaDescription="Route-accurate Schema.org WebPage node connecting navbar, footer, and FAQ."
           />
 
           {/* Navbar Showcase */}

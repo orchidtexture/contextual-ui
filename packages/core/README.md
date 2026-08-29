@@ -20,11 +20,18 @@ pnpm add contextual-ui zod
 Combine standard Zod schemas with pre-built registries that automatically generate Schema.org JSON-LD:
 
 ```typescript
-import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
+import {
+  defineSchema,
+  websiteRegistry,
+  webpageRegistry,
+  navbarRegistry,
+  faqRegistry,
+} from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
   website: websiteRegistry(),
+  webpage: webpageRegistry(),
   navbar: navbarRegistry(),
   faq: faqRegistry(),
   announcement: {
@@ -61,30 +68,49 @@ export const siteApp = createContextualApp({
 export type SiteData = InferData<typeof siteSchema>;
 ```
 
-### 3. Render with `ContextualSite` Wrapper (`app/layout.tsx`)
-Wrap your layout or app root with `ContextualSite` to automatically provide data to child components and inject a single, unified Schema.org `@graph` `<script>` tag:
+### 3. Render with `ContextualSite` & `WebPage` (`app/layout.tsx` and `app/page.tsx`)
+Wrap your layout or app root with `ContextualSite` to distribute global data, and wrap routes with `<WebPage />` from `contextual-ui/server` to inject route-accurate Schema.org JSON-LD graphs:
 
 ```tsx
+// app/layout.tsx
 import { siteApp } from '@/data/site.server';
-import { ContextualSite, Navbar, Faq } from 'contextual-ui';
+import { ContextualSite } from 'contextual-ui';
+import { Navbar } from '@/components/Navbar';
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const data = await siteApp.fetchData();
-  const graph = await siteApp.getGraph();
 
   return (
     <html lang="en">
       <body>
-        <ContextualSite data={data} graph={graph}>
-          {/* Navbar automatically consumes data.navbar from context */}
-          <Navbar.Root>
-            <Navbar.Brand />
-          </Navbar.Root>
-
+        <ContextualSite data={data} options={{ disableJsonLdScript: true }}>
+          <Navbar />
           {children}
         </ContextualSite>
       </body>
     </html>
+  );
+}
+```
+
+```tsx
+// app/docs/page.tsx
+import { siteApp } from '@/data/site.server';
+import { WebPage } from 'contextual-ui/server';
+import { DocsClient } from './DocsClient';
+
+export default async function DocsPage() {
+  const data = await siteApp.fetchData({
+    webpage: {
+      name: 'Docs',
+      url: '/docs',
+    },
+  });
+
+  return (
+    <WebPage app={siteApp} name="Docs" url="/docs">
+      <DocsClient data={data} />
+    </WebPage>
   );
 }
 ```
@@ -112,6 +138,46 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 | `options` | `ContextualSiteOptions` | Graph configuration (e.g., `baseUrl`, `dedupeStrategy`, `disableJsonLdScript`). |
 | `asChild` | `boolean` | If true, merges props onto the immediate child element instead of rendering a `<div>`. |
 | `className` | `string` | CSS class name for the wrapper element. |
+
+---
+
+## 📱 Architecture Patterns: SPAs vs. Multi-Page Applications
+
+Contextual UI supports both Single-Page Applications (SPAs) and Server-Rendered Multi-Page Applications (Next.js App Router):
+
+### Pattern 1: Multi-Page Applications (Next.js App Router)
+In multi-page architectures, layout components (`<ContextualSite>`) distribute global data (`navbar`, `footer`), while `<WebPage>` in each `page.tsx` generates route-specific Schema.org JSON-LD scripts with accurate URLs and titles:
+
+* **Root Layout (`app/layout.tsx`)**: Wraps the tree with `<ContextualSite data={data}>` (no `graph` prop passed, so no sitewide script is injected).
+* **Page (`app/docs/page.tsx`)**: Wraps content with `<WebPage app={siteApp} name="Docs" url="/docs">`, which compiles and injects the route-accurate Schema.org graph.
+
+### Pattern 2: Single-Page Applications & Landing Pages (Vite, CRA, or 1-Page Next.js)
+If your app is a single landing page without multiple sub-routes, `<ContextualSite>` handles everything in one place:
+
+```tsx
+// App.tsx (Single Landing Page / SPA)
+import { ContextualSite, Navbar, Faq, Footer } from 'contextual-ui';
+import { siteSchema } from './site.schema';
+import { siteData } from './site.data';
+
+export default function App() {
+  return (
+    <ContextualSite schema={siteSchema} data={siteData}>
+      <Navbar.Root />
+      <main>
+        <Faq.Root />
+      </main>
+      <Footer.Root />
+    </ContextualSite>
+  );
+}
+```
+In this mode, `<ContextualSite>` compiles the unified Schema.org `@graph` (combining `Organization`, `WebSite`, `WebPage`, `Navbar`, `FAQPage`, `Footer`) and injects the `<script type="application/ld+json">` automatically.
+
+### Pattern 3: Client-Routed SPAs (React Router / TanStack Router)
+For SPAs with client-side routing:
+* Put `<ContextualSite data={siteData}>` around your root router.
+* Render `<WebPage name="Docs" url="/docs">` inside each client route view to dynamically set route metadata.
 
 ---
 

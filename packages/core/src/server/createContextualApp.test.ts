@@ -69,4 +69,45 @@ describe('createContextualApp with baseUrl', () => {
     const websiteNode = graph['@graph'].find((node: any) => node['@type'] === 'WebSite');
     expect(websiteNode?.['@id']).toBe('https://custom-override.site/#website');
   });
+
+  it('allows overriding data with dataOverrides in getGraph', async () => {
+    const app = createContextualApp({
+      schema,
+      connector,
+      baseUrl: 'https://contextual.site',
+    });
+
+    const graph = await app.getGraph({
+      includeAll: true,
+      dataOverrides: {
+        webpage: {
+          name: 'Custom Page - Overridden',
+          url: 'https://contextual.site/custom',
+        }
+      }
+    });
+
+    const webpageNode = graph['@graph'].find((node: any) => node['@type'] === 'WebPage');
+    expect(webpageNode).toBeDefined();
+    expect(webpageNode?.name).toBe('Custom Page - Overridden');
+    expect(webpageNode?.url).toBe('https://contextual.site/custom');
+  });
+
+  it('allows overriding data with dataOverrides in fetchData', async () => {
+    const app = createContextualApp({
+      schema,
+      connector,
+    });
+
+    const data = await app.fetchData({
+      webpage: {
+        name: 'Custom Page Data',
+        url: 'https://contextual.site/data',
+      }
+    });
+
+    expect(data.webpage?.name).toBe('Custom Page Data');
+    expect(data.webpage?.url).toBe('https://contextual.site/data');
+    expect(data.website?.name).toBe('Contextual UI');
+  });
 });

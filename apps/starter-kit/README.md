@@ -50,12 +50,19 @@ Define your data structures using standard Zod schemas combined with Contextual 
 
 ```typescript
 // data/site.schema.ts
-import { defineSchema, websiteRegistry, navbarRegistry, faqRegistry } from 'contextual-ui/server';
+import {
+  defineSchema,
+  websiteRegistry,
+  webpageRegistry,
+  navbarRegistry,
+  faqRegistry
+} from 'contextual-ui/server';
 import { z } from 'zod';
 
 export const siteSchema = defineSchema({
   // Built-in registries with automatic JSON-LD Schema.org generators
   website: websiteRegistry(),
+  webpage: webpageRegistry(),
   navbar: navbarRegistry(),
   faq: faqRegistry(),
 
@@ -123,11 +130,16 @@ Fetch your data on the server with `siteApp.fetchData()`. Contextual UI componen
 ```tsx
 // app/page.tsx (Server Component)
 import { siteApp } from '@/data/site.server';
+import { WebPage } from 'contextual-ui/server';
 import { HomeClient } from './HomeClient';
 
 export default async function HomePage() {
   const data = await siteApp.fetchData();
-  return <HomeClient data={data} />;
+  return (
+    <WebPage app={siteApp} name="Contextual UI Starter Kit - Home" url="/">
+      <HomeClient data={data} />
+    </WebPage>
+  );
 }
 ```
 

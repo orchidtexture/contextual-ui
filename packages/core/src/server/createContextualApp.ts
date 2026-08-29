@@ -11,30 +11,34 @@ export interface ContextualAppOptions<
   baseUrl?: string;
 }
 
-export type GetGraphOptions = GraphRouteHandlerOptions & {
+export type GetGraphOptions<
+  TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any } = any
+> = GraphRouteHandlerOptions & {
   includeKeys?: string[];
   excludeKeys?: string[];
   includeAll?: boolean;
+  dataOverrides?: Partial<InferData<TSchema>>;
 };
 
 export function createContextualApp<
   TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any },
   TConnector extends { fetchData: () => Promise<any> }
 >(options: ContextualAppOptions<TSchema, TConnector>) {
-  const getHydrated = async () => {
+  const getHydrated = async (overrides?: Partial<InferData<TSchema>>) => {
     const raw = await options.connector.fetchData();
-    return options.schema.hydrate(raw);
+    const merged = { ...raw, ...overrides };
+    return options.schema.hydrate(merged);
   };
 
   return {
     schema: options.schema,
     connector: options.connector,
-    async fetchData(): Promise<InferData<TSchema>> {
-      const raw = await options.connector.fetchData();
-      return options.schema.hydrate(raw).raw as InferData<TSchema>;
+    async fetchData(dataOverrides?: Partial<InferData<TSchema>>): Promise<InferData<TSchema>> {
+      const hydrated = await getHydrated(dataOverrides);
+      return hydrated.raw as InferData<TSchema>;
     },
-    async getGraph(handlerOptions?: GetGraphOptions) {
-      const hydrated = await getHydrated();
+    async getGraph(handlerOptions?: GetGraphOptions<TSchema>) {
+      const hydrated = await getHydrated(handlerOptions?.dataOverrides);
       const generated = hydrated.generateJsonLd(handlerOptions?.jsonLdContext);
       const config = hydrated.config || options.schema.config || {};
       
@@ -70,11 +74,11 @@ export function createContextualApp<
       };
       return buildGraph(entities, graphOptions);
     },
-    createGraphHandler(handlerOptions?: GetGraphOptions) {
+    createGraphHandler(handlerOptions?: GetGraphOptions<TSchema>) {
       return {
         GET: async (req: Request) => {
-          const hydrated = await getHydrated();
-          const effectiveOptions: GetGraphOptions = {
+          const hydrated = await getHydrated(handlerOptions?.dataOverrides);
+          const effectiveOptions: GetGraphOptions<TSchema> = {
             ...handlerOptions,
             graphOptions: {
               baseUrl: options.baseUrl,
@@ -86,7 +90,7 @@ export function createContextualApp<
         },
       };
     },
-    createGraphRouteHandler(handlerOptions?: GetGraphOptions) {
+    createGraphRouteHandler(handlerOptions?: GetGraphOptions<TSchema>) {
       return this.createGraphHandler(handlerOptions);
     },
   };

@@ -29,6 +29,8 @@ export { generateFooterJsonLd, exportAgentData as exportFooterAgentData, footerR
 export { WebsiteDataSchema } from '../components/website/website.schema';
 export type { WebsiteData } from '../components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from '../components/website/website.utils';
+export { WebPage } from '../components/webpage';
+export type { WebPageProps } from '../components/webpage';
 export { WebpageDataSchema } from '../components/webpage/webpage.schema';
 export type { WebpageData } from '../components/webpage/webpage.schema';
 export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry } from '../components/webpage/webpage.utils';

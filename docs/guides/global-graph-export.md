@@ -18,11 +18,19 @@ Contextual UI separates schema generation from React component rendering:
 ### Step 1: Define Schemas
 ```typescript
 // data/site.schema.ts
-import { defineSchema, faqRegistry, navbarRegistry } from '@contextual-ui/core/server';
+import {
+  defineSchema,
+  websiteRegistry,
+  webpageRegistry,
+  faqRegistry,
+  navbarRegistry
+} from '@contextual-ui/core/server';
 
 export const siteSchema = defineSchema({
-  faq: faqRegistry(),
+  website: websiteRegistry(),
+  webpage: webpageRegistry(),
   navbar: navbarRegistry(),
+  faq: faqRegistry(),
 });
 ```
 
@@ -79,5 +87,46 @@ export async function GET(req: Request) {
   return Response.json(graph, {
     headers: { 'Content-Type': 'application/ld+json' },
   });
+}
+```
+
+---
+
+## 4. WebSite vs. WebPage & Page-Level Graph Ingestion
+
+Schema.org distinguishes between a top-level `WebSite` and individual `WebPage` nodes:
+* `WebSite` represents the global domain and points to the publishing `Organization`.
+* `WebPage` represents the specific route/URL document, referencing the `WebSite` via `isPartOf`.
+* Layout components (`Navbar`, `Footer`, `FAQPage`, `Breadcrumb`) belong to and reference the `WebPage`.
+
+### Using `<WebPage />` for Route-Level Schema Injection (Next.js App Router)
+
+In Next.js App Router, use `<WebPage>` in each `page.tsx` to declare route-level metadata and inject the unified `@graph` for that route:
+
+```tsx
+// app/docs/page.tsx
+import { siteApp } from '@/data/site.server';
+import { WebPage } from 'contextual-ui/server';
+import { DocsClient } from './DocsClient';
+
+export default async function DocsPage() {
+  const data = await siteApp.fetchData({
+    webpage: {
+      name: 'Documentation - Contextual UI',
+      url: '/docs',
+      description: 'Learn how to use Contextual UI.',
+    },
+  });
+
+  return (
+    <WebPage
+      app={siteApp}
+      name="Documentation - Contextual UI"
+      url="/docs"
+      description="Learn how to use Contextual UI."
+    >
+      <DocsClient data={data} />
+    </WebPage>
+  );
 }
 ```
