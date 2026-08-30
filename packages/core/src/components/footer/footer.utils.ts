@@ -61,7 +61,6 @@ export function generateFooterJsonLd(data: FooterData, ctx?: Partial<JsonLdConte
       ? {
           hasPart: allLinks.map((link) => ({
             '@type': 'SiteNavigationElement',
-            '@id': create('footer-nav', link.id),
             name: link.label,
             url: link.href,
           })),

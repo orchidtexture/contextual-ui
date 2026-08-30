@@ -101,7 +101,23 @@ Schema.org distinguishes between a top-level `WebSite` and individual `WebPage` 
 
 ### Using `<WebPage />` for Route-Level Schema Injection (Next.js App Router)
 
-In Next.js App Router, use `<WebPage>` in each `page.tsx` to declare route-level metadata and inject the unified `@graph` for that route:
+In Next.js App Router, you can define your known site pages in your data connector as an array:
+
+```typescript
+// data/site.server.ts
+export const connector = staticConnector({
+  website: { name: 'Contextual UI', url: 'https://example.com' },
+  webpage: [
+    { id: 'home', name: 'Home', url: '/' },
+    { id: 'docs', name: 'Documentation', url: '/docs', description: 'Learn how to use Contextual UI.' },
+  ],
+  // ...
+});
+```
+
+When hitting `/api/graph.json`, Contextual UI exports all `WebPage` nodes into the global Knowledge Graph for AI agents.
+
+Inside individual route files (`page.tsx`), use `<WebPage>` with the matching `id` or inline overrides to inject the route-specific graph for search engines:
 
 ```tsx
 // app/docs/page.tsx
@@ -110,21 +126,10 @@ import { WebPage } from 'contextual-ui/server';
 import { DocsClient } from './DocsClient';
 
 export default async function DocsPage() {
-  const data = await siteApp.fetchData({
-    webpage: {
-      name: 'Documentation - Contextual UI',
-      url: '/docs',
-      description: 'Learn how to use Contextual UI.',
-    },
-  });
+  const data = await siteApp.fetchData();
 
   return (
-    <WebPage
-      app={siteApp}
-      name="Documentation - Contextual UI"
-      url="/docs"
-      description="Learn how to use Contextual UI."
-    >
+    <WebPage app={siteApp} id="docs">
       <DocsClient data={data} />
     </WebPage>
   );

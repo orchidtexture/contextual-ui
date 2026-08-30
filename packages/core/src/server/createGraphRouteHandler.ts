@@ -49,7 +49,7 @@ export function createGraphRouteHandler(
         }
 
         if (typeof filteredGenerated === 'object' && filteredGenerated !== null) {
-          entities = Object.values(filteredGenerated).filter(Boolean) as JsonLdObject[];
+          entities = Object.values(filteredGenerated).flat().filter(Boolean) as JsonLdObject[];
         }
 
         const graph = buildGraph(entities, options.graphOptions);

@@ -16,11 +16,9 @@ export function generateFaqJsonLd(items: FaqData, ctx?: Partial<JsonLdContext>) 
     isPartOf: refer('webpage'),
     mainEntity: items.map((item) => ({
       '@type': 'Question',
-      '@id': create('faq-q', item.id),
       name: item.question,
       acceptedAnswer: {
         '@type': 'Answer',
-        '@id': create('faq-a', item.id),
         text: item.answer,
       },
     })),

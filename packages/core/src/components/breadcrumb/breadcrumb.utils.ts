@@ -20,7 +20,6 @@ export function generateBreadcrumbJsonLd(
     isPartOf: refer('webpage'),
     itemListElement: items.map((item, index) => ({
       '@type': 'ListItem',
-      '@id': create('breadcrumb-item', item.id || String(index + 1)),
       position: index + 1,
       name: item.label,
       ...(item.url

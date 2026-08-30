@@ -96,6 +96,26 @@ const connector = staticConnector({
     url: siteUrl,
     description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
   },
+  webpage: [
+    {
+      id: 'home',
+      name: 'Contextual UI Starter Kit - Home',
+      url: '/',
+      description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
+    },
+    {
+      id: 'docs',
+      name: 'Documentation - Contextual UI Starter Kit',
+      url: '/docs',
+      description: 'Learn how to use Contextual UI.',
+    },
+    {
+      id: 'schema',
+      name: 'Schema Inspector - Contextual UI Starter Kit',
+      url: '/schema',
+      description: 'Inspect the generated Schema.org JSON-LD graph.',
+    },
+  ],
   faq: [
     { id: '1', question: 'What is Contextual UI Starter Kit?', answer: 'An open-source starter for SSOT apps.' }
   ],
@@ -136,7 +156,7 @@ import { HomeClient } from './HomeClient';
 export default async function HomePage() {
   const data = await siteApp.fetchData();
   return (
-    <WebPage app={siteApp} name="Contextual UI Starter Kit - Home" url="/">
+    <WebPage app={siteApp} id="home">
       <HomeClient data={data} />
     </WebPage>
   );

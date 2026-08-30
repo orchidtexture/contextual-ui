@@ -2,15 +2,14 @@ import { createId, refersTo } from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../../registry/defineSchema';
 import { NavbarDataSchema, NavbarData, NavItem } from './navbar.schema';
 
-function mapNavLink(link: NavItem, create: typeof createId): any {
+function mapNavLink(link: NavItem): any {
   return {
     '@type': 'SiteNavigationElement',
-    '@id': create('nav', link.id),
     name: link.label,
     ...(link.href ? { url: link.href } : {}),
     ...(link.children && link.children.length > 0
       ? {
-          hasPart: link.children.map((child) => mapNavLink(child, create)),
+          hasPart: link.children.map((child) => mapNavLink(child)),
         }
       : {}),
   };
@@ -30,7 +29,7 @@ export function generateNavbarJsonLd(data: NavbarData, ctx?: Partial<JsonLdConte
     isPartOf: refer('webpage'),
     name: data.brand?.name || 'Navigation',
     url: data.brand?.href || '/',
-    hasPart: data.links.map((link) => mapNavLink(link, create)),
+    hasPart: data.links.map((link) => mapNavLink(link)),
   };
 }
 

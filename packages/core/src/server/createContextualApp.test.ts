@@ -110,4 +110,98 @@ describe('createContextualApp with baseUrl', () => {
     expect(data.webpage?.url).toBe('https://contextual.site/data');
     expect(data.website?.name).toBe('Contextual UI');
   });
+
+  describe('multi-page / array webpage schema', () => {
+    const multiPageConnector = {
+      async fetchData() {
+        return {
+          website: {
+            name: 'Contextual UI',
+            url: 'https://contextual.site',
+          },
+          webpage: [
+            {
+              id: 'home',
+              name: 'Contextual UI - Home',
+              url: 'https://contextual.site',
+              description: 'Home page description',
+            },
+            {
+              id: 'docs',
+              name: 'Contextual UI - Docs',
+              url: 'https://contextual.site/docs',
+              description: 'Docs page description',
+            },
+            {
+              id: 'schema',
+              name: 'Contextual UI - Schema',
+              url: 'https://contextual.site/schema',
+              description: 'Schema inspector description',
+            },
+          ],
+          faq: [
+            { id: '1', question: 'What is this?', answer: 'A test.' },
+          ],
+        };
+      },
+    };
+
+    it('generates full multi-page knowledge graph when includeAll is true', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: multiPageConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const graph = await app.getGraph({ includeAll: true });
+      const webpageNodes = graph['@graph'].filter((node: any) => node['@type'] === 'WebPage');
+
+      expect(webpageNodes).toHaveLength(3);
+      expect(webpageNodes.map((n: any) => n['@id'])).toEqual([
+        'https://contextual.site/#webpage:home',
+        'https://contextual.site/#webpage:docs',
+        'https://contextual.site/#webpage:schema',
+      ]);
+      expect(webpageNodes.every((n: any) => n.isPartOf['@id'] === 'https://contextual.site/#website')).toBe(true);
+    });
+
+    it('filters to a single page node when pageId is provided', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: multiPageConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const graph = await app.getGraph({ pageId: 'docs' });
+      const webpageNodes = graph['@graph'].filter((node: any) => node['@type'] === 'WebPage');
+
+      expect(webpageNodes).toHaveLength(1);
+      expect(webpageNodes[0]?.['@id']).toBe('https://contextual.site/#webpage:docs');
+      expect(webpageNodes[0]?.name).toBe('Contextual UI - Docs');
+      expect(webpageNodes[0]?.description).toBe('Docs page description');
+    });
+
+    it('filters by pageUrl and merges dataOverrides', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: multiPageConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const graph = await app.getGraph({
+        pageUrl: 'https://contextual.site/docs',
+        dataOverrides: {
+          webpage: {
+            name: 'Overridden Docs Title',
+          },
+        },
+      });
+
+      const webpageNodes = graph['@graph'].filter((node: any) => node['@type'] === 'WebPage');
+      expect(webpageNodes).toHaveLength(1);
+      expect(webpageNodes[0]?.['@id']).toBe('https://contextual.site/#webpage:docs');
+      expect(webpageNodes[0]?.name).toBe('Overridden Docs Title');
+      expect(webpageNodes[0]?.description).toBe('Docs page description');
+    });
+  });
 });

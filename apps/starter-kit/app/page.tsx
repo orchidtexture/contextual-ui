@@ -5,7 +5,7 @@ import { HomeClient } from './HomeClient';
 export default async function Home() {
   const data = await siteApp.fetchData();
   return (
-    <WebPage app={siteApp} name="Contextual UI Starter Kit - Home" url="/">
+    <WebPage app={siteApp} id="home">
       <HomeClient data={data} />
     </WebPage>
   );

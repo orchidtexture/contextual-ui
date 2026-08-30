@@ -118,7 +118,7 @@ export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
               jsonLdData[key] = section.generateJsonLd(data, context);
             }
           }
-          const entities = Object.values(jsonLdData).filter(Boolean) as JsonLdObject[];
+          const entities = Object.values(jsonLdData).flat().filter(Boolean) as JsonLdObject[];
           return buildGraph(entities, options);
         },
       };
@@ -161,7 +161,7 @@ export function defineSchema<TConfig extends SchemaConfig>(config: TConfig) {
       options?: GraphBuilderOptions & { jsonLdContext?: Partial<JsonLdContext> }
     ): JsonLdGraphResult {
       const jsonLdData = this.generateJsonLd(validatedData, options?.jsonLdContext);
-      const entities = Object.values(jsonLdData).filter(Boolean) as JsonLdObject[];
+      const entities = Object.values(jsonLdData).flat().filter(Boolean) as JsonLdObject[];
       return buildGraph(entities, options);
     },
   };

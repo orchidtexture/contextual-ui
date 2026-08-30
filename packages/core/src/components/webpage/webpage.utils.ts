@@ -1,37 +1,62 @@
 import { createId, refersTo } from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../../registry/defineSchema';
-import { WebpageDataSchema, WebpageData } from './webpage.schema';
+import { WebpageDataSchema, WebpageData, WebpageItem } from './webpage.schema';
 
-/**
- * Generates a Schema.org WebPage JSON-LD object connecting sub-components.
- */
-export function generateWebpageJsonLd(data: WebpageData, ctx?: Partial<JsonLdContext>) {
+function generateSingleWebpageJsonLd(item: WebpageItem, ctx?: Partial<JsonLdContext>, isSolo: boolean = false) {
   const create = ctx?.createId ?? createId;
   const refer = ctx?.refersTo ?? refersTo;
+
+  const pageId = item.id
+    ? create('webpage', item.id)
+    : (isSolo || !item.url || item.url === '/'
+        ? create('webpage')
+        : create('webpage', item.url.replace(/^\//, '')));
 
   return {
     '@context': 'https://schema.org',
     '@type': 'WebPage',
-    '@id': create('webpage'),
-    ...(data.name ? { name: data.name } : {}),
-    ...(data.url ? { url: data.url } : {}),
-    ...(data.description ? { description: data.description } : {}),
-    isPartOf: data.isPartOf ? refer(data.isPartOf) : refer('website'),
+    '@id': pageId,
+    ...(item.name ? { name: item.name } : {}),
+    ...(item.url ? { url: item.url } : {}),
+    ...(item.description ? { description: item.description } : {}),
+    ...(item.inLanguage ? { inLanguage: item.inLanguage } : {}),
+    isPartOf: item.isPartOf ? refer(item.isPartOf) : refer('website'),
     hasPart:
-      data.hasPart && data.hasPart.length > 0
-        ? data.hasPart.map((part) => refer(part))
+      item.hasPart && item.hasPart.length > 0
+        ? item.hasPart.map((part) => refer(part))
         : [refer('navbar'), refer('faq'), refer('footer')],
   };
+}
+
+/**
+ * Generates Schema.org WebPage JSON-LD object(s) connecting sub-components.
+ */
+export function generateWebpageJsonLd(data: WebpageData, ctx?: Partial<JsonLdContext>) {
+  if (Array.isArray(data)) {
+    return data.map((item) => generateSingleWebpageJsonLd(item, ctx, false));
+  }
+  return generateSingleWebpageJsonLd(data || {}, ctx, true);
 }
 
 /**
  * Exports plain data for AI agents.
  */
 export function exportAgentData(data: WebpageData) {
+  if (Array.isArray(data)) {
+    return data.map((item) => ({
+      id: item.id,
+      name: item.name,
+      url: item.url,
+      description: item.description,
+      inLanguage: item.inLanguage,
+    }));
+  }
   return {
-    name: data.name,
-    url: data.url,
-    description: data.description,
+    id: data?.id,
+    name: data?.name,
+    url: data?.url,
+    description: data?.description,
+    inLanguage: data?.inLanguage,
   };
 }
 
@@ -46,3 +71,6 @@ export function webpageRegistry() {
     generateJsonLd: generateWebpageJsonLd,
   };
 }
+
+export const webpagesRegistry = webpageRegistry;
+

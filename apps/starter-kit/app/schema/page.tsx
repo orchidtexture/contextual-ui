@@ -4,13 +4,7 @@ import { SchemaClient } from './SchemaClient';
 
 export default async function SchemaPage() {
   const handler = siteApp.createGraphHandler({
-    dataOverrides: {
-      webpage: {
-        name: 'Schema Inspector - Contextual UI Starter Kit',
-        url: '/schema',
-        description: 'Inspect the generated Schema.org JSON-LD graph.',
-      },
-    },
+    includeAll: true,
     graphOptions: {
       flatten: true,
       dedupeStrategy: 'merge',
@@ -47,12 +41,7 @@ export const siteSchema = defineSchema({
 });`;
 
   return (
-    <WebPage
-      app={siteApp}
-      name="Schema Inspector - Contextual UI Starter Kit"
-      url="/schema"
-      description="Inspect the generated Schema.org JSON-LD graph."
-    >
+    <WebPage app={siteApp} id="schema">
       <SchemaClient schemaSource={schemaSourceCode} graphJson={graphJson} />
     </WebPage>
   );

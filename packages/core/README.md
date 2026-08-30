@@ -53,6 +53,10 @@ import { createContextualApp, InferData } from 'contextual-ui/server';
 
 const connector = staticConnector({
   website: { name: 'My App', url: 'https://example.com' },
+  webpage: [
+    { id: 'home', name: 'Home', url: '/' },
+    { id: 'docs', name: 'Docs', url: '/docs', description: 'Documentation' },
+  ],
   faq: [{ id: '1', question: 'What is this?', answer: 'An SSOT UI kit.' }],
   navbar: { links: [{ id: '1', label: 'Home', href: '/' }] },
   announcement: { enabled: true, message: 'Welcome!' },
@@ -100,15 +104,10 @@ import { WebPage } from 'contextual-ui/server';
 import { DocsClient } from './DocsClient';
 
 export default async function DocsPage() {
-  const data = await siteApp.fetchData({
-    webpage: {
-      name: 'Docs',
-      url: '/docs',
-    },
-  });
+  const data = await siteApp.fetchData();
 
   return (
-    <WebPage app={siteApp} name="Docs" url="/docs">
+    <WebPage app={siteApp} id="docs">
       <DocsClient data={data} />
     </WebPage>
   );

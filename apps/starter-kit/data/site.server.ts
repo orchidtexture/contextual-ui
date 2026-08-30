@@ -20,11 +20,32 @@ const connector = staticConnector({
     url: siteUrl,
     description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
   },
-  webpage: {
-    name: 'Contextual UI Starter Kit - Home',
-    url: siteUrl,
-    description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
-  },
+  webpage: [
+    {
+      id: 'home',
+      name: 'Contextual UI Starter Kit - Home',
+      url: '/',
+      description: 'A headless UI and semantic SEO Knowledge Graph starter kit.',
+    },
+    {
+      id: 'docs',
+      name: 'Documentation - Contextual UI Starter Kit',
+      url: '/docs',
+      description: 'Learn how to use Contextual UI.',
+    },
+    {
+      id: 'schema',
+      name: 'Schema Inspector - Contextual UI Starter Kit',
+      url: '/schema',
+      description: 'Inspect the generated Schema.org JSON-LD graph.',
+    },
+    {
+      id: 'cms',
+      name: 'CMS Dashboard - Contextual UI Starter Kit',
+      url: '/cms',
+      description: 'Manage content and validate schemas.',
+    },
+  ],
   faq: [
     { id: '1', question: 'What is Contextual UI Starter Kit?', answer: 'An open-source starter for SSOT apps.' },
     { id: '2', question: 'How does semantic SEO work with Contextual UI?', answer: 'Contextual UI automatically injects structured JSON-LD graphs for search engines and AI agents.' },

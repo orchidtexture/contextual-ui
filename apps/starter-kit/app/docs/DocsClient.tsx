@@ -378,11 +378,20 @@ const connector = staticConnector({
     url: 'https://example.com',
     description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
   },
-  webpage: {
-    name: 'Acme App - Home',
-    url: 'https://example.com',
-    description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
-  },
+  webpage: [
+    {
+      id: 'home',
+      name: 'Acme App - Home',
+      url: '/',
+      description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
+    },
+    {
+      id: 'docs',
+      name: 'Acme App - Docs',
+      url: '/docs',
+      description: 'Documentation for Acme App.',
+    },
+  ],
   navbar: {
     brand: { name: 'Acme', href: '/', logo: '/images/logo.svg' },
     links: [
@@ -454,7 +463,7 @@ export default async function HomePage() {
   const data = await siteApp.fetchData();
 
   return (
-    <WebPage app={siteApp} name="Acme App - Home" url="/">
+    <WebPage app={siteApp} id="home">
       <main className="min-h-screen flex flex-col justify-between">
         {/* 1. Navbar: Automatically reads navigation & brand from ContextualSite context */}
         <Navbar.Root className="flex justify-between items-center px-6 py-4 border-b border-zinc-800">
@@ -1344,21 +1353,10 @@ import { WebPage } from 'contextual-ui/server';
 import { DocsClient } from './DocsClient';
 
 export default async function DocsPage() {
-  const data = await siteApp.fetchData({
-    webpage: {
-      name: 'Documentation - Contextual UI',
-      url: '/docs',
-      description: 'Learn how to use Contextual UI.'
-    }
-  });
+  const data = await siteApp.fetchData();
 
   return (
-    <WebPage
-      app={siteApp}
-      name="Documentation - Contextual UI"
-      url="/docs"
-      description="Learn how to use Contextual UI."
-    >
+    <WebPage app={siteApp} id="docs">
       <DocsClient data={data} />
     </WebPage>
   );
@@ -1401,15 +1399,14 @@ export default async function DocsPage() {
 </Navbar.Root>`;
 
   const navbarSchema = JSON.stringify({
+    "@context": "https://schema.org",
     "@type": "SiteNavigationElement",
-    "name": "Navigation Bar",
-    "brand": {
-      "@type": "Brand",
-      "name": navbarData.brand?.name || "Contextual UI",
-      "url": navbarData.brand?.href || "/"
-    },
+    "@id": "https://contextual.site/#navbar",
+    "isPartOf": { "@id": "https://contextual.site/#webpage" },
+    "name": navbarData.brand?.name || "Contextual UI",
+    "url": navbarData.brand?.href || "/",
     "hasPart": navbarData.links.map(link => ({
-      "@type": "WebPage",
+      "@type": "SiteNavigationElement",
       "name": link.label,
       "url": link.href
     }))
@@ -1491,7 +1488,7 @@ export default async function DocsPage() {
     "@context": "https://schema.org",
     "@type": "WPFooter",
     "@id": "https://contextual.site/#footer",
-    "isPartOf": { "@id": "https://contextual.site/#website" },
+    "isPartOf": { "@id": "https://contextual.site/#webpage" },
     ...(footerData.brand?.name ? { "name": footerData.brand.name } : {}),
     ...(footerData.brand?.description ? { "description": footerData.brand.description } : {}),
     ...(footerData.brand?.href ? { "url": footerData.brand.href } : {}),
@@ -1551,6 +1548,8 @@ export default async function DocsPage() {
   const faqSchema = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "FAQPage",
+    "@id": "https://contextual.site/#faq",
+    "isPartOf": { "@id": "https://contextual.site/#webpage" },
     "mainEntity": faqList.map(item => ({
       "@type": "Question",
       "name": item.question,

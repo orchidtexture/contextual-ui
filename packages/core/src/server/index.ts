@@ -31,9 +31,9 @@ export type { WebsiteData } from '../components/website/website.schema';
 export { generateWebsiteJsonLd, exportAgentData as exportWebsiteAgentData, websiteRegistry } from '../components/website/website.utils';
 export { WebPage } from '../components/webpage';
 export type { WebPageProps } from '../components/webpage';
-export { WebpageDataSchema } from '../components/webpage/webpage.schema';
-export type { WebpageData } from '../components/webpage/webpage.schema';
-export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry } from '../components/webpage/webpage.utils';
+export { WebpageDataSchema, WebpageItemSchema } from '../components/webpage/webpage.schema';
+export type { WebpageData, WebpageItem } from '../components/webpage/webpage.schema';
+export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry, webpagesRegistry } from '../components/webpage/webpage.utils';
 export {
   OrganizationDataSchema,
 } from '../components/organization/organization.schema';
