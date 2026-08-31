@@ -32,7 +32,7 @@ import {
   ShieldCheck,
   ArrowRight,
 } from 'lucide-react';
-import { Breadcrumb, Navbar, Faq, Footer, createForm } from 'contextual-ui';
+import { Breadcrumb, Navbar, Faq, Footer, createForm, AutoForm } from 'contextual-ui';
 import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
 
@@ -933,6 +933,46 @@ faq: [
   { id: '2', question: 'How does SEO work?', answer: 'Injects Schema.org JSON-LD graphs.' },
 ],`,
   },
+  {
+    id: 'forms',
+    name: 'formRegistry',
+    signature: 'formRegistry()',
+    schemaType: 'ContactAction / Action',
+    schemaUrl: 'https://schema.org/PotentialAction',
+    description: 'Declares CMS-driven forms with dynamic in-memory Zod validation, headless <AutoForm> rendering, and machine-readable Schema.org PotentialAction graphs for AI agents.',
+    fields: [
+      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique identifier for the form (e.g. "contact-sales")' },
+      { name: 'name / title', type: 'string', required: false, schemaOrgMapping: 'name', description: 'Display title for the form action' },
+      { name: 'actionType', type: 'string', required: false, schemaOrgMapping: '@type', description: 'Schema.org Action type (e.g. "ContactAction", "SearchAction", "SubscribeAction")' },
+      { name: 'endpoint', type: 'string', required: true, schemaOrgMapping: 'target.urlTemplate', description: 'HTTP API endpoint for form submission' },
+      { name: 'method', type: 'POST | GET | PUT', required: false, schemaOrgMapping: 'target.httpMethod', description: 'HTTP method used to submit the payload' },
+      { name: 'fields', type: 'FormField[]', required: true, schemaOrgMapping: 'object (PropertyValueSpecification)', description: 'Array of input fields with type, label, required, and validation rules' },
+      { name: 'submitLabel', type: 'string', required: false, schemaOrgMapping: '—', description: 'Custom submit button display label' },
+      { name: 'successMessage', type: 'string', required: false, schemaOrgMapping: '—', description: 'Success notification text shown upon successful submission' },
+    ],
+    sampleCode: `// data/site.schema.ts
+import { defineSchema, formRegistry } from 'contextual-ui/server';
+
+export const siteSchema = defineSchema({
+  forms: formRegistry(),
+});`,
+    sampleData: `// Ingested connector data
+forms: [
+  {
+    id: 'contact-sales',
+    name: 'Contact Sales',
+    actionType: 'ContactAction',
+    endpoint: '/api/contact',
+    method: 'POST',
+    fields: [
+      { name: 'name', type: 'text', label: 'Full Name', required: true },
+      { name: 'email', type: 'email', label: 'Work Email', required: true },
+      { name: 'message', type: 'textarea', label: 'Message', required: true },
+    ],
+    submitLabel: 'Send Inquiry',
+  },
+],`,
+  },
 ];
 
 function SchemaRegistriesSection() {
@@ -962,6 +1002,7 @@ export const siteSchema = defineSchema({
   footer: footerRegistry(),
   breadcrumb: breadcrumbRegistry(),
   faq: faqRegistry(),
+  forms: formRegistry(),
 
   // Custom Typed Zod Schema Extension
   announcement: {
@@ -1146,39 +1187,563 @@ export const siteSchema = defineSchema({
   );
 }
 
-function FormFactorySection() {
+function AutoFormSection({ formsData }: { formsData?: any }) {
+  const [autoFormResponse, setAutoFormResponse] = useState<Record<string, unknown> | null>(null);
+
+  const fallbackForms = [
+    {
+      id: 'contact-sales',
+      name: 'Contact Sales & Support',
+      title: 'Get in Touch',
+      description: 'Send our team a direct message. Submissions are dynamically validated and Agentic AI ready.',
+      actionType: 'ContactAction',
+      endpoint: '/api/contact',
+      method: 'POST' as const,
+      fields: [
+        {
+          name: 'name',
+          type: 'text' as const,
+          label: 'Full Name',
+          required: true,
+          placeholder: 'Jane Doe',
+          validation: { minLength: 2 },
+        },
+        {
+          name: 'email',
+          type: 'email' as const,
+          label: 'Work Email',
+          required: true,
+          placeholder: 'jane@company.com',
+        },
+        {
+          name: 'topic',
+          type: 'select' as const,
+          label: 'Topic',
+          required: true,
+          placeholder: 'Select inquiry topic...',
+          options: [
+            { label: 'General Inquiry', value: 'general' },
+            { label: 'Sales & Enterprise', value: 'sales' },
+            { label: 'Technical Support', value: 'support' },
+            { label: 'Partnership', value: 'partnership' },
+          ],
+        },
+        {
+          name: 'message',
+          type: 'textarea' as const,
+          label: 'Message',
+          required: true,
+          placeholder: 'Tell us how we can help your team...',
+          validation: { minLength: 10 },
+        },
+      ],
+      submitLabel: 'Send Message',
+      successMessage: 'Thank you! Your message has been received by our team.',
+    },
+  ];
+
+  const activeFormsData = formsData || fallbackForms;
+
+  const autoFormStep1Code = `// 1. data/site.schema.ts
+import { defineSchema, formRegistry } from 'contextual-ui/server';
+
+export const siteSchema = defineSchema({
+  forms: formRegistry(), // Single Source of Truth for CMS forms
+});`;
+
+  const autoFormStep2Code = `// 2. data/site.server.ts (or ingested from Headless CMS connector)
+forms: [
+  {
+    id: 'contact-sales',
+    name: 'Contact Sales',
+    title: 'Get in Touch',
+    actionType: 'ContactAction',
+    endpoint: '/api/contact',
+    method: 'POST',
+    fields: [
+      { name: 'name', type: 'text', label: 'Full Name', required: true, validation: { minLength: 2 } },
+      { name: 'email', type: 'email', label: 'Work Email', required: true },
+      { 
+        name: 'topic', 
+        type: 'select', 
+        label: 'Topic', 
+        options: [
+          { label: 'General Inquiry', value: 'general' },
+          { label: 'Sales & Enterprise', value: 'sales' },
+          { label: 'Technical Support', value: 'support' },
+        ] 
+      },
+      { name: 'message', type: 'textarea', label: 'Message', required: true, validation: { minLength: 10 } },
+    ],
+    submitLabel: 'Send Message',
+    successMessage: 'Thank you! Your message has been received.',
+  },
+]`;
+
+  const autoFormStep3Code = `// 3. app/contact/page.tsx
+import { AutoForm } from 'contextual-ui';
+import { siteApp } from '@/data/site.server';
+
+export default async function ContactPage() {
+  const data = await siteApp.fetchData();
+
+  return (
+    <div className="max-w-md mx-auto py-10">
+      {/* AutoForm builds dynamic Zod validation in-memory & renders inputs */}
+      <AutoForm 
+        data={data.forms} 
+        formId="contact-sales"
+        // Optional custom Tailwind component slots:
+        components={{
+          Input: (props) => (
+            <input className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs" {...props} />
+          ),
+          Submit: ({ isSubmitting, children, ...props }) => (
+            <button className="w-full py-2.5 bg-accent hover:bg-accent-hover text-white font-medium rounded-lg text-xs" {...props}>
+              {isSubmitting ? 'Sending...' : children}
+            </button>
+          ),
+        }}
+      />
+    </div>
+  );
+}`;
+
+  const autoFormStep4Code = `// 4. Automated Schema.org PotentialAction Graph for AI Agents
+{
+  "@context": "https://schema.org",
+  "@type": "ContactAction",
+  "@id": "https://example.com/#action:form-contact-sales",
+  "name": "Contact Sales & Support",
+  "isPartOf": { "@id": "https://example.com/#webpage" },
+  "target": {
+    "@type": "EntryPoint",
+    "urlTemplate": "https://example.com/api/contact",
+    "httpMethod": "POST",
+    "contentType": "application/json"
+  },
+  "object": [
+    {
+      "@type": "PropertyValueSpecification",
+      "valueName": "name",
+      "valueRequired": true,
+      "valueMinLength": 2
+    },
+    {
+      "@type": "PropertyValueSpecification",
+      "valueName": "email",
+      "valueRequired": true,
+      "valuePattern": "^.+@.+\\\\..+$"
+    },
+    {
+      "@type": "PropertyValueSpecification",
+      "valueName": "topic",
+      "valueRequired": true,
+      "valueOption": ["general", "sales", "support"]
+    },
+    {
+      "@type": "PropertyValueSpecification",
+      "valueName": "message",
+      "valueRequired": true,
+      "valueMinLength": 10
+    }
+  ]
+}`;
+
+  const autoFormPropsRef = [
+    {
+      name: 'data',
+      type: 'FormData',
+      required: 'Yes (or form)',
+      description: 'Ingested forms data from connector/registry (single FormEntity or FormEntity[] array).',
+    },
+    {
+      name: 'formId',
+      type: 'string',
+      required: 'Optional',
+      description: 'Matches a specific form by its id when data contains multiple forms.',
+    },
+    {
+      name: 'form',
+      type: 'FormEntity',
+      required: 'Optional',
+      description: 'Explicit form entity object override (bypassing data lookup).',
+    },
+    {
+      name: 'components',
+      type: 'AutoFormCustomComponents',
+      required: 'Optional',
+      description: 'Custom UI slots for Form, Field, Label, Input, TextArea, Select, Checkbox, ErrorMessage, Submit, Section.',
+    },
+    {
+      name: 'action',
+      type: 'string',
+      required: 'Optional',
+      description: 'Overrides the form submit endpoint (defaults to form.endpoint).',
+    },
+    {
+      name: 'method',
+      type: "'POST' | 'GET' | 'PUT' | 'PATCH'",
+      required: 'Optional',
+      description: 'Overrides HTTP method (defaults to form.method or "POST").',
+    },
+    {
+      name: 'onSubmit',
+      type: '(values, form) => void | Promise<void>',
+      required: 'Optional',
+      description: 'Custom submit handler. If omitted, AutoForm performs a JSON POST fetch to the endpoint automatically.',
+    },
+    {
+      name: 'onSuccess',
+      type: '(result) => void',
+      required: 'Optional',
+      description: 'Callback invoked after successful form submission.',
+    },
+    {
+      name: 'onError',
+      type: '(error: ZodError) => void',
+      required: 'Optional',
+      description: 'Callback invoked when client-side validation fails.',
+    },
+    {
+      name: 'submitLabel',
+      type: 'string',
+      required: 'Optional',
+      description: 'Overrides the submit button text (defaults to form.submitLabel or "Submit").',
+    },
+  ];
+
+  const autoFormCustomSlots = {
+    Field: ({ children, className }: any) => (
+      <div className={`space-y-1 ${className || ''}`}>{children}</div>
+    ),
+    Label: ({ htmlFor, children }: any) => (
+      <label htmlFor={htmlFor} className="block text-xs font-mono text-zinc-300">
+        {children}
+      </label>
+    ),
+    Input: ({ field, dataInvalid, ...props }: any) => (
+      <input
+        {...props}
+        className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-xs"
+      />
+    ),
+    TextArea: ({ field, dataInvalid, ...props }: any) => (
+      <textarea
+        rows={3}
+        {...props}
+        className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-xs"
+      />
+    ),
+    Select: ({ field, options, dataInvalid, children, ...props }: any) => (
+      <select
+        {...props}
+        className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-xs cursor-pointer"
+      >
+        {children}
+      </select>
+    ),
+    ErrorMessage: ({ error }: any) => (
+      <span className="text-rose-400 text-[11px] font-mono mt-1 block">{error}</span>
+    ),
+    Submit: ({ isSubmitting, children, ...props }: any) => (
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium rounded-lg transition-colors text-xs font-mono cursor-pointer flex items-center justify-center gap-2"
+        {...props}
+      >
+        {isSubmitting ? (
+          <>
+            <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+            <span>Submitting to /api/contact...</span>
+          </>
+        ) : (
+          <span>{children}</span>
+        )}
+      </button>
+    ),
+    Section: ({ title, description, children }: any) => (
+      <div className="space-y-4">
+        {(title || description) && (
+          <div className="space-y-1 mb-2">
+            {title && <h4 className="text-sm font-semibold text-zinc-100">{title}</h4>}
+            {description && <p className="text-xs text-zinc-400 leading-relaxed">{description}</p>}
+          </div>
+        )}
+        <div className="space-y-3">{children}</div>
+      </div>
+    ),
+  };
+
+  return (
+    <section id="auto-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2 mb-2">
+          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 font-semibold">
+            CMS-Driven · In-Memory Zod · Agentic AI PotentialAction
+          </span>
+        </div>
+        <h2 className="text-2xl font-bold tracking-tight mb-2">AutoForm &amp; formRegistry</h2>
+        <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
+          <code className="code-short">&lt;AutoForm&gt;</code> unifies Headless CMS form definitions, dynamic in-memory Zod validation, and machine-readable Schema.org <code className="code-short">PotentialAction</code> JSON-LD graphs for AI agents. Define your form structure in your CMS or connector, and render dynamic accessible UI without writing repetitive React field boilerplate.
+        </p>
+      </div>
+
+      {/* Step Flow Banner */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
+          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">1</span>
+          <span className="text-xs text-zinc-300 font-medium">formRegistry SSOT</span>
+        </div>
+        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
+          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">2</span>
+          <span className="text-xs text-zinc-300 font-medium">CMS Ingestion</span>
+        </div>
+        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
+          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">3</span>
+          <span className="text-xs text-zinc-300 font-medium">&lt;AutoForm&gt; Render</span>
+        </div>
+        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
+          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">4</span>
+          <span className="text-xs text-zinc-300 font-medium">AI PotentialAction</span>
+        </div>
+      </div>
+
+      {/* Step-by-Step Walkthrough */}
+      <div className="space-y-10">
+        {/* Step 1 */}
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">1</span>
+            <div>
+              <h3 className="text-base font-semibold text-zinc-100">Declare formRegistry in your Site Schema</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                Add <code className="code-short">forms: formRegistry()</code> inside <code className="code-short">defineSchema</code>. This sets up the runtime validation contract and links form entities into the single source of truth.
+              </p>
+            </div>
+          </div>
+          <div className="pl-9">
+            <CodeSnippet filename="data/site.schema.ts" code={autoFormStep1Code} lang="typescript" />
+          </div>
+        </div>
+
+        {/* Step 2 */}
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">2</span>
+            <div>
+              <h3 className="text-base font-semibold text-zinc-100">Define Forms in Connector / Headless CMS Data</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                Marketing teams or developers can define forms as JSON arrays in Sanity, Strapi, or static configs. Define endpoints, field types, labels, and validation rules without touching React JSX.
+              </p>
+            </div>
+          </div>
+          <div className="pl-9">
+            <CodeSnippet filename="data/site.server.ts (CMS Connector)" code={autoFormStep2Code} lang="typescript" />
+          </div>
+        </div>
+
+        {/* Step 3 */}
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">3</span>
+            <div>
+              <h3 className="text-base font-semibold text-zinc-100">Render Dynamic Headless Forms with &lt;AutoForm&gt;</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                Pass the connector forms payload to <code className="code-short">&lt;AutoForm data=&#123;data.forms&#125; formId="contact-sales" /&gt;</code>. AutoForm dynamically compiles an in-memory Zod schema for blur &amp; submit validation and renders the form fields. Custom UI slots can be passed via the <code className="code-short">components</code> prop.
+              </p>
+            </div>
+          </div>
+          <div className="pl-9">
+            <CodeSnippet filename="app/contact/page.tsx" code={autoFormStep3Code} lang="tsx" />
+          </div>
+        </div>
+
+        {/* Step 4 */}
+        <div className="space-y-3">
+          <div className="flex items-start gap-3">
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">4</span>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold text-zinc-100">Automated Schema.org PotentialAction Graph for AI Agents</h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono text-accent bg-accent/10 border border-accent/20">
+                  Agentic AI Spec
+                </span>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                The JSON-LD graph builder automatically maps the form entity to a Schema.org <code className="code-short">PotentialAction</code> (e.g. <code className="code-short">ContactAction</code>) with <code className="code-short">EntryPoint</code> and <code className="code-short">PropertyValueSpecification</code> fields. AI agents (Claude, Perplexity, OpenAI agents) can discover the API contract and interact programmatically without DOM clicking.
+              </p>
+            </div>
+          </div>
+          <div className="pl-9">
+            <CodeSnippet filename="Generated JSON-LD (@graph snippet)" code={autoFormStep4Code} lang="json" />
+          </div>
+        </div>
+      </div>
+
+      {/* Interactive Live AutoForm Playground */}
+      <div className="space-y-4 pt-4">
+        <div>
+          <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+            <span>Interactive Live Demo (&lt;AutoForm&gt;)</span>
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
+              Live Preview · Real Endpoint (/api/contact)
+            </span>
+          </h3>
+          <p className="text-xs text-zinc-400 mt-1">
+            The form below is generated directly from the starter kit&apos;s <code className="code-short">data.forms</code> connector registry. Fill it out and submit to test real validation and the API POST handler.
+          </p>
+        </div>
+
+        <div className="p-6 bg-zinc-950/60 rounded-2xl border border-base backdrop-blur-sm relative overflow-hidden shadow-sm">
+          <div className="max-w-md mx-auto">
+            <AutoForm
+              data={activeFormsData}
+              formId="contact-sales"
+              components={autoFormCustomSlots}
+              onSuccess={(res) => {
+                setAutoFormResponse(res);
+              }}
+            />
+
+            {autoFormResponse && (
+              <div className="mt-6 pt-6 border-t border-zinc-800/80">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-mono text-emerald-400 font-medium">
+                      Response from /api/contact Received!
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setAutoFormResponse(null)}
+                    className="text-[11px] font-mono text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="p-3 bg-zinc-900/90 rounded-lg border border-zinc-800 font-mono text-xs text-zinc-300 overflow-x-auto">
+                  <pre>{JSON.stringify(autoFormResponse, null, 2)}</pre>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* AutoForm Props Reference Table */}
+      <div className="space-y-4 pt-4">
+        <div>
+          <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+            <span>&lt;AutoForm&gt; Props Reference</span>
+            <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
+              {autoFormPropsRef.length} Props
+            </span>
+          </h3>
+          <p className="text-xs text-zinc-400 mt-1">
+            Complete props contract for configuring dynamic forms, custom slot overrides, and submission callbacks.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto rounded-xl border border-base bg-zinc-950/70 shadow-inner">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-base bg-zinc-900/80 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
+                <th className="py-2.5 px-3.5 font-semibold">Prop</th>
+                <th className="py-2.5 px-3.5 font-semibold">Type</th>
+                <th className="py-2.5 px-3.5 font-semibold">Requirement</th>
+                <th className="py-2.5 px-3.5 font-semibold">Description</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-800 font-mono">
+              {autoFormPropsRef.map((prop) => (
+                <tr key={prop.name} className="hover:bg-zinc-900/40 transition-colors">
+                  <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
+                    {prop.name}
+                  </td>
+                  <td className="py-2.5 px-3.5 whitespace-nowrap">
+                    <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
+                      {prop.type}
+                    </span>
+                  </td>
+                  <td className="py-2.5 px-3.5 whitespace-nowrap text-[11px] text-zinc-400">
+                    {prop.required}
+                  </td>
+                  <td className="py-2.5 px-3.5 font-sans text-zinc-300 text-xs min-w-[260px] leading-relaxed">
+                    {prop.description}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Feature Pillars Footer */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
+        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
+            <RefreshCw className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">CMS-Driven &amp; Zero Deployments</span>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Add or modify form fields in your Headless CMS. Forms update dynamically in the UI and server validation without code changes.
+            </p>
+          </div>
+        </div>
+        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
+            <Bot className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Agentic AI Ready</span>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Emits Schema.org <code className="code-short">PotentialAction</code> JSON-LD letting AI agents (Claude, Perplexity) interact with forms via API.
+            </p>
+          </div>
+        </div>
+        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <div>
+            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Dynamic In-Memory Zod</span>
+            <p className="text-[11px] text-zinc-400 leading-relaxed">
+              Compiles strict Zod validators on the fly, providing instant blur feedback and safe schema parsing on submit.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CreateFormSection() {
   const [submittedData, setSubmittedData] = useState<Record<string, unknown> | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmittingStatic, setIsSubmittingStatic] = useState(false);
 
-  const step1SchemaCode = `import { z } from 'zod';
+  const staticStep1Code = `import { z } from 'zod';
 
-// 1. Define your Zod validation schema
+// 1. Define your static Zod validation schema
 export const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
   message: z.string().min(10, 'Message must be at least 10 characters'),
 });
 
-// Infer full TypeScript types with zero manual duplication
 export type ContactFormData = z.infer<typeof contactSchema>;`;
 
-  const step2FactoryCode = `import { createForm } from 'contextual-ui';
+  const staticStep2Code = `import { createForm } from 'contextual-ui';
 import { contactSchema } from '@/schemas/contact';
 
 // 2. Instantiate type-safe compound form components
-export const ContactForm = createForm(contactSchema);
+export const ContactForm = createForm(contactSchema);`;
 
-// Generates:
-// - ContactForm.Root
-// - ContactForm.Field
-// - ContactForm.Label
-// - ContactForm.Input
-// - ContactForm.TextArea
-// - ContactForm.Submit
-// - ContactForm.ErrorMessage
-// - ContactForm.Section`;
-
-  const step3LayoutCode = `import { ContactForm } from '@/components/ContactForm';
+  const staticStep3Code = `import { ContactForm } from '@/components/ContactForm';
 
 export function ContactFormCard() {
   return (
@@ -1191,73 +1756,42 @@ export function ContactFormCard() {
           body: JSON.stringify(data),
         });
       }}
-      onError={(error) => {
-        console.error('Validation error:', error.flatten().fieldErrors);
-      }}
       className="space-y-4 max-w-md mx-auto"
     >
-      {/* Name Field */}
       <ContactForm.Field name="name" className="space-y-1.5">
-        <ContactForm.Label className="block text-xs font-mono text-zinc-300">
-          Full Name
-        </ContactForm.Label>
-        <ContactForm.Input
-          placeholder="Jane Doe"
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent"
-        />
+        <ContactForm.Label className="block text-xs font-mono text-zinc-300">Full Name</ContactForm.Label>
+        <ContactForm.Input placeholder="Jane Doe" className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white" />
         <ContactForm.ErrorMessage className="text-rose-400 text-xs font-mono block" />
       </ContactForm.Field>
 
-      {/* Email Field */}
       <ContactForm.Field name="email" className="space-y-1.5">
-        <ContactForm.Label className="block text-xs font-mono text-zinc-300">
-          Email Address
-        </ContactForm.Label>
-        <ContactForm.Input
-          type="email"
-          placeholder="jane@example.com"
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent"
-        />
+        <ContactForm.Label className="block text-xs font-mono text-zinc-300">Email</ContactForm.Label>
+        <ContactForm.Input type="email" placeholder="jane@example.com" className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white" />
         <ContactForm.ErrorMessage className="text-rose-400 text-xs font-mono block" />
       </ContactForm.Field>
 
-      {/* Message Field */}
       <ContactForm.Field name="message" className="space-y-1.5">
-        <ContactForm.Label className="block text-xs font-mono text-zinc-300">
-          Message
-        </ContactForm.Label>
-        <ContactForm.TextArea
-          rows={3}
-          placeholder="How can we help you?"
-          className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent"
-        />
+        <ContactForm.Label className="block text-xs font-mono text-zinc-300">Message</ContactForm.Label>
+        <ContactForm.TextArea rows={3} placeholder="How can we help?" className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white" />
         <ContactForm.ErrorMessage className="text-rose-400 text-xs font-mono block" />
       </ContactForm.Field>
 
-      {/* Submit Button */}
-      <ContactForm.Submit className="w-full py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium rounded-lg transition-colors cursor-pointer">
+      <ContactForm.Submit className="w-full py-2.5 bg-accent text-white font-medium rounded-lg">
         Send Message
       </ContactForm.Submit>
     </ContactForm.Root>
   );
 }`;
 
-  const step4LifecycleCode = `// Automatic blur & submit validation lifecycle:
+  const staticStep4Code = `// Automatic blur & submit validation lifecycle
 <ContactForm.Root
   onSubmit={async (data) => {
-    // 1. Guaranteed valid schema data (safeParse passed)
-    // 2. isSubmitting state automatically activates -> disables Submit button
-    const res = await fetch('/api/contact', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
-    });
-    
+    // 1. safeParse passes -> data is typed & sanitized
+    // 2. isSubmitting state automatically activates
+    const res = await fetch('/api/contact', { method: 'POST', body: JSON.stringify(data) });
     if (!res.ok) throw new Error('Submission failed');
-    // 3. isSubmitting returns to false once the promise settles
   }}
   onError={(error) => {
-    // Optional callback when schema validation fails upon submission
     console.warn('Validation errors:', error.flatten().fieldErrors);
   }}
 >
@@ -1268,12 +1802,12 @@ export function ContactFormCard() {
     {
       name: 'Form.Root',
       props: 'onSubmit, onError?, className?, id?',
-      description: 'Top-level context provider. Manages values, field errors, blur validation, and async submission states.',
+      description: 'Top-level context provider for static forms. Manages state, errors, blur validation, and async lifecycle.',
     },
     {
       name: 'Form.Field',
       props: 'name: keyof Schema, className?',
-      description: 'Scopes field context by name prop. Strictly type-checked against schema keys at compile time.',
+      description: 'Scopes field context by name. Strictly type-checked against schema keys at compile time.',
     },
     {
       name: 'Form.Label',
@@ -1293,12 +1827,12 @@ export function ContactFormCard() {
     {
       name: 'Form.ErrorMessage',
       props: 'asChild?, className?, style?',
-      description: 'Conditionally renders the active validation error string for the current field.',
+      description: 'Conditionally renders active validation error strings for the scoped field.',
     },
     {
       name: 'Form.Submit',
       props: 'asChild?, ...ButtonHTMLAttributes',
-      description: 'Submit <button> automatically disabled while an async onSubmit promise is pending.',
+      description: 'Submit button automatically disabled while an async onSubmit promise is pending.',
     },
     {
       name: 'Form.Section',
@@ -1308,17 +1842,17 @@ export function ContactFormCard() {
   ];
 
   return (
-    <section id="form-factory" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
+    <section id="create-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-2">
           <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 font-semibold">
-            Zod Powered · Headless · Zero Boilerplate
+            Compile-Time Type Safety · Headless Compound Components
           </span>
         </div>
-        <h2 className="text-2xl font-bold tracking-tight mb-2">Form Factory (createForm)</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-2">createForm (Static Form Factory)</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
-          The <code className="code-short">createForm</code> factory generates headless, fully type-safe React form components directly from any Zod schema. It automatically manages form state, field-level blur validation, accessibility connections (<code className="code-short">htmlFor</code>, <code className="code-short">data-invalid</code>), error messages, and submission loading states without boilerplate.
+          The <code className="code-short">createForm</code> factory generates headless, strictly type-safe React form components directly from a hardcoded Zod schema. Ideal for developer-centric custom forms with fixed field requirements, providing automatic blur validation, field name autocompletion, and zero-state boilerplate.
         </p>
       </div>
 
@@ -1342,144 +1876,126 @@ export function ContactFormCard() {
         </div>
       </div>
 
-      {/* Step-by-Step Walkthrough */}
+      {/* Steps List */}
       <div className="space-y-10">
-        {/* Step 1 */}
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              1
-            </span>
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">1</span>
             <div>
               <h3 className="text-base font-semibold text-zinc-100">Define your Validation Schema with Zod</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Define the shape and validation constraints of your form using standard Zod types (<code className="code-short">z.string()</code>, <code className="code-short">z.number()</code>, <code className="code-short">z.enum()</code>, etc.). Custom error messages set in the schema are automatically surfaced in the UI on validation failures.
+                Define the shape and validation constraints using standard Zod types (<code className="code-short">z.string()</code>, <code className="code-short">z.number()</code>, <code className="code-short">z.enum()</code>).
               </p>
             </div>
           </div>
           <div className="pl-9">
-            <CodeSnippet filename="schemas/contact.ts" code={step1SchemaCode} lang="typescript" />
+            <CodeSnippet filename="schemas/contact.ts" code={staticStep1Code} lang="typescript" />
           </div>
         </div>
 
-        {/* Step 2 */}
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              2
-            </span>
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">2</span>
             <div>
               <h3 className="text-base font-semibold text-zinc-100">Initialize Form Components with createForm</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Pass your schema into <code className="code-short">createForm(schema)</code> from <code className="code-short">contextual-ui</code>. This generates a family of compound components (<code className="code-short">Root</code>, <code className="code-short">Field</code>, <code className="code-short">Label</code>, <code className="code-short">Input</code>, <code className="code-short">TextArea</code>, <code className="code-short">Submit</code>, <code className="code-short">ErrorMessage</code>, <code className="code-short">Section</code>) strictly typed to your schema keys.
+                Pass your schema into <code className="code-short">createForm(schema)</code> to produce compound components strictly typed to your schema keys.
               </p>
             </div>
           </div>
           <div className="pl-9">
-            <CodeSnippet filename="components/ContactForm.tsx (Initialization)" code={step2FactoryCode} lang="typescript" />
+            <CodeSnippet filename="components/ContactForm.tsx (Init)" code={staticStep2Code} lang="typescript" />
           </div>
         </div>
 
-        {/* Step 3 */}
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              3
-            </span>
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">3</span>
             <div>
               <h3 className="text-base font-semibold text-zinc-100">Compose Headless Form Layout &amp; Field Controls</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Structure your UI with the generated compound components. Wrap each input control in <code className="code-short">&lt;ContactForm.Field name="..."&gt;</code>. The field name is type-checked against your schema, and child components (<code className="code-short">Label</code>, <code className="code-short">Input</code>, <code className="code-short">ErrorMessage</code>) automatically share context without manual state passing.
+                Wrap input controls in <code className="code-short">&lt;ContactForm.Field name="..."&gt;</code>. Child components share context and validation automatically.
               </p>
             </div>
           </div>
           <div className="pl-9">
-            <CodeSnippet filename="components/ContactForm.tsx (Component)" code={step3LayoutCode} lang="tsx" />
+            <CodeSnippet filename="components/ContactForm.tsx (UI)" code={staticStep3Code} lang="tsx" />
           </div>
         </div>
 
-        {/* Step 4 */}
         <div className="space-y-3">
           <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              4
-            </span>
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">4</span>
             <div>
               <h3 className="text-base font-semibold text-zinc-100">Automatic Blur Validation &amp; Submit Lifecycle</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Validation runs automatically on two levels: <strong className="text-zinc-200">field blur</strong> (validates individual inputs on blur and sets <code className="code-short">data-invalid</code>) and <strong className="text-zinc-200">form submit</strong> (validates the full schema, calls <code className="code-short">onSubmit</code> with sanitized data, and disables the submit button during async requests).
+                Validation runs on field blur and on form submit. Submitting state is automatically managed during async promises.
               </p>
             </div>
           </div>
           <div className="pl-9">
-            <CodeSnippet filename="components/ContactForm.tsx (Lifecycle)" code={step4LifecycleCode} lang="tsx" />
+            <CodeSnippet filename="components/ContactForm.tsx (Lifecycle)" code={staticStep4Code} lang="tsx" />
           </div>
         </div>
       </div>
 
-      {/* Interactive Live Playground */}
+      {/* Static Live Demo */}
       <div className="space-y-4 pt-4">
         <div>
           <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>Interactive Live Demo</span>
+            <span>Static Form Live Demo</span>
             <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
               Live Preview
             </span>
           </h3>
           <p className="text-xs text-zinc-400 mt-1">
-            Test the live form below. Blur fields to trigger instant validation, or submit valid data to inspect the received payload.
+            Test the static compound form below. Blur fields to test validation feedback.
           </p>
         </div>
 
         <div className="p-6 bg-zinc-950/60 rounded-2xl border border-base backdrop-blur-sm relative overflow-hidden shadow-sm">
           <ContactForm.Root 
             onSubmit={async (data) => {
-              setIsSubmitting(true);
+              setIsSubmittingStatic(true);
               await new Promise((resolve) => setTimeout(resolve, 400));
               setSubmittedData(data);
-              setIsSubmitting(false);
+              setIsSubmittingStatic(false);
             }}
             className="space-y-4 max-w-md mx-auto relative z-10"
           >
             <div className="flex flex-col sm:flex-row gap-4">
               <ContactForm.Field name="name" className="flex-1 space-y-1">
-                <ContactForm.Label className="block text-xs font-mono text-zinc-300">
-                  Full Name
-                </ContactForm.Label>
+                <ContactForm.Label className="block text-xs font-mono text-zinc-300">Full Name</ContactForm.Label>
                 <ContactForm.Input
                   placeholder="Jane Doe"
-                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-xs"
+                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent text-xs"
                 />
                 <ContactForm.ErrorMessage className="text-rose-400 text-[11px] font-mono mt-1 block" />
               </ContactForm.Field>
 
               <ContactForm.Field name="email" className="flex-1 space-y-1">
-                <ContactForm.Label className="block text-xs font-mono text-zinc-300">
-                  Email Address
-                </ContactForm.Label>
+                <ContactForm.Label className="block text-xs font-mono text-zinc-300">Email Address</ContactForm.Label>
                 <ContactForm.Input
                   type="email"
                   placeholder="jane@example.com"
-                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-xs"
+                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent text-xs"
                 />
                 <ContactForm.ErrorMessage className="text-rose-400 text-[11px] font-mono mt-1 block" />
               </ContactForm.Field>
             </div>
 
             <ContactForm.Field name="message" className="space-y-1">
-              <ContactForm.Label className="block text-xs font-mono text-zinc-300">
-                Message
-              </ContactForm.Label>
+              <ContactForm.Label className="block text-xs font-mono text-zinc-300">Message</ContactForm.Label>
               <ContactForm.TextArea
                 rows={3}
-                placeholder="Type your message here (min 10 characters)..."
-                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-all text-xs"
+                placeholder="Type message here (min 10 chars)..."
+                className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white placeholder:text-zinc-600 focus:outline-none focus:border-accent text-xs"
               />
               <ContactForm.ErrorMessage className="text-rose-400 text-[11px] font-mono mt-1 block" />
             </ContactForm.Field>
 
             <ContactForm.Submit className="w-full py-2.5 bg-accent hover:bg-accent-hover disabled:opacity-50 text-white font-medium rounded-lg transition-colors text-xs font-mono cursor-pointer flex items-center justify-center gap-2">
-              {isSubmitting ? (
+              {isSubmittingStatic ? (
                 <>
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                   <span>Submitting...</span>
@@ -1490,15 +2006,12 @@ export function ContactFormCard() {
             </ContactForm.Submit>
           </ContactForm.Root>
 
-          {/* Submitted Payload Box */}
           {submittedData && (
             <div className="mt-6 pt-6 border-t border-zinc-800/80 max-w-md mx-auto">
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xs font-mono text-emerald-400 font-medium">
-                    Form Submitted Successfully!
-                  </span>
+                  <span className="text-xs font-mono text-emerald-400 font-medium">Static Form Submitted!</span>
                 </div>
                 <button
                   type="button"
@@ -1516,17 +2029,17 @@ export function ContactFormCard() {
         </div>
       </div>
 
-      {/* Compound Subcomponents API Contract */}
+      {/* Subcomponents Reference */}
       <div className="space-y-4 pt-4">
         <div>
           <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>Generated Subcomponents Reference</span>
+            <span>createForm Compound Subcomponents Reference</span>
             <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
               {formSubcomponents.length} Subcomponents
             </span>
           </h3>
           <p className="text-xs text-zinc-400 mt-1">
-            Every component generated by <code className="code-short">createForm</code> is completely headless and composable with Radix UI Slot (<code className="code-short">asChild</code>) support.
+            Every component produced by <code className="code-short">createForm</code> is completely headless and composable with Radix UI Slot (<code className="code-short">asChild</code>) support.
           </p>
         </div>
 
@@ -1542,10 +2055,10 @@ export function ContactFormCard() {
             <tbody className="divide-y divide-zinc-800 font-mono">
               {formSubcomponents.map((sub) => (
                 <tr key={sub.name} className="hover:bg-zinc-900/40 transition-colors">
-                  <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
+                  <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs font-mono">
                     {sub.name}
                   </td>
-                  <td className="py-2.5 px-3.5 whitespace-nowrap">
+                  <td className="py-2.5 px-3.5 whitespace-nowrap font-mono">
                     <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
                       {sub.props}
                     </span>
@@ -1998,8 +2511,9 @@ export function DocsClient({ data }: { data: SiteData }) {
     { id: 'faq', label: 'FAQ', desc: 'FAQ & Accordion' },
   ];
 
-  const factoryNavItems = [
-    { id: 'form-factory', label: 'Form Factory', desc: 'Type-safe Forms' },
+  const formNavItems = [
+    { id: 'auto-form', label: 'AutoForm', desc: 'CMS & Agentic Forms' },
+    { id: 'create-form', label: 'createForm', desc: 'Type-safe Static Forms' },
   ];
 
   const connectorNavItems = [
@@ -2027,7 +2541,8 @@ export function DocsClient({ data }: { data: SiteData }) {
       'footer',
       'breadcrumb',
       'faq',
-      'form-factory',
+      'auto-form',
+      'create-form',
       'connectors',
     ];
     sections.forEach((id) => {
@@ -3398,13 +3913,13 @@ export default async function DocsPage() {
               </nav>
             </div>
 
-            {/* Subsection 3: Factories */}
+            {/* Subsection 3: Forms */}
             <div className="space-y-2 pt-3 border-t border-base">
               <h3 className="text-[11px] font-mono uppercase tracking-wider font-semibold text-zinc-400 px-3 pt-1">
-                Factories
+                Forms
               </h3>
               <nav className="space-y-1">
-                {factoryNavItems.map((item) => {
+                {formNavItems.map((item) => {
                   const isActive = activeId === item.id;
                   return (
                     <a
@@ -3466,7 +3981,7 @@ export default async function DocsPage() {
         <div className="flex-1 min-w-0 space-y-12 w-full">
           {/* Mobile Navigation Pills */}
           <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 border-b border-base w-full">
-            {[...quickstartNavItems, ...componentNavItems, ...factoryNavItems, ...connectorNavItems].map((item) => {
+            {[...quickstartNavItems, ...componentNavItems, ...formNavItems, ...connectorNavItems].map((item) => {
               const isActive = activeId === item.id;
               return (
                 <a
@@ -3722,8 +4237,11 @@ export default async function DocsPage() {
             </Faq.Root>
           </ShowcaseSection>
 
-          {/* Form Factory Section */}
-          <FormFactorySection />
+          {/* Forms: AutoForm Section */}
+          <AutoFormSection formsData={data.forms} />
+
+          {/* Forms: createForm Section */}
+          <CreateFormSection />
 
           {/* Connectors Section */}
           <ConnectorsSection />

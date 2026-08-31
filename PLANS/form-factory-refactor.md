@@ -57,11 +57,12 @@ Replace or extend the static `createForm` with a dynamic `<AutoForm>` component 
 Update the starter kit to use the new architecture to prove it works end-to-end.
 
 **Tasks:**
-- [ ] Update `connectors/static/src/index.ts` to include a sample `forms` configuration.
-- [ ] Update `apps/starter-kit/data/site.schema.ts` to register `forms: formRegistry()`.
-- [ ] Create an API route (`apps/starter-kit/app/api/contact/route.ts`) to handle the form submission.
-- [ ] Replace the manual `ContactForm` in `DocsClient.tsx` with the new `<AutoForm>` implementation.
-- [ ] Update documentation copy to highlight the "Agentic AI Forms" and "CMS-Driven Forms" concepts.
+- [x] Updated `apps/starter-kit/data/site.schema.ts` to register `forms: formRegistry()`.
+- [x] Updated `apps/starter-kit/data/site.server.ts` to include form entities (`contact-sales`) with typed fields and Schema.org metadata.
+- [x] Created API route `apps/starter-kit/app/api/contact/route.ts` handling real POST submissions and validation.
+- [x] Updated `DocsClient.tsx` with dynamic `<AutoForm>` rendering from connector data, real `/api/contact` submissions, and mode switching between CMS-Driven forms and static forms.
+- [x] Added `formRegistry` to the registries catalog in documentation with Schema.org mapping and example definitions.
+- [x] Verified full monorepo builds and Next.js route generation (`/api/contact`, `/api/graph.json`, `/docs`).
 
 ---
 

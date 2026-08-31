@@ -6,6 +6,7 @@ import {
   navbarRegistry,
   faqRegistry,
   footerRegistry,
+  formRegistry,
 } from 'contextual-ui/server';
 import { z } from 'zod';
 
@@ -16,6 +17,7 @@ export const siteSchema = defineSchema({
   navbar: navbarRegistry(),
   footer: footerRegistry(),
   faq: faqRegistry(),
+  forms: formRegistry(),
   announcement: {
     schema: z.object({
       enabled: z.boolean(),

@@ -52,6 +52,57 @@ const connector = staticConnector({
     { id: '3', question: 'Can I use custom Zod schemas for CMS validation?', answer: 'Yes, any Zod schema can be plugged into the CMS dashboard and form generator.' },
     { id: '4', question: 'Why use Contextual UI for building websites when AI is getting better and better?', answer: 'Well, libraries like Contextual UI are the kind of thing that make AI better, so lets use it!' },
   ],
+  forms: [
+    {
+      id: 'contact-sales',
+      name: 'Contact Sales & Support',
+      title: 'Get in Touch',
+      description: 'Send our team a direct message. Submissions are dynamically validated and Agentic AI ready.',
+      actionType: 'ContactAction',
+      endpoint: '/api/contact',
+      method: 'POST',
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          label: 'Full Name',
+          required: true,
+          placeholder: 'Jane Doe',
+          validation: { minLength: 2 },
+        },
+        {
+          name: 'email',
+          type: 'email',
+          label: 'Work Email',
+          required: true,
+          placeholder: 'jane@company.com',
+        },
+        {
+          name: 'topic',
+          type: 'select',
+          label: 'Topic',
+          required: true,
+          placeholder: 'Select inquiry topic...',
+          options: [
+            { label: 'General Inquiry', value: 'general' },
+            { label: 'Sales & Enterprise', value: 'sales' },
+            { label: 'Technical Support', value: 'support' },
+            { label: 'Partnership', value: 'partnership' },
+          ],
+        },
+        {
+          name: 'message',
+          type: 'textarea',
+          label: 'Message',
+          required: true,
+          placeholder: 'Tell us how we can help your team...',
+          validation: { minLength: 10 },
+        },
+      ],
+      submitLabel: 'Send Message',
+      successMessage: 'Thank you! Your message has been received by our team.',
+    },
+  ],
   navbar: {
     brand: { name: 'Contextual', href: '/', logo: '/images/onigiri_logo.svg' },
     links: [
