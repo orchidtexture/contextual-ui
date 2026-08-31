@@ -5,7 +5,10 @@ import { ContextualSite } from 'contextual-ui';
 import { CustomNavbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 
+const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://contextual.site';
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: 'Contextual UI Starter Kit',
   description: 'Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.',
   icons: {

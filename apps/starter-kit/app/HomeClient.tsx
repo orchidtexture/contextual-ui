@@ -12,7 +12,6 @@ import {
   Code2,
   Cpu,
   Bot,
-  Sliders,
   ArrowRight,
 } from 'lucide-react';
 import { Faq, useContextualSiteContext } from 'contextual-ui';
@@ -38,10 +37,10 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
         <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
           <div className="lg:col-span-7 space-y-6">
             <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight">
-              One Schema. UI for Humans, Structured Data for AI & Search Engines.
+            Build Websites Optimized for Search & AI Agents.
             </h1>
             <p className="text-lg text-zinc-300 leading-relaxed max-w-2xl">
-              Headless components for website building that inject schema markup and expose a full Knowledge Graph for easy integration with agentic workflows.
+              Stop writing boilerplate schema markup. Use our open-source headless components to build accessible UIs that automatically compile into an unified JSON-LD Knowledge Graph for Next-Gen SEO and LLM ingestion.
             </p>
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
@@ -115,7 +114,7 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                     Single Source of Truth (SSOT)
                   </h3>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    Define your site schema once using standard Zod schemas and pre-built registries. Automatically generate TypeScript types, runtime validation, and Schema.org JSON-LD with zero drift.
+                    Define your site schema once in Zod. Automatically generate TypeScript types, runtime validation, and Schema.org JSON-LD with zero drift.
                   </p>
                 </div>
 
@@ -128,51 +127,78 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                 </a>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Boxes className="w-4 h-4" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                {/* 3 Value Pillars */}
+                <div className="lg:col-span-6 grid grid-cols-1 gap-3">
+                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                      <Boxes className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-100">1. Define Once</h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
+                        Compose Schema.org registries (<code className="text-accent font-mono text-[11px]">websiteRegistry</code>, <code className="text-accent font-mono text-[11px]">faqRegistry</code>) and custom Zod schemas.
+                      </p>
+                    </div>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Composable Registries</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Pre-built registries (<code className="text-accent font-mono text-[11px]">websiteRegistry</code>, <code className="text-accent font-mono text-[11px]">faqRegistry</code>, etc.) enforce official Schema.org standards without boilerplate.
-                  </p>
+
+                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                      <ShieldCheck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-100">2. Auto Type Inference</h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
+                        Derive 100% type-safe models via <code className="text-accent font-mono text-[11px]">InferData&lt;typeof siteSchema&gt;</code> with zero manual duplication.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                      <Workflow className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-100">3. Zero Drift Sync</h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
+                        Connector data automatically keeps headless React UI components and SEO JSON-LD graphs in sync.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Automatic Type Inference</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Derive 100% type-safe data models via <code className="text-accent font-mono text-[11px]">InferData&lt;typeof siteSchema&gt;</code> with zero manual duplicate typing.
-                  </p>
-                </div>
+                {/* Micro Code Preview Card */}
+                <div className="lg:col-span-6 border border-base rounded-2xl bg-zinc-950/80 p-5 font-mono text-xs shadow-inner flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-800/80 text-[11px] text-zinc-500">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+                        <span className="ml-2 text-zinc-400 font-medium">data/site.schema.ts</span>
+                      </div>
+                      <span className="text-accent font-semibold">SSOT Contract</span>
+                    </div>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Workflow className="w-4 h-4" />
+                    <pre className="text-zinc-300 overflow-x-auto leading-relaxed !bg-transparent !p-0 !m-0">
+                      <code>
+                        <span className="text-purple-400">export const</span> siteSchema = <span className="text-accent">defineSchema</span>({'{'}{'\n'}
+                        {'  '}organization: <span className="text-accent">organizationRegistry</span>(),{'\n'}
+                        {'  '}website: <span className="text-accent">websiteRegistry</span>(),{'\n'}
+                        {'  '}faq: <span className="text-accent">faqRegistry</span>(),{'\n'}
+                        {'}'});{'\n\n'}
+                        <span className="text-zinc-500">// TypeScript type derived automatically</span>{'\n'}
+                        <span className="text-purple-400">export type</span> <span className="text-amber-300">SiteData</span> = <span className="text-accent">InferData</span>&lt;<span className="text-purple-400">typeof</span> siteSchema&gt;;
+                      </code>
+                    </pre>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Zero Drift Guarantee</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Modifying data in your connector automatically keeps React UI components, CMS validators, and SEO meta tags synchronized.
-                  </p>
-                </div>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Code2 className="w-4 h-4" />
+                  <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                    <span className="text-emerald-400">● Runtime Validated</span>
+                    <span>Schema.org @graph Ready</span>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Custom Zod Extension</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Seamlessly mix standard registries with custom Zod objects for announcement banners, blogs, team bios, and custom product catalogs.
-                  </p>
                 </div>
               </div>
-
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-                <strong className="text-zinc-200 font-medium">Why it matters:</strong> Instead of authoring JSON-LD tags by hand or risking schema mismatches during refactors, your single schema acts as the single source of truth for runtime validation, compile-time TypeScript types, and search/AI crawlers.
-              </p>
             </div>
 
             {/* Subsection 2: Global Knowledge Graph */}
@@ -183,18 +209,11 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                     Global Knowledge Graph
                   </h3>
                   <p className="text-sm text-zinc-400 leading-relaxed">
-                    Connect domain entities, route documents, and UI components into a referentially-linked Schema.org <code className="code-short">@graph</code>. Exposed sitewide via <a href="/api/graph.json" target="_blank" className="text-accent underline">/api/graph.json</a> for search engines and AI agents.
+                    Entities, route documents, and component metadata compile into a single referentially-linked Schema.org <code className="code-short">@graph</code>. Exposed sitewide for AI agents, LLM pipelines, and search bots.
                   </p>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 shrink-0">
-                  <a
-                    href="/schema"
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-xs font-mono text-accent border border-base transition-colors"
-                  >
-                    <Network className="w-3.5 h-3.5" />
-                    <span>Graph Visualizer</span>
-                  </a>
+                <div className="flex items-center gap-2.5 shrink-0">
                   <a
                     href="/api/graph.json"
                     target="_blank"
@@ -203,54 +222,99 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                     <span>/api/graph.json</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
+                  <a
+                    href="/schema"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 text-xs font-mono text-accent border border-accent/30 transition-colors"
+                    title="Interactive visualization demo of this site's graph"
+                  >
+                    <Network className="w-3.5 h-3.5" />
+                    <span>Visualizer Demo</span>
+                  </a>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Network className="w-4 h-4" />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
+                {/* 3 Value Pillars */}
+                <div className="lg:col-span-6 grid grid-cols-1 gap-3">
+                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                      <Network className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-100">Referential @id Linking</h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
+                        Entities reference each other with canonical URIs (<code className="text-accent font-mono text-[11px]">#website</code>, <code className="text-accent font-mono text-[11px]">#organization</code>) forming a true Semantic Web graph.
+                      </p>
+                    </div>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Referential @id Linking</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Entities reference each other with canonical URIs (<code className="text-accent font-mono text-[11px]">#website</code>, <code className="text-accent font-mono text-[11px]">#organization</code>) forming a true Semantic Web graph.
-                  </p>
+
+                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                      <Bot className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-100">Agent-Ready API Endpoint</h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
+                        Exposes <code className="text-accent font-mono text-[11px]">/api/graph.json</code> so AI agents (Perplexity, ChatGPT Search, Claude) consume clean structured data without parsing messy DOM.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                      <Cpu className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-zinc-100">Zero Scraping Fragility</h4>
+                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
+                        Eliminates scraper breaks from markup refactors, client hydration delays, and costly LLM token waste.
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Agent-Ready API Feed</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Exposes <code className="text-accent font-mono text-[11px]">/api/graph.json</code> so AI agents, RAG pipelines, and LLM search bots consume structured data without parsing messy DOM.
-                  </p>
-                </div>
+                {/* JSON-LD Graph Endpoint Preview */}
+                <div className="lg:col-span-6 border border-base rounded-2xl bg-zinc-950/80 p-5 font-mono text-xs shadow-inner flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-800/80 text-[11px] text-zinc-500">
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
+                        <span className="ml-2 text-zinc-400 font-medium">GET /api/graph.json</span>
+                      </div>
+                      <span className="text-accent font-semibold">JSON-LD @graph</span>
+                    </div>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Cpu className="w-4 h-4" />
+                    <pre className="text-zinc-300 overflow-x-auto leading-relaxed !bg-transparent !p-0 !m-0">
+                      <code>
+                        {'{'}{'\n'}
+                        {'  '}<span className="text-zinc-500">"@context":</span> <span className="text-emerald-400">"https://schema.org"</span>,{'\n'}
+                        {'  '}<span className="text-zinc-500">"@graph":</span> [{'\n'}
+                        {'    '}{'{'}{'\n'}
+                        {'      '}<span className="text-zinc-500">"@type":</span> <span className="text-amber-300">"WebSite"</span>,{'\n'}
+                        {'      '}<span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#website"</span>,{'\n'}
+                        {'      '}<span className="text-zinc-500">"publisher":</span> {'{'} <span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#org"</span> {'}'}{'\n'}
+                        {'    '}{'}'},{'\n'}
+                        {'    '}{'{'}{'\n'}
+                        {'      '}<span className="text-zinc-500">"@type":</span> <span className="text-amber-300">"Organization"</span>,{'\n'}
+                        {'      '}<span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#org"</span>{'\n'}
+                        {'    '}{'}'}{'\n'}
+                        {'  '}]{'\n'}
+                        {'}'}
+                      </code>
+                    </pre>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Zero Scraping Fragility</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Eliminates scraper breaks from markup updates, hydration mismatches, client-side rendering delays, and token bloat.
-                  </p>
-                </div>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Sliders className="w-4 h-4" />
+                  <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-500">
+                    <span className="text-emerald-400">● Live AI Feed</span>
+                    <a href="/schema" className="text-accent hover:underline flex items-center gap-1">
+                      <span>Explore visualizer demo</span>
+                      <span>&rarr;</span>
+                    </a>
                   </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Interactive Schema Graph</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Built-in visual DAG inspector to visualize node connections, schema types, and attribute relations in real time.
-                  </p>
                 </div>
               </div>
-
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-                <strong className="text-zinc-200 font-medium">Why it matters:</strong> Modern AI search engines (like Perplexity, ChatGPT Search, and Google AI Overviews) and LLM agents prioritize referentially-linked knowledge over isolated meta tags.
-              </p>
             </div>
 
             {/* Subsection 3: Global vs Route Metadata */}
@@ -418,35 +482,6 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                 </Faq.Item>
               ))}
             </Faq.Root>
-          </div>
-        </section>
-
-        {/* Quick Navigation Cards */}
-        <section className="pt-10 border-t border-base space-y-4">
-          <h3 className="text-sm font-mono uppercase tracking-wider text-zinc-400">Starter Kit Navigation</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            <a
-              href="/docs"
-              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-base p-4 rounded-xl no-underline text-xs font-semibold transition-colors shadow-sm flex flex-col gap-1"
-            >
-              <span className="text-accent text-sm">Documentation &rarr;</span>
-              <span className="text-zinc-400 font-normal">Explore ContextualSite, Navbar, Breadcrumb, FAQ</span>
-            </a>
-            <a
-              href="/schema"
-              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-base p-4 rounded-xl no-underline text-xs font-semibold transition-colors shadow-sm flex flex-col gap-1"
-            >
-              <span className="text-accent text-sm">Schema Graph &rarr;</span>
-              <span className="text-zinc-400 font-normal">View SSOT and interactive Knowledge Graph</span>
-            </a>
-            <a
-              href="/api/graph.json"
-              target="_blank"
-              className="bg-zinc-900 hover:bg-zinc-800 text-zinc-100 border border-base p-4 rounded-xl no-underline text-xs font-semibold transition-colors shadow-sm flex flex-col gap-1"
-            >
-              <span className="text-accent text-sm">JSON-LD Graph &rarr;</span>
-              <span className="text-zinc-400 font-normal">Raw schema.org @graph JSON endpoint</span>
-            </a>
           </div>
         </section>
       </main>

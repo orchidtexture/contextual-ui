@@ -47,8 +47,6 @@ function getDefaultGridCols(count: number): string {
       return 'grid-cols-1 sm:grid-cols-3';
     case 5:
       return 'grid-cols-2 md:grid-cols-5';
-    case 6:
-      return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-6';
     case 4:
     default:
       return 'grid-cols-2 md:grid-cols-4';

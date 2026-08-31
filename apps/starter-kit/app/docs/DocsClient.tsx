@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Prism from 'prismjs';
 import 'prismjs/components/prism-jsx';
 import 'prismjs/components/prism-typescript';
@@ -253,7 +253,7 @@ function CodeSnippet({
       <pre
         tabIndex={0}
         suppressHydrationWarning
-        className="!bg-zinc-900 !text-zinc-100 p-5 text-xs font-mono overflow-x-auto shadow-inner m-0"
+        className="!bg-zinc-900 !text-zinc-100 !m-0 p-5 text-xs font-mono overflow-x-auto shadow-inner"
       >
         <code
           className={`language-${lang}`}
@@ -526,12 +526,7 @@ export const { GET } = siteApp.createGraphHandler({
 
   return (
     <section id="quickstart" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
-      <div className="mb-6">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 font-semibold">
-            Next.js App Router · TypeScript · Zod
-          </span>
-        </div>
+      <div className="docs-section-header mb-6">
         <h2 className="text-2xl font-bold tracking-tight mb-2">Quickstart Guide</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
           Learn how to install Contextual UI, define a single-source-of-truth schema, configure a data connector, and render headless SEO-ready components in your Next.js application in under 5 minutes.
@@ -546,13 +541,15 @@ export const { GET } = siteApp.createGraphHandler({
           'Define Schema',
           'App Connector',
           'Hydrate Layout',
+          'Webpage Wrapper',
+          'Knowledge Graph'
         ]}
       />
 
       {/* Steps List */}
       <div className="space-y-10">
         {/* Step 1 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
               1
@@ -570,7 +567,7 @@ export const { GET } = siteApp.createGraphHandler({
         </div>
 
         {/* Step 2 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
               2
@@ -588,7 +585,7 @@ export const { GET } = siteApp.createGraphHandler({
         </div>
 
         {/* Step 3 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
               3
@@ -606,7 +603,7 @@ export const { GET } = siteApp.createGraphHandler({
         </div>
 
         {/* Step 4 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
               4
@@ -624,7 +621,7 @@ export const { GET } = siteApp.createGraphHandler({
         </div>
 
         {/* Step 5 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
               5
@@ -642,7 +639,7 @@ export const { GET } = siteApp.createGraphHandler({
         </div>
 
         {/* Step 6 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
               6
@@ -661,43 +658,6 @@ export const { GET } = siteApp.createGraphHandler({
           </div>
           <div className="pl-9">
             <CodeSnippet filename="app/api/graph.json/route.ts" code={routeCode} lang="typescript" />
-          </div>
-        </div>
-      </div>
-
-      {/* Feature Pillars Footer */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-10">
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Automated Schema.org SEO</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Produces valid Schema.org JSON-LD graphs with @id cross-references for maximum search ranking and AI discoverability.
-            </p>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <RefreshCw className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Zero UI Rewrites</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Switch from hardcoded static data to a headless CMS (Sanity, Strapi) or database without changing UI code.
-            </p>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <Bot className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">AI Agent Ready</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Built-in Route Handler serves clean JSON-LD graphs for agentic workflows, search crawlers, and LLMs.
-            </p>
           </div>
         </div>
       </div>
@@ -967,6 +927,104 @@ forms: [
   },
 ];
 
+function RegistrySelector({
+  registries,
+  selectedId,
+  onSelect,
+}: {
+  registries: RegistryItem[];
+  selectedId: string;
+  onSelect: (id: string) => void;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const selected = registries.find((r) => r.id === selectedId) || registries[0];
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen]);
+
+  return (
+    <div ref={containerRef} className="relative w-full sm:w-80 shrink-0">
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between gap-3 px-3.5 py-2 rounded-xl bg-zinc-950/80 border border-base hover:border-zinc-700 text-left transition-all cursor-pointer shadow-sm focus:outline-none focus:border-accent"
+        aria-haspopup="listbox"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-2.5 truncate">
+          <Boxes className="w-4 h-4 text-accent shrink-0" />
+          <span className="font-mono text-xs font-semibold text-zinc-100 truncate">
+            {selected.name}
+          </span>
+          <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800 shrink-0">
+            {selected.schemaType}
+          </span>
+        </div>
+        <ChevronDown
+          className={`w-4 h-4 text-zinc-400 transition-transform duration-200 shrink-0 ${
+            isOpen ? 'rotate-180 text-accent' : ''
+          }`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1.5 max-h-72 overflow-y-auto rounded-xl bg-zinc-950 border border-zinc-800 shadow-2xl z-50 p-1.5 space-y-0.5">
+          {registries.map((registry) => {
+            const isSelected = registry.id === selectedId;
+            return (
+              <button
+                key={registry.id}
+                type="button"
+                onClick={() => {
+                  onSelect(registry.id);
+                  setIsOpen(false);
+                }}
+                className={`w-full flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-xs font-mono transition-all cursor-pointer text-left ${
+                  isSelected
+                    ? 'bg-zinc-900 text-accent font-semibold border border-zinc-700/80'
+                    : 'text-zinc-300 hover:text-zinc-100 hover:bg-zinc-900/60'
+                }`}
+              >
+                <div className="flex items-center gap-2 truncate">
+                  {isSelected ? (
+                    <Check className="w-3.5 h-3.5 text-accent shrink-0" />
+                  ) : (
+                    <span className="w-3.5 h-3.5 shrink-0" />
+                  )}
+                  <span className="truncate">{registry.name}</span>
+                </div>
+                <span className="text-[10px] text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800 shrink-0">
+                  {registry.schemaType}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SchemaRegistriesSection() {
   const [selectedRegistryId, setSelectedRegistryId] = useState<string>('website');
   const [codeMode, setCodeMode] = useState<'schema' | 'data'>('schema');
@@ -1011,12 +1069,7 @@ export type SiteData = InferData<typeof siteSchema>;`;
 
   return (
     <section id="schemas" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 font-semibold">
-            Single Source of Truth · Schema.org · Zod
-          </span>
-        </div>
+      <div className="docs-section-header">
         <h2 className="text-2xl font-bold tracking-tight mb-2">Schema Registries & defineSchema</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
           <code className="code-short">defineSchema</code> allows you to compose pre-built, type-validated Schema.org registries and custom Zod schemas into a unified contract. Each registry automatically validates runtime data, generates compile-time TypeScript types, and compiles referentially linked Schema.org <code className="code-short">@graph</code> JSON-LD nodes.
@@ -1037,40 +1090,25 @@ export type SiteData = InferData<typeof siteSchema>;`;
 
       {/* Registry Catalog */}
       <div className="space-y-4 pt-4">
-        <div>
-          <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>Built-in Registries Reference</span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
-              {REGISTRIES_DATA.length} Registries
-            </span>
-          </h3>
-          <p className="text-xs text-zinc-400 mt-1">
-            Select a registry below to inspect its Schema.org specification, field requirements, and usage examples.
-          </p>
-        </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
+              <span>Built-in Registries Reference</span>
+              <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
+                {REGISTRIES_DATA.length} Registries
+              </span>
+            </h3>
+            <p className="text-xs text-zinc-400 mt-1">
+              Select a registry below to inspect its Schema.org specification, field requirements, and usage examples.
+            </p>
+          </div>
 
-        {/* Registry Selector Tabs */}
-        <div className="flex flex-wrap gap-2 p-1.5 rounded-xl bg-zinc-950/80 border border-base">
-          {REGISTRIES_DATA.map((registry) => {
-            const isSelected = registry.id === selectedRegistryId;
-            return (
-              <button
-                key={registry.id}
-                type="button"
-                onClick={() => setSelectedRegistryId(registry.id)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-mono transition-all cursor-pointer flex items-center gap-2 ${
-                  isSelected
-                    ? 'bg-zinc-800 text-accent font-semibold shadow-sm border border-zinc-700/80'
-                    : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900'
-                }`}
-              >
-                <span>{registry.name}</span>
-                <span className="text-[10px] text-zinc-500 bg-zinc-900 px-1.5 py-0.2 rounded border border-zinc-800">
-                  {registry.schemaType}
-                </span>
-              </button>
-            );
-          })}
+          {/* Registry Selector */}
+          <RegistrySelector
+            registries={REGISTRIES_DATA}
+            selectedId={selectedRegistryId}
+            onSelect={setSelectedRegistryId}
+          />
         </div>
 
         {/* Selected Registry Detail Panel */}
@@ -1491,7 +1529,7 @@ export default async function ContactPage() {
       {/* Step-by-Step Walkthrough */}
       <div className="space-y-10">
         {/* Step 1 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">1</span>
             <div>
@@ -1507,7 +1545,7 @@ export default async function ContactPage() {
         </div>
 
         {/* Step 2 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">2</span>
             <div>
@@ -1523,7 +1561,7 @@ export default async function ContactPage() {
         </div>
 
         {/* Step 3 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">3</span>
             <div>
@@ -1539,7 +1577,7 @@ export default async function ContactPage() {
         </div>
 
         {/* Step 4 */}
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">4</span>
             <div>
@@ -1797,7 +1835,7 @@ export function ContactFormCard() {
 
       {/* Steps List */}
       <div className="space-y-10">
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">1</span>
             <div>
@@ -1812,7 +1850,7 @@ export function ContactFormCard() {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">2</span>
             <div>
@@ -1827,7 +1865,7 @@ export function ContactFormCard() {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">3</span>
             <div>
@@ -1842,7 +1880,7 @@ export function ContactFormCard() {
           </div>
         </div>
 
-        <div className="space-y-3">
+        <div className="docs-step">
           <div className="flex items-start gap-3">
             <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">4</span>
             <div>
@@ -2095,43 +2133,6 @@ export const siteApp = createContextualApp({
       <p className="mb-6 text-sm leading-relaxed text-zinc-300">
         Connectors decouple your data sources (Static JSON, Headless CMS, Database ORMs, or REST APIs) from your React UI components and SEO knowledge graphs. Any source that fulfills the simple <code className="code-short">{`{ fetchData: () => Promise<T> }`}</code> contract can be plugged into <code className="code-short">createContextualApp</code>.
       </p>
-
-      {/* Feature Pillars */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
-        <div className="p-3.5 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <Plug className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-0.5">1. Decoupled Ingestion</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Write a 5-line connector function to load data from any headless CMS, database, or API.
-            </p>
-          </div>
-        </div>
-        <div className="p-3.5 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <Sparkles className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-0.5">2. Runtime Hydration</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Raw connector payloads are verified and typed through your Zod schema at runtime.
-            </p>
-          </div>
-        </div>
-        <div className="p-3.5 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <RefreshCw className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-0.5">3. Zero UI Rewrites</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Switch from static files to a live CMS without modifying any React components or SEO schemas.
-            </p>
-          </div>
-        </div>
-      </div>
 
       <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
         <div className="flex ml-auto border border-base rounded-md overflow-hidden">
