@@ -18,5 +18,8 @@
   .code-short {
     @apply text-accent font-mono;
   }
+  .docs-section-header {
+    @apply flex flex-col gap-4;
+  }
 
 }

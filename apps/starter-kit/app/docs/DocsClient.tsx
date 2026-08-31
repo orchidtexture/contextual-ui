@@ -33,6 +33,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Breadcrumb, Navbar, Faq, Footer, createForm, AutoForm } from 'contextual-ui';
+import { StepFlowBanner } from '@/components/StepFlowBanner';
 import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
 
@@ -538,24 +539,15 @@ export const { GET } = siteApp.createGraphHandler({
       </div>
 
       {/* Step Flow Banner */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">1</span>
-          <span className="text-xs text-zinc-300 font-medium">Install Packages</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">2</span>
-          <span className="text-xs text-zinc-300 font-medium">Define Schema</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">3</span>
-          <span className="text-xs text-zinc-300 font-medium">App Connector</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">4</span>
-          <span className="text-xs text-zinc-300 font-medium">Hydrate Layout</span>
-        </div>
-      </div>
+      <StepFlowBanner
+        className="mb-8"
+        steps={[
+          'Install Packages',
+          'Define Schema',
+          'App Connector',
+          'Hydrate Layout',
+        ]}
+      />
 
       {/* Steps List */}
       <div className="space-y-10">
@@ -1479,12 +1471,7 @@ export default async function ContactPage() {
   return (
     <section id="auto-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 font-semibold">
-            CMS-Driven · In-Memory Zod · Agentic AI PotentialAction
-          </span>
-        </div>
+      <div className="docs-section-header">
         <h2 className="text-2xl font-bold tracking-tight mb-2">AutoForm &amp; formRegistry</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
           <code className="code-short">&lt;AutoForm&gt;</code> unifies Headless CMS form definitions, dynamic in-memory Zod validation, and machine-readable Schema.org <code className="code-short">PotentialAction</code> JSON-LD graphs for AI agents. Define your form structure in your CMS or connector, and render dynamic accessible UI without writing repetitive React field boilerplate.
@@ -1492,24 +1479,14 @@ export default async function ContactPage() {
       </div>
 
       {/* Step Flow Banner */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">1</span>
-          <span className="text-xs text-zinc-300 font-medium">formRegistry SSOT</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">2</span>
-          <span className="text-xs text-zinc-300 font-medium">CMS Ingestion</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">3</span>
-          <span className="text-xs text-zinc-300 font-medium">&lt;AutoForm&gt; Render</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">4</span>
-          <span className="text-xs text-zinc-300 font-medium">AI PotentialAction</span>
-        </div>
-      </div>
+      <StepFlowBanner
+        steps={[
+          'formRegistry SSOT',
+          'CMS Ingestion',
+          '<AutoForm> Render',
+          'AI PotentialAction',
+        ]}
+      />
 
       {/* Step-by-Step Walkthrough */}
       <div className="space-y-10">
@@ -1568,9 +1545,6 @@ export default async function ContactPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-zinc-100">Automated Schema.org PotentialAction Graph for AI Agents</h3>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono text-accent bg-accent/10 border border-accent/20">
-                  Agentic AI Spec
-                </span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
                 The JSON-LD graph builder automatically maps the form entity to a Schema.org <code className="code-short">PotentialAction</code> (e.g. <code className="code-short">ContactAction</code>) with <code className="code-short">EntryPoint</code> and <code className="code-short">PropertyValueSpecification</code> fields. AI agents (Claude, Perplexity, OpenAI agents) can discover the API contract and interact programmatically without DOM clicking.
@@ -1587,10 +1561,7 @@ export default async function ContactPage() {
       <div className="space-y-4 pt-4">
         <div>
           <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>Interactive Live Demo (&lt;AutoForm&gt;)</span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
-              Live Preview · Real Endpoint (/api/contact)
-            </span>
+          Interactive Live Demo (&lt;AutoForm&gt;)
           </h3>
           <p className="text-xs text-zinc-400 mt-1">
             The form below is generated directly from the starter kit&apos;s <code className="code-short">data.forms</code> connector registry. Fill it out and submit to test real validation and the API POST handler.
@@ -1679,43 +1650,6 @@ export default async function ContactPage() {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Feature Pillars Footer */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <RefreshCw className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">CMS-Driven &amp; Zero Deployments</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Add or modify form fields in your Headless CMS. Forms update dynamically in the UI and server validation without code changes.
-            </p>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <Bot className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Agentic AI Ready</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Emits Schema.org <code className="code-short">PotentialAction</code> JSON-LD letting AI agents (Claude, Perplexity) interact with forms via API.
-            </p>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Dynamic In-Memory Zod</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Compiles strict Zod validators on the fly, providing instant blur feedback and safe schema parsing on submit.
-            </p>
-          </div>
         </div>
       </div>
     </section>
@@ -1844,12 +1778,7 @@ export function ContactFormCard() {
   return (
     <section id="create-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-mono text-accent bg-accent/10 border border-accent/20 font-semibold">
-            Compile-Time Type Safety · Headless Compound Components
-          </span>
-        </div>
+      <div className="docs-section-header">
         <h2 className="text-2xl font-bold tracking-tight mb-2">createForm (Static Form Factory)</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
           The <code className="code-short">createForm</code> factory generates headless, strictly type-safe React form components directly from a hardcoded Zod schema. Ideal for developer-centric custom forms with fixed field requirements, providing automatic blur validation, field name autocompletion, and zero-state boilerplate.
@@ -1857,24 +1786,14 @@ export function ContactFormCard() {
       </div>
 
       {/* Step Flow Banner */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">1</span>
-          <span className="text-xs text-zinc-300 font-medium">Define Schema</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">2</span>
-          <span className="text-xs text-zinc-300 font-medium">Call createForm</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">3</span>
-          <span className="text-xs text-zinc-300 font-medium">Compose Fields</span>
-        </div>
-        <div className="p-3 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-center gap-2.5">
-          <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0">4</span>
-          <span className="text-xs text-zinc-300 font-medium">Handle Submit</span>
-        </div>
-      </div>
+      <StepFlowBanner
+        steps={[
+          'Define Schema',
+          'Call createForm',
+          'Compose Fields',
+          'Handle Submit',
+        ]}
+      />
 
       {/* Steps List */}
       <div className="space-y-10">
@@ -1943,10 +1862,7 @@ export function ContactFormCard() {
       <div className="space-y-4 pt-4">
         <div>
           <h3 className="text-lg font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <span>Static Form Live Demo</span>
-            <span className="text-xs font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 font-normal">
-              Live Preview
-            </span>
+          Static Form Live Demo
           </h3>
           <p className="text-xs text-zinc-400 mt-1">
             Test the static compound form below. Blur fields to test validation feedback.
@@ -2070,43 +1986,6 @@ export function ContactFormCard() {
               ))}
             </tbody>
           </table>
-        </div>
-      </div>
-
-      {/* Feature Pillars Footer */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">End-to-End Type Safety</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Field names on <code className="code-short">Form.Field</code> and submit payloads are strictly checked against your Zod schema at compile-time.
-            </p>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <RefreshCw className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Blur &amp; Submit Validation</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Provides instant feedback on blur without custom state management, then performs full schema parsing upon form submission.
-            </p>
-          </div>
-        </div>
-        <div className="p-4 rounded-xl border border-base bg-zinc-950/60 shadow-sm flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-accent/10 border border-accent/20 text-accent shrink-0">
-            <Layers className="w-4 h-4" />
-          </div>
-          <div>
-            <span className="text-zinc-200 text-xs font-mono font-semibold block mb-1">Headless &amp; Radix Slots</span>
-            <p className="text-[11px] text-zinc-400 leading-relaxed">
-              Bring your own CSS classes or use <code className="code-short">asChild</code> to delegate rendering to Radix UI or Shadcn UI primitives.
-            </p>
-          </div>
         </div>
       </div>
     </section>
