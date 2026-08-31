@@ -34,6 +34,10 @@ export const connector = staticConnector({
     url: 'https://contextual.site',
     description: 'A headless UI and semantic SEO Knowledge Graph.'
   },
+  webpage: [
+    { id: 'home', name: 'Home', url: '/' },
+    { id: 'docs', name: 'Docs', url: '/docs' }
+  ],
   faq: [
     { id: '1', question: 'What is Contextual UI?', answer: 'SSOT framework.' },
     { id: '2', question: 'How does SEO work?', answer: 'Injected JSON-LD graph.' }
@@ -80,6 +84,7 @@ export const siteSchema = defineSchema({
   website: websiteRegistry(),
   webpage: webpageRegistry(),
   navbar: navbarRegistry(),
+  footer: footerRegistry(),
   faq: faqRegistry(),
   announcement: {
     schema: z.object({
@@ -206,9 +211,16 @@ const graph = await siteApp.generateGraph();`,
       "url": "https://contextual.site"
     },
     {
+      "@type": "WebPage",
+      "@id": "https://contextual.site/#webpage:home",
+      "name": "Home",
+      "url": "https://contextual.site/",
+      "isPartOf": { "@id": "https://contextual.site/#website" }
+    },
+    {
       "@type": "FAQPage",
       "@id": "https://contextual.site/#faq",
-      "isPartOf": { "@id": "https://contextual.site/#website" },
+      "isPartOf": { "@id": "https://contextual.site/#webpage" },
       "mainEntity": [
         {
           "@type": "Question",
@@ -252,7 +264,7 @@ const graph = await siteApp.generateGraph();`,
         code: `{
   "agent_context": {
     "site": "Contextual UI Starter Kit",
-    "entities_discovered": ["WebSite", "FAQPage", "SiteNavigationElement"],
+    "entities_discovered": ["Organization", "WebSite", "WebPage", "FAQPage", "SiteNavigationElement", "WPFooter"],
     "direct_graph_url": "/api/graph.json",
     "zero_scraping": true,
     "accuracy_score": 1.0,
