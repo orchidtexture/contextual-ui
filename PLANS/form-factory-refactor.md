@@ -34,13 +34,11 @@ We need to create a new built-in registry in `packages/core/src/server/registrie
 AI agents need to know how to interact with the form. We will map the form data to a Schema.org `PotentialAction`.
 
 **Tasks:**
-- [ ] Update `packages/jsonld-graph-builder/src/` to handle `formRegistry` data.
-- [ ] Map the root form object to a Schema.org Action (e.g., `"@type": "ContactAction"`).
-- [ ] Map the `endpoint` and `method` to a `target` (`EntryPoint`).
-- [ ] Map the `fields` array into the `object` property as `PropertyValueSpecification` entities:
-  - `"valueName"` maps to `field.name`.
-  - `"valueRequired"` maps to `field.required`.
-  - Infer `"valuePattern"` based on `field.type` (e.g., regex for email).
+- [x] Update `packages/jsonld-graph-builder/src/` with `createPotentialAction`, `createPropertyValueSpecification`, and `inferValuePattern`.
+- [x] Map the root form object to a Schema.org Action (`"@type": form.actionType || "ContactAction"`).
+- [x] Map the `endpoint` and `method` to an `EntryPoint` target with canonical URL resolution (`canonicalizeUrl`).
+- [x] Map the `fields` array into `PropertyValueSpecification` entities with validation rules (`valuePattern`, `valueMinLength`, `valueMaxLength`, `minValue`, `maxValue`, `valueOption`, `valueRequired`).
+- [x] Add comprehensive unit tests in `packages/jsonld-graph-builder/src/__tests__/builder.test.ts`.
 
 ---
 

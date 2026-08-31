@@ -28,3 +28,38 @@ export interface JsonLdGraphResult {
   '@context': 'https://schema.org';
   '@graph': JsonLdObject[];
 }
+
+export interface EntryPointOptions {
+  urlTemplate: string;
+  httpMethod?: 'POST' | 'GET' | 'PUT' | 'PATCH' | string;
+  contentType?: string;
+  encodingType?: string;
+  actionPlatform?: string | string[];
+}
+
+export interface PropertyValueSpecOptions {
+  valueName: string;
+  valueRequired?: boolean;
+  valuePattern?: string;
+  valueMinLength?: number;
+  valueMaxLength?: number;
+  minValue?: number;
+  maxValue?: number;
+  defaultValue?: any;
+  description?: string;
+  valueOption?: Array<string | { name: string; value: string }>;
+  readonlyValue?: boolean;
+  multipleValues?: boolean;
+}
+
+export interface PotentialActionOptions {
+  id?: string;
+  actionType?: string;
+  name?: string;
+  description?: string;
+  target: string | EntryPointOptions;
+  object?: PropertyValueSpecOptions[];
+  result?: any;
+  isPartOf?: { '@id': string } | string;
+}
+

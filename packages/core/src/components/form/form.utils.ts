@@ -1,4 +1,8 @@
-import { createId, refersTo } from 'jsonld-graph-builder';
+import {
+  refersTo,
+  createPotentialAction,
+  inferValuePattern,
+} from 'jsonld-graph-builder';
 import type { JsonLdContext } from '../../registry/defineSchema';
 import { FormDataSchema, FormData, FormEntity } from './form.schema';
 
@@ -11,34 +15,58 @@ export function normalizeForms(data: FormData): FormEntity[] {
 }
 
 /**
- * Generates a Schema.org PotentialAction JSON-LD object for each form.
+ * Generates Schema.org PotentialAction JSON-LD objects with EntryPoint targets
+ * and PropertyValueSpecification fields for AI agents and search engines.
  */
 export function generateFormJsonLd(data: FormData, ctx?: Partial<JsonLdContext>) {
-  const create = ctx?.createId ?? createId;
   const refer = ctx?.refersTo ?? refersTo;
   const forms = normalizeForms(data);
 
-  return forms.map((form) => ({
-    '@context': 'https://schema.org',
-    '@type': form.actionType || 'ContactAction',
-    '@id': create(`form-${form.id}`),
-    name: form.name || form.title || form.id,
-    description: form.description,
-    isPartOf: refer('webpage'),
-    target: {
-      '@type': 'EntryPoint',
-      urlTemplate: form.endpoint,
-      httpMethod: form.method || 'POST',
-      contentType: 'application/json',
-    },
-    object: form.fields.map((field) => ({
-      '@type': 'PropertyValueSpecification',
-      valueName: field.name,
-      valueRequired: field.required ?? false,
-      ...(field.type === 'email' ? { valuePattern: '^.+@.+\\..+$' } : {}),
-      ...(field.description ? { description: field.description } : {}),
-    })),
-  }));
+  return forms.map((form) =>
+    createPotentialAction({
+      id: `form-${form.id}`,
+      actionType: form.actionType || 'ContactAction',
+      name: form.name || form.title || form.id,
+      description: form.description,
+      isPartOf: refer('webpage'),
+      target: {
+        urlTemplate: form.endpoint,
+        httpMethod: form.method || 'POST',
+        contentType: 'application/json',
+      },
+      object: form.fields.map((field) => {
+        const pattern =
+          field.validation?.pattern || inferValuePattern(field.type);
+
+        const options = field.options?.map((opt) =>
+          typeof opt === 'string' ? opt : { name: opt.label, value: opt.value }
+        );
+
+        return {
+          valueName: field.name,
+          valueRequired: field.required ?? false,
+          ...(pattern ? { valuePattern: pattern } : {}),
+          ...(field.validation?.minLength !== undefined
+            ? { valueMinLength: field.validation.minLength }
+            : {}),
+          ...(field.validation?.maxLength !== undefined
+            ? { valueMaxLength: field.validation.maxLength }
+            : {}),
+          ...(field.validation?.min !== undefined
+            ? { minValue: field.validation.min }
+            : {}),
+          ...(field.validation?.max !== undefined
+            ? { maxValue: field.validation.max }
+            : {}),
+          ...(field.defaultValue !== undefined
+            ? { defaultValue: field.defaultValue }
+            : {}),
+          ...(field.description ? { description: field.description } : {}),
+          ...(options && options.length > 0 ? { valueOption: options } : {}),
+        };
+      }),
+    })
+  );
 }
 
 /**

@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { buildGraph, createId, refersTo } from '../index';
+import {
+  buildGraph,
+  createId,
+  refersTo,
+  createPotentialAction,
+  createPropertyValueSpecification,
+  inferValuePattern,
+} from '../index';
 
 describe('JSON-LD Graph Builder', () => {
   it('canonicalizes relative @id values against baseUrl', () => {
@@ -211,6 +218,61 @@ describe('JSON-LD Graph Builder', () => {
 
     expect(id).toBe('#article:seo-post');
     expect(ref).toEqual({ '@id': '#organization:main' });
+  });
+
+  it('builds and canonicalizes potentialAction entities for AI agents', () => {
+    const action = createPotentialAction({
+      id: 'contact',
+      actionType: 'ContactAction',
+      name: 'Contact Sales',
+      target: {
+        urlTemplate: '/api/contact',
+        httpMethod: 'POST',
+      },
+      object: [
+        {
+          valueName: 'email',
+          valueRequired: true,
+          valuePattern: '^.+@.+\\..+$',
+        },
+        {
+          valueName: 'companySize',
+          valueRequired: false,
+          valueOption: ['1-10', '11-50', '50+'],
+        },
+      ],
+    });
+
+    const result = buildGraph([action], {
+      baseUrl: 'https://example.com',
+    });
+
+    expect(result['@graph']).toHaveLength(1);
+    const actionNode = result['@graph'][0];
+
+    expect(actionNode['@id']).toBe('https://example.com/#action:contact');
+    expect(actionNode['@type']).toBe('ContactAction');
+    expect(actionNode.name).toBe('Contact Sales');
+    expect(actionNode.target).toEqual({
+      '@type': 'EntryPoint',
+      urlTemplate: 'https://example.com/api/contact',
+      httpMethod: 'POST',
+      contentType: 'application/json',
+    });
+    expect(actionNode.object).toEqual([
+      {
+        '@type': 'PropertyValueSpecification',
+        valueName: 'email',
+        valueRequired: true,
+        valuePattern: '^.+@.+\\..+$',
+      },
+      {
+        '@type': 'PropertyValueSpecification',
+        valueName: 'companySize',
+        valueRequired: false,
+        valueOption: ['1-10', '11-50', '50+'],
+      },
+    ]);
   });
 
   it('handles empty inputs safely', () => {
