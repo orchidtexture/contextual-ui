@@ -46,22 +46,10 @@ AI agents need to know how to interact with the form. We will map the form data 
 Replace or extend the static `createForm` with a dynamic `<AutoForm>` component capable of reading the registry payload.
 
 **Tasks:**
-- [ ] **Dynamic Zod Generation**: Write a utility function `buildZodSchema(fields)` that iterates through the JSON fields and generates a Zod schema in-memory (e.g., converting `{ type: 'email', required: true }` to `z.string().email()`).
-- [ ] **`AutoForm` Component**:
-  - Accepts `data` (the form configuration array) and `formId`.
-  - Uses the dynamic Zod schema to initialize form state and validation.
-  - Iterates over the form's `fields` to dynamically render inputs.
-- [ ] **Headless Slots Support**: Allow developers to inject custom UI components via a `components` prop.
-  ```tsx
-  <AutoForm 
-    data={formsData} 
-    formId="contact"
-    components={{
-      Input: (props) => <input className="my-custom-input" {...props} />,
-      Submit: (props) => <button className="my-btn">{props.children}</button>
-    }}
-  />
-  ```
+- [x] **Dynamic Zod Generation**: Created `buildZodSchema(fields)` and `buildFieldZodSchema(field)` in `packages/core/src/components/form/buildZodSchema.ts` that dynamically generate Zod schemas in-memory supporting text, email, textarea, select, boolean, number, url, tel, and password field types with custom error messages and constraints.
+- [x] **`AutoForm` Component**: Implemented `<AutoForm>` in `packages/core/src/components/form/AutoForm.tsx` consuming `data` (forms registry payload) and `formId`, binding dynamic Zod validation, handling `onBlur` and `onSubmit` states, and managing success/error lifecycles.
+- [x] **Headless Slots Support**: Implemented `components` prop with customizable slots (`Form`, `Field`, `Label`, `Input`, `TextArea`, `Select`, `Checkbox`, `ErrorMessage`, `Submit`, `Section`).
+- [x] **Unit Tests**: Added test suite in `packages/core/src/components/form/autoForm.test.ts` covering dynamic schema generation, validation constraints, and optional field handling.
 
 ---
 

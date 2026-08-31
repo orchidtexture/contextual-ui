@@ -13,8 +13,9 @@ export type * from './components/breadcrumb/breadcrumb.types';
 export { BreadcrumbDataSchema, BreadcrumbItemSchema } from './components/breadcrumb/breadcrumb.schema';
 export { generateBreadcrumbJsonLd, exportAgentData as exportBreadcrumbAgentData, breadcrumbRegistry } from './components/breadcrumb/breadcrumb.utils';
 
-export { createForm } from './components/form';
+export { createForm, AutoForm, buildZodSchema, buildFieldZodSchema } from './components/form';
 export type * from './components/form/form.types';
+export type * from './components/form/autoForm.types';
 export {
   FormDataSchema,
   FormEntitySchema,
