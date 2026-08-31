@@ -15,6 +15,26 @@ export { generateBreadcrumbJsonLd, exportAgentData as exportBreadcrumbAgentData,
 
 export { createForm } from './components/form';
 export type * from './components/form/form.types';
+export {
+  FormDataSchema,
+  FormEntitySchema,
+  FormFieldSchema,
+  FormFieldOptionSchema,
+  FormFieldValidationSchema,
+} from './components/form/form.schema';
+export type {
+  FormData,
+  FormEntity,
+  FormField,
+  FormFieldOption,
+  FormFieldValidation,
+} from './components/form/form.schema';
+export {
+  generateFormJsonLd,
+  exportAgentData as exportFormAgentData,
+  formRegistry,
+  formsRegistry,
+} from './components/form/form.utils';
 
 export { Navbar, useNavbar } from './components/navbar';
 export type { NavItem, NavbarData } from './components/navbar/navbar.schema';

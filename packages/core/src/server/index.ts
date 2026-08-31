@@ -43,4 +43,25 @@ export {
   exportAgentData as exportOrganizationAgentData,
   organizationRegistry,
 } from '../components/organization/organization.utils';
+export {
+  FormDataSchema,
+  FormEntitySchema,
+  FormFieldSchema,
+  FormFieldOptionSchema,
+  FormFieldValidationSchema,
+} from '../components/form/form.schema';
+export type {
+  FormData,
+  FormEntity,
+  FormField,
+  FormFieldOption,
+  FormFieldValidation,
+} from '../components/form/form.schema';
+export {
+  generateFormJsonLd,
+  exportAgentData as exportFormAgentData,
+  formRegistry,
+  formsRegistry,
+} from '../components/form/form.utils';
+
 

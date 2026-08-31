@@ -1,0 +1,84 @@
+# Plan: Form Factory Refactor (CMS-Driven & Agentic Forms)
+
+## Overview
+Currently, `createForm` relies on hardcoded Zod schemas and static JSX fields. This refactor transitions the Form Factory into a truly **Contextual** feature by introducing three distinct layers of automation:
+1. **CMS-Driven**: Forms are defined in the CMS (or static connector) and passed down as data.
+2. **Dynamic UI & Validation**: The frontend dynamically builds runtime Zod schemas and renders headless React components based on the CMS data.
+3. **Agentic Schema.org Action**: The JSON-LD graph builder automatically emits `PotentialAction` entities (e.g., `ContactAction`), exposing a machine-readable "API Spec" for AI agents to interact with the form programmatically without needing a browser DOM.
+
+---
+
+## Phase 1: Define `formRegistry` (Core API)
+We need to create a new built-in registry in `packages/core/src/server/registries/`.
+
+**Tasks:**
+- [x] Create `form.schema.ts` and `form.utils.ts` in `packages/core/src/components/form/`.
+- [x] Define the TypeScript contract for a Form Entity (`FormEntitySchema`, `FormFieldSchema`, `FormDataSchema`).
+  - `id`: Unique identifier for the form (e.g., `'contact-sales'`).
+  - `actionType`: Schema.org action type (e.g., `'ContactAction'`, `'SearchAction'`, `'SubscribeAction'`).
+  - `endpoint`: The API endpoint to hit (e.g., `'/api/contact'`).
+  - `method`: HTTP Method (e.g., `'POST'`).
+  - `fields`: Array of field configurations:
+    - `name`: string (e.g., `'email'`)
+    - `type`: `'text' | 'email' | 'textarea' | 'select' | 'boolean' | 'number' | 'tel' | 'url' | 'password'`
+    - `label`: string
+    - `required`: boolean
+    - `placeholder`?: string
+    - `options`?: array of strings/objects (for selects)
+- [x] Export `formRegistry` and `formsRegistry` to be used inside `defineSchema`.
+- [x] Add comprehensive test coverage in `packages/core/src/components/form/form.test.ts`.
+
+---
+
+## Phase 2: Schema.org Graph Integration (Agentic AI)
+AI agents need to know how to interact with the form. We will map the form data to a Schema.org `PotentialAction`.
+
+**Tasks:**
+- [ ] Update `packages/jsonld-graph-builder/src/` to handle `formRegistry` data.
+- [ ] Map the root form object to a Schema.org Action (e.g., `"@type": "ContactAction"`).
+- [ ] Map the `endpoint` and `method` to a `target` (`EntryPoint`).
+- [ ] Map the `fields` array into the `object` property as `PropertyValueSpecification` entities:
+  - `"valueName"` maps to `field.name`.
+  - `"valueRequired"` maps to `field.required`.
+  - Infer `"valuePattern"` based on `field.type` (e.g., regex for email).
+
+---
+
+## Phase 3: Dynamic Runtime & UI (`AutoForm`)
+Replace or extend the static `createForm` with a dynamic `<AutoForm>` component capable of reading the registry payload.
+
+**Tasks:**
+- [ ] **Dynamic Zod Generation**: Write a utility function `buildZodSchema(fields)` that iterates through the JSON fields and generates a Zod schema in-memory (e.g., converting `{ type: 'email', required: true }` to `z.string().email()`).
+- [ ] **`AutoForm` Component**:
+  - Accepts `data` (the form configuration array) and `formId`.
+  - Uses the dynamic Zod schema to initialize form state and validation.
+  - Iterates over the form's `fields` to dynamically render inputs.
+- [ ] **Headless Slots Support**: Allow developers to inject custom UI components via a `components` prop.
+  ```tsx
+  <AutoForm 
+    data={formsData} 
+    formId="contact"
+    components={{
+      Input: (props) => <input className="my-custom-input" {...props} />,
+      Submit: (props) => <button className="my-btn">{props.children}</button>
+    }}
+  />
+  ```
+
+---
+
+## Phase 4: Starter Kit & Documentation Updates
+Update the starter kit to use the new architecture to prove it works end-to-end.
+
+**Tasks:**
+- [ ] Update `connectors/static/src/index.ts` to include a sample `forms` configuration.
+- [ ] Update `apps/starter-kit/data/site.schema.ts` to register `forms: formRegistry()`.
+- [ ] Create an API route (`apps/starter-kit/app/api/contact/route.ts`) to handle the form submission.
+- [ ] Replace the manual `ContactForm` in `DocsClient.tsx` with the new `<AutoForm>` implementation.
+- [ ] Update documentation copy to highlight the "Agentic AI Forms" and "CMS-Driven Forms" concepts.
+
+---
+
+## Technical Considerations
+- **Security**: The dynamic Zod schema is strictly for client-side validation and DX. The server handling the POST request must still validate the incoming payload independently.
+- **Extensibility**: Make sure the `AutoForm` slots can handle custom field types in the future (e.g., Date pickers, File uploads).
