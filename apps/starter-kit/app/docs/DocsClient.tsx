@@ -33,7 +33,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { Breadcrumb, Navbar, Faq, Footer, createForm, AutoForm } from 'contextual-ui';
-import { StepFlowBanner } from '@/components/StepFlowBanner';
 import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
 
@@ -532,19 +531,6 @@ export const { GET } = siteApp.createGraphHandler({
           Learn how to install Contextual UI, define a single-source-of-truth schema, configure a data connector, and render headless SEO-ready components in your Next.js application in under 5 minutes.
         </p>
       </div>
-
-      {/* Step Flow Banner */}
-      <StepFlowBanner
-        className="mb-8"
-        steps={[
-          'Install Packages',
-          'Define Schema',
-          'App Connector',
-          'Hydrate Layout',
-          'Webpage Wrapper',
-          'Knowledge Graph'
-        ]}
-      />
 
       {/* Steps List */}
       <div className="space-y-10">
@@ -1525,16 +1511,6 @@ export default async function ContactPage() {
         </a>
       </div>
 
-      {/* Step Flow Banner */}
-      <StepFlowBanner
-        steps={[
-          'formRegistry SSOT',
-          'CMS Ingestion',
-          '<AutoForm> Render',
-          'AI PotentialAction',
-        ]}
-      />
-
       {/* Step-by-Step Walkthrough */}
       <div className="space-y-10">
         {/* Step 1 */}
@@ -1840,16 +1816,6 @@ export function ContactFormCard() {
           The <code className="code-short">createForm</code> factory generates headless, strictly type-safe React form components directly from a hardcoded Zod schema. Ideal for developer-centric custom forms with fixed field requirements, providing automatic blur validation, field name autocompletion, and zero-state boilerplate.
         </p>
       </div>
-
-      {/* Step Flow Banner */}
-      <StepFlowBanner
-        steps={[
-          'Define Schema',
-          'Call createForm',
-          'Compose Fields',
-          'Handle Submit',
-        ]}
-      />
 
       {/* Steps List */}
       <div className="space-y-10">
