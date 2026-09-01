@@ -34,43 +34,32 @@ export function Footer({ data: explicitData }: CustomFooterProps = {}) {
             </ContextualFooter.Brand>
             <ContextualFooter.Description className="text-xs text-zinc-400 max-w-sm leading-relaxed" />
             {footerData?.socials && footerData.socials.length > 0 && (
-              <ContextualFooter.Socials className="flex gap-2 pt-2">
-                {footerData.socials.map((social) => (
-                  <ContextualFooter.SocialLink
-                    key={social.id}
-                    item={social}
-                    className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-accent hover:border-accent/40 transition-colors"
-                  >
-                    {social.label || social.platform}
-                  </ContextualFooter.SocialLink>
-                ))}
-              </ContextualFooter.Socials>
+              <ContextualFooter.Socials
+                className="flex gap-2 pt-2"
+                socialClassName="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-accent hover:border-accent/40 transition-colors"
+              />
             )}
           </div>
 
-          <ContextualFooter.Columns className="md:col-span-2 grid grid-cols-2 gap-6">
+          <ContextualFooter.Columns
+            className="md:col-span-2 grid grid-cols-2 gap-6"
+            titleClassName="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300"
+            linkClassName="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+          >
             {footerData?.columns?.map((col) => (
               <ContextualFooter.Column key={col.id} column={col} className="space-y-3">
-                <ContextualFooter.ColumnTitle className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
-                  {col.title}
-                </ContextualFooter.ColumnTitle>
-                <ContextualFooter.Links className="space-y-2 list-none p-0 m-0">
-                  {col.links.map((link) => (
-                    <li key={link.id}>
-                      <ContextualFooter.Link
-                        item={link}
-                        className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-                      />
-                    </li>
-                  ))}
-                </ContextualFooter.Links>
+                <ContextualFooter.ColumnTitle />
+                <ContextualFooter.Links className="space-y-2 flex flex-col" />
               </ContextualFooter.Column>
             ))}
           </ContextualFooter.Columns>
         </div>
 
         {/* Bottom Bar: Copyright & Legal */}
-        <ContextualFooter.Bottom className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+        <ContextualFooter.Bottom
+          className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400"
+          linkClassName="hover:text-zinc-200 transition-colors"
+        >
           <div className="flex items-center gap-2">
             <span>Maintained by</span>
             <a
@@ -108,7 +97,6 @@ export function Footer({ data: explicitData }: CustomFooterProps = {}) {
               <ContextualFooter.Link
                 key={link.id}
                 item={link}
-                className="hover:text-zinc-200 transition-colors"
               />
             ))}
           </div>

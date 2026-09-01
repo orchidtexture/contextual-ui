@@ -403,47 +403,77 @@ Pass a function as child to `<Navbar.Links>` or `<Navbar.Menu>` to customize the
 ```
 
 ### 5. Footer (`footerRegistry` & `<Footer />`)
-Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph.
+Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph. Supports context-driven styling inheritance (`linkClassName`, `titleClassName`, `socialClassName`), zero-wrapper fragment rendering, and render props.
 
+#### Pattern A: Zero Boilerplate Auto-Rendering
 ```tsx
 import { Footer } from 'contextual-ui';
 
-const footerData = {
-  brand: {
-    name: 'Contextual UI',
-    description: 'Headless UI with built-in Agentic AI and Schema.org SEO.',
-  },
-  columns: [
-    {
-      id: 'resources',
-      title: 'Resources',
-      links: [
-        { id: '1', label: 'Docs', href: '/docs' },
-        { id: '2', label: 'Schema Graph', href: '/schema' },
-      ],
-    },
-  ],
-  socials: [
-    { id: '1', platform: 'github', href: 'https://github.com/tasuku-io' },
-  ],
-  copyright: {
-    holder: 'Tasuku Studio',
-  },
-};
-
-export function SiteFooter() {
+export function SiteFooter({ data }) {
   return (
-    <Footer.Root data={footerData} className="p-8 border-t">
+    <Footer.Root data={data.footer} className="bg-zinc-950 p-8">
       <Footer.Brand />
-      <Footer.Description />
-      <Footer.Columns>
-        <Footer.Column id="resources">
+      <Footer.Description className="text-sm text-zinc-400 mt-2" />
+      
+      <Footer.Columns 
+        className="grid grid-cols-4 gap-8 my-8" 
+        titleClassName="font-bold text-white mb-4"
+        linkClassName="text-zinc-400 hover:text-white block py-1" 
+      />
+
+      <Footer.Socials 
+        className="flex gap-4 my-4" 
+        socialClassName="text-zinc-400 hover:text-white" 
+      />
+
+      <Footer.Bottom 
+        className="border-t border-zinc-800 pt-8 flex justify-between"
+        linkClassName="text-xs text-zinc-500 hover:text-white"
+      />
+    </Footer.Root>
+  );
+}
+```
+
+#### Pattern B: Composable with Custom Elements & Render Props
+```tsx
+import { Footer } from 'contextual-ui';
+
+export function ComposableFooter() {
+  return (
+    <Footer.Root className="p-8 border-t border-zinc-800">
+      <Footer.Brand>
+        {(brand) => <span className="font-bold text-lg">{brand?.name}</span>}
+      </Footer.Brand>
+
+      <Footer.Columns className="grid grid-cols-3 gap-6 my-6" linkClassName="text-zinc-400 hover:text-zinc-200">
+        <Footer.Column id="resources" linkClassName="hover:underline">
           <Footer.ColumnTitle />
           <Footer.Links />
+          {/* Appended custom link sharing the column's inherited styles */}
+          <Footer.Link href="/custom-resource">Custom Resource</Footer.Link>
+        </Footer.Column>
+
+        <Footer.Column id="company">
+          <Footer.ColumnTitle className="text-zinc-100 font-semibold uppercase" />
+          <Footer.Links>
+            {(links) => (
+              <ul className="space-y-2">
+                {links.map((link) => (
+                  <li key={link.id}>
+                    <Footer.Link item={link} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Footer.Links>
         </Footer.Column>
       </Footer.Columns>
-      <Footer.Socials />
-      <Footer.Copyright />
+
+      <Footer.Bottom className="flex justify-between items-center text-sm">
+        <Footer.Copyright />
+        <Footer.Socials />
+      </Footer.Bottom>
     </Footer.Root>
   );
 }

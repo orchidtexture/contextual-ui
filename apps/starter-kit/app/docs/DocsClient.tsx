@@ -2601,40 +2601,31 @@ export default async function DocsPage() {
       <Footer.Description className="text-xs text-zinc-400 max-w-sm leading-relaxed">
         ${footerData.brand?.description || ''}
       </Footer.Description>
-      <Footer.Socials className="flex flex-wrap gap-2 pt-2">
-        {data.footer?.socials?.map((social) => (
-          <Footer.SocialLink
-            key={social.id}
-            item={social}
-            className="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-accent transition-colors"
-          />
-        ))}
-      </Footer.Socials>
+      <Footer.Socials 
+        className="flex flex-wrap gap-2 pt-2"
+        socialClassName="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-accent transition-colors"
+      />
     </div>
 
-    <Footer.Columns className="md:col-span-2 grid grid-cols-2 gap-6">
+    <Footer.Columns 
+      className="md:col-span-2 grid grid-cols-2 gap-6"
+      titleClassName="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300"
+      linkClassName="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+    >
       {data.footer?.columns?.map((col) => (
         <Footer.Column key={col.id} column={col} className="space-y-3">
-          <Footer.ColumnTitle className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
-            {col.title}
-          </Footer.ColumnTitle>
-          <Footer.Links className="space-y-2 list-none p-0 m-0">
-            {col.links.map((link) => (
-              <li key={link.id}>
-                <Footer.Link
-                  item={link}
-                  className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-                />
-              </li>
-            ))}
-          </Footer.Links>
+          <Footer.ColumnTitle />
+          <Footer.Links className="space-y-2 flex flex-col" />
         </Footer.Column>
       ))}
     </Footer.Columns>
   </div>
 
   {/* Bottom Bar: Copyright & Legal Policies */}
-  <Footer.Bottom className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+  <Footer.Bottom 
+    className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400"
+    linkClassName="hover:text-zinc-200 transition-colors"
+  >
     <Footer.Copyright
       holder="${footerData.copyright?.holder || 'Tasuku Studio'}"
       year={${footerData.copyright?.year || new Date().getFullYear()}}
@@ -2645,7 +2636,6 @@ export default async function DocsPage() {
         <Footer.Link
           key={link.id}
           item={link}
-          className="hover:text-zinc-200 transition-colors"
         />
       ))}
     </div>
@@ -3984,43 +3974,32 @@ export default async function DocsPage() {
                     </Footer.Description>
                   )}
                   {footerData.socials && footerData.socials.length > 0 && (
-                    <Footer.Socials className="flex flex-wrap gap-2 pt-2">
-                      {footerData.socials.map((social) => (
-                        <Footer.SocialLink
-                          key={social.id}
-                          item={social}
-                          className="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-accent hover:border-accent/40 transition-colors"
-                        >
-                          {social.label || social.platform}
-                        </Footer.SocialLink>
-                      ))}
-                    </Footer.Socials>
+                    <Footer.Socials
+                      className="flex flex-wrap gap-2 pt-2"
+                      socialClassName="text-[11px] font-mono px-2 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-accent hover:border-accent/40 transition-colors"
+                    />
                   )}
                 </div>
 
-                <Footer.Columns className="md:col-span-2 grid grid-cols-2 gap-6">
+                <Footer.Columns
+                  className="md:col-span-2 grid grid-cols-2 gap-6"
+                  titleClassName="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300"
+                  linkClassName="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
+                >
                   {footerData.columns?.map((col) => (
                     <Footer.Column key={col.id} column={col} className="space-y-3">
-                      <Footer.ColumnTitle className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-300">
-                        {col.title}
-                      </Footer.ColumnTitle>
-                      <Footer.Links className="space-y-2 list-none p-0 m-0">
-                        {col.links.map((link) => (
-                          <li key={link.id}>
-                            <Footer.Link
-                              item={link}
-                              className="text-xs text-zinc-400 hover:text-zinc-200 transition-colors"
-                            />
-                          </li>
-                        ))}
-                      </Footer.Links>
+                      <Footer.ColumnTitle />
+                      <Footer.Links className="space-y-2 flex flex-col" />
                     </Footer.Column>
                   ))}
                 </Footer.Columns>
               </div>
 
               {/* Bottom Bar: Copyright & Legal Policies */}
-              <Footer.Bottom className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400">
+              <Footer.Bottom
+                className="pt-6 border-t border-base flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-zinc-400"
+                linkClassName="hover:text-zinc-200 transition-colors"
+              >
                 <Footer.Copyright
                   holder={footerData.copyright?.holder}
                   year={footerData.copyright?.year}
@@ -4032,7 +4011,6 @@ export default async function DocsPage() {
                       <Footer.Link
                         key={link.id}
                         item={link}
-                        className="hover:text-zinc-200 transition-colors"
                       />
                     ))}
                   </div>
