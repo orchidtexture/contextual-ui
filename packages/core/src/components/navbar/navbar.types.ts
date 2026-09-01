@@ -4,34 +4,40 @@ import { NavbarData, NavItem } from './navbar.schema';
 export interface NavbarRootProps {
   data?: NavbarData;
   sectionKey?: string;
-  children: ReactNode;
+  linkClassName?: string;
+  children?: ReactNode;
   className?: string;
   sticky?: boolean;
   injectJsonLd?: boolean;
 }
 
-export interface NavbarBrandProps {
-  children?: ReactNode;
+export interface NavbarBrandProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'children'> {
+  children?: ReactNode | ((brand?: NavbarData['brand']) => ReactNode);
   className?: string;
   asChild?: boolean;
   href?: string;
-  [key: string]: any;
 }
 
-export interface NavbarContentProps {
-  children: ReactNode;
+export interface NavbarLinksProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
+  links?: NavItem[];
+  linkClassName?: string;
+  children?: ReactNode | ((links: NavItem[]) => ReactNode);
+  renderItem?: (item: NavItem) => ReactNode;
   className?: string;
+  asChild?: boolean;
 }
 
-export interface NavbarToggleProps {
+export interface NavbarToggleProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: ReactNode;
   className?: string;
   asChild?: boolean;
 }
 
-export interface NavbarMenuProps {
-  children: ReactNode;
+export interface NavbarMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
+  children?: ReactNode | ((data?: NavbarData) => ReactNode);
+  linkClassName?: string;
   className?: string;
+  asChild?: boolean;
 }
 
 export interface NavbarLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
@@ -48,4 +54,6 @@ export interface NavbarContextValue {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   toggle: () => void;
+  linkClassName?: string;
 }
+

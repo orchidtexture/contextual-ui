@@ -326,37 +326,80 @@ export default async function DocsPage() {
 ```
 
 ### 4. Navbar (`navbarRegistry` & `<Navbar />`)
-Provides responsive navigation structure, mobile drawer toggles, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
+Provides responsive navigation structure, mobile drawer toggles, automatic link rendering, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
+
+When wrapped in `<ContextualSite>`, it resolves branding and links directly from the global application context without manual prop passing or context hooks.
+
+#### Pattern A: Declarative & Zero-Boilerplate (with `linkClassName`)
+Style auto-rendered links directly on `<Navbar.Links>` and `<Navbar.Menu>`:
 
 ```tsx
 import { Navbar } from 'contextual-ui';
 
-const navData = {
-  brand: { name: 'Contextual UI', href: '/' },
-  links: [
-    { id: '1', label: 'Features', href: '#features' },
-    { id: '2', label: 'Docs', href: '/docs' },
-  ]
-};
-
 export function Header() {
   return (
-    <Navbar.Root data={navData} className="flex justify-between p-4">
-      <Navbar.Brand href="/" className="font-bold text-xl" />
-      <Navbar.Content className="hidden md:flex gap-4">
-        {navData.links.map(link => (
-          <a key={link.id} href={link.href}>{link.label}</a>
-        ))}
-      </Navbar.Content>
-      <Navbar.Toggle className="md:hidden" />
-      <Navbar.Menu className="md:hidden flex flex-col mt-4">
-        {navData.links.map(link => (
-          <a key={link.id} href={link.href} className="py-2">{link.label}</a>
-        ))}
-      </Navbar.Menu>
+    <Navbar.Root className="flex justify-between items-center p-4">
+      {/* Automatically renders logo and name from site context */}
+      <Navbar.Brand className="font-bold text-xl flex items-center gap-2" />
+
+      {/* Automatically renders all schema links with linkClassName applied */}
+      <Navbar.Links 
+        className="hidden md:flex gap-6 items-center" 
+        linkClassName="hover:text-zinc-200 no-underline text-sm font-medium transition-colors" 
+      />
+
+      {/* Mobile drawer toggle with ARIA attributes */}
+      <Navbar.Toggle className="md:hidden p-2 text-zinc-400" />
+
+      {/* Responsive mobile menu */}
+      <Navbar.Menu 
+        className="md:hidden flex flex-col gap-2 mt-4" 
+        linkClassName="hover:text-zinc-200 text-base py-1 transition-colors" 
+      />
     </Navbar.Root>
   );
 }
+```
+
+#### Pattern B: Composable Links with Appended Custom Items
+`<Navbar.Links>` automatically renders all schema links with `linkClassName`, and appends any custom `<Navbar.Link>` children:
+
+```tsx
+<Navbar.Root className="flex justify-between items-center p-4">
+  <Navbar.Brand />
+
+  <Navbar.Links 
+    className="hidden md:flex gap-6 items-center" 
+    linkClassName="hover:text-zinc-200 no-underline text-sm font-medium transition-colors"
+  >
+    {/* Custom CTA / external link button appended to the links */}
+    <Navbar.Link 
+      href="https://github.com/orchidtexture/contextual-ui" 
+      external 
+      className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs"
+    >
+      GitHub
+    </Navbar.Link>
+  </Navbar.Links>
+
+  <Navbar.Toggle className="md:hidden" />
+
+  <Navbar.Menu 
+    className="md:hidden flex flex-col gap-2 mt-4" 
+    linkClassName="hover:text-zinc-200 text-base py-1 transition-colors" 
+  />
+</Navbar.Root>
+```
+
+#### Pattern C: Render Props for Complete Control
+Pass a function as child to `<Navbar.Links>` or `<Navbar.Menu>` to customize the iteration:
+
+```tsx
+<Navbar.Links className="hidden md:flex gap-6 items-center">
+  {(links) => links.map((link) => (
+    <Navbar.Link key={link.id} item={link} className="hover:text-zinc-200" />
+  ))}
+</Navbar.Links>
 ```
 
 ### 5. Footer (`footerRegistry` & `<Footer />`)
