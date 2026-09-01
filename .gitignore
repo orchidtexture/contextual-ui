@@ -10,6 +10,9 @@ build/
 .next/
 out/
 
+# Archivos empaquetados
+*.tgz
+
 # Variables de entorno
 .env
 .env*.local
