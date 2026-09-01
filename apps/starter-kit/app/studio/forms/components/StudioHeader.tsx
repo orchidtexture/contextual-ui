@@ -24,8 +24,6 @@ export function StudioHeader({
   selectedPresetId,
   onSelectPreset,
   onOpenSettings,
-  onCopyAiPrompt,
-  copiedAiPrompt,
   onResetToDefault,
 }: StudioHeaderProps) {
   return (
@@ -37,7 +35,7 @@ export function StudioHeader({
             Studio
           </span>
           <span className="text-xs text-zinc-500 font-mono">/</span>
-          <h1 className="text-sm font-semibold text-zinc-200">Forms Playground</h1>
+          <h1 className="text-sm font-semibold text-zinc-200">AutoForm</h1>
         </div>
 
         {/* Preset Selector */}
@@ -65,44 +63,11 @@ export function StudioHeader({
       <div className="flex items-center gap-2.5">
         <button
           type="button"
-          onClick={onOpenSettings}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-zinc-300 bg-zinc-800/60 hover:bg-zinc-800 border border-zinc-700/60 transition-colors"
-          title="Edit form properties, API endpoint & action"
-        >
-          <Settings className="w-3.5 h-3.5 text-zinc-400" />
-          <span className="hidden sm:inline">Settings</span>
-        </button>
-
-        <button
-          type="button"
           onClick={onResetToDefault}
           className="p-1.5 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 rounded-lg border border-transparent hover:border-zinc-700 transition-colors"
           title="Reset form configuration"
         >
           <RotateCcw className="w-3.5 h-3.5" />
-        </button>
-
-        {/* Primary Action: Copy AI Prompt */}
-        <button
-          type="button"
-          onClick={onCopyAiPrompt}
-          className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-sm ${
-            copiedAiPrompt
-              ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-              : 'bg-accent hover:bg-accent/90 text-zinc-950 font-semibold shadow-accent/20 hover:shadow-accent/30'
-          }`}
-        >
-          {copiedAiPrompt ? (
-            <>
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Prompt Copied!</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Copy AI Prompt</span>
-            </>
-          )}
         </button>
       </div>
     </header>

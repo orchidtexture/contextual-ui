@@ -47,7 +47,7 @@ export function PromptTweaker({
   ];
 
   return (
-    <div className="flex flex-col h-full bg-zinc-950 font-sans text-xs space-y-5">
+    <div className="flex flex-col font-sans text-xs space-y-4">
       {/* Pane Title */}
       <div className="flex items-center justify-between pb-3 border-b border-zinc-800/80">
         <div className="flex items-center gap-2">
@@ -111,16 +111,17 @@ export function PromptTweaker({
       </div>
 
       {/* Custom Context / Requirements */}
-      <div className="space-y-2 flex-1 flex flex-col min-h-[140px]">
+      <div className="space-y-2 flex flex-col">
         <label className="flex items-center gap-1.5 text-zinc-400 font-medium">
           <Sliders className="w-3.5 h-3.5 text-zinc-500" />
           <span>Custom Instructions (Optional)</span>
         </label>
         <textarea
+          rows={3}
           value={promptOptions.customInstructions}
           onChange={(e) => onChangeOptions({ customInstructions: e.target.value })}
-          placeholder="e.g., Send confirmation email to user, style with rounded-3xl borders, add Cloudflare Turnstile captcha..."
-          className="w-full flex-1 bg-zinc-900/80 border border-zinc-800 rounded-lg p-2.5 text-zinc-200 focus:outline-none focus:border-accent text-xs placeholder:text-zinc-600 resize-none font-mono"
+          placeholder="e.g., Send confirmation email, add Turnstile captcha..."
+          className="w-full bg-zinc-900/80 border border-zinc-800 rounded-lg p-2.5 text-zinc-200 focus:outline-none focus:border-accent text-xs placeholder:text-zinc-600 resize-y font-mono"
         />
       </div>
 

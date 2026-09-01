@@ -18,6 +18,15 @@
   .code-short {
     @apply text-accent font-mono;
   }
+  .bg-glass {
+    @apply bg-zinc-950/60 backdrop-blur-md border border-base shadow-sm;
+  }
+  .bg-glass-card {
+    @apply bg-zinc-950/60 backdrop-blur-md border border-base rounded-2xl shadow-sm;
+  }
+  .bg-canvas-gradient {
+    background: radial-gradient(circle at 50% 25%, rgba(79, 171, 240, 0.08) 0%, rgba(9, 9, 11, 0.4) 60%, rgba(9, 9, 11, 1) 100%);
+  }
   .docs-section-header {
     @apply flex flex-col gap-4;
   }

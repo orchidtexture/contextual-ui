@@ -5,9 +5,7 @@ import type { FormField } from 'contextual-ui';
 import {
   Plus,
   Trash2,
-  ChevronDown,
-  ChevronUp,
-  Settings2,
+  GripVertical,
   Type,
   Mail,
   ListFilter,
@@ -36,15 +34,27 @@ const FIELD_TYPES = [
   { value: 'password', label: 'Password', icon: Lock },
 ];
 
+function labelToKey(label: string, fallbackIndex = 1): string {
+  if (!label || !label.trim()) return `field_${fallbackIndex}`;
+  const camel = label
+    .trim()
+    .replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase())
+    .replace(/^[A-Z]/, (chr) => chr.toLowerCase())
+    .replace(/[^a-zA-Z0-9_]/g, '');
+  return camel || `field_${fallbackIndex}`;
+}
+
 export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(0);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const handleAddField = () => {
-    const newFieldName = `field_${fields.length + 1}`;
+    const defaultLabel = `Field ${fields.length + 1}`;
     const newField: FormField = {
-      name: newFieldName,
+      name: labelToKey(defaultLabel, fields.length + 1),
       type: 'text',
-      label: `New Field ${fields.length + 1}`,
+      label: defaultLabel,
       required: false,
       placeholder: '',
     };
@@ -67,19 +77,71 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
     onChange(updated);
   };
 
-  const handleMove = (index: number, direction: 'up' | 'down') => {
-    if (
-      (direction === 'up' && index === 0) ||
-      (direction === 'down' && index === fields.length - 1)
-    ) {
+  const handleLabelChange = (index: number, newLabel: string) => {
+    const autoKey = labelToKey(newLabel, index + 1);
+    handleUpdateField(index, {
+      label: newLabel,
+      name: autoKey,
+    });
+  };
+
+  // Drag & Drop Handlers
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', `${index}`);
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
       return;
     }
-    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
     const updated = [...fields];
-    const [moved] = updated.splice(index, 1);
-    updated.splice(targetIndex, 0, moved);
+    const [movedItem] = updated.splice(draggedIndex, 1);
+    updated.splice(targetIndex, 0, movedItem);
+
     onChange(updated);
-    setExpandedIndex(targetIndex);
+
+    // Keep expanded item tracking in sync
+    if (expandedIndex === draggedIndex) {
+      setExpandedIndex(targetIndex);
+    } else if (
+      expandedIndex !== null &&
+      draggedIndex < expandedIndex &&
+      targetIndex >= expandedIndex
+    ) {
+      setExpandedIndex(expandedIndex - 1);
+    } else if (
+      expandedIndex !== null &&
+      draggedIndex > expandedIndex &&
+      targetIndex <= expandedIndex
+    ) {
+      setExpandedIndex(expandedIndex + 1);
+    }
+
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
@@ -91,7 +153,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
         <button
           type="button"
           onClick={handleAddField}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-medium"
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 text-accent border border-accent/20 hover:bg-accent/20 transition-colors text-xs font-medium cursor-pointer"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add Field</span>
@@ -101,25 +163,47 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
       <div className="space-y-2">
         {fields.map((field, idx) => {
           const isExpanded = expandedIndex === idx;
+          const isBeingDragged = draggedIndex === idx;
+          const isDragTarget = dragOverIndex === idx && draggedIndex !== idx;
+
           const TypeIcon =
             FIELD_TYPES.find((t) => t.value === field.type)?.icon || Type;
 
           return (
             <div
-              key={`${field.name}-${idx}`}
-              className={`border rounded-xl transition-all duration-150 overflow-hidden ${
-                isExpanded
-                  ? 'border-zinc-700 bg-zinc-900/90 shadow-md'
-                  : 'border-zinc-800/80 bg-zinc-900/40 hover:border-zinc-700'
+              key={`builder-field-${idx}`}
+              onDragOver={(e) => handleDragOver(e, idx)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, idx)}
+              className={`border rounded-xl transition-all duration-150 overflow-hidden backdrop-blur-md ${
+                isBeingDragged
+                  ? 'opacity-40 scale-[0.98] border-dashed border-accent bg-zinc-900/20'
+                  : isDragTarget
+                  ? 'border-accent bg-accent/10 ring-1 ring-accent shadow-lg'
+                  : isExpanded
+                  ? 'border-zinc-700/80 bg-zinc-900/60 shadow-md'
+                  : 'border-zinc-800/80 bg-zinc-950/40 hover:border-zinc-700/80 hover:bg-zinc-900/30'
               }`}
             >
-              {/* Field Header Summary */}
+              {/* Field Header Summary & Drag Handle */}
               <div
                 className="flex items-center justify-between p-2.5 cursor-pointer select-none"
                 onClick={() => setExpandedIndex(isExpanded ? null : idx)}
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="p-1 rounded bg-zinc-800 text-zinc-400">
+                  {/* Draggable Grip Handle */}
+                  <div
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, idx)}
+                    onDragEnd={handleDragEnd}
+                    onClick={(e) => e.stopPropagation()}
+                    className="cursor-grab active:cursor-grabbing p-1 -ml-1 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    title="Drag to reorder field"
+                  >
+                    <GripVertical className="w-3.5 h-3.5" />
+                  </div>
+
+                  <span className="p-1 rounded bg-zinc-800/80 text-zinc-400 shrink-0">
                     <TypeIcon className="w-3.5 h-3.5" />
                   </span>
                   <div className="min-w-0">
@@ -132,7 +216,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                       )}
                     </div>
                     <span className="text-[10px] text-zinc-500 font-mono block">
-                      {field.name} ({field.type})
+                      {field.type} • <span className="text-zinc-600">{field.name}</span>
                     </span>
                   </div>
                 </div>
@@ -140,36 +224,12 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                 <div className="flex items-center gap-1">
                   <button
                     type="button"
-                    title="Move Up"
-                    disabled={idx === 0}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMove(idx, 'up');
-                    }}
-                    className="p-1 text-zinc-500 hover:text-zinc-300 disabled:opacity-20 transition-colors"
-                  >
-                    <ChevronUp className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    title="Move Down"
-                    disabled={idx === fields.length - 1}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMove(idx, 'down');
-                    }}
-                    className="p-1 text-zinc-500 hover:text-zinc-300 disabled:opacity-20 transition-colors"
-                  >
-                    <ChevronDown className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    type="button"
                     title="Delete Field"
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRemoveField(idx);
                     }}
-                    className="p-1 text-zinc-500 hover:text-rose-400 transition-colors"
+                    className="p-1.5 text-zinc-500 hover:text-rose-400 transition-colors cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -179,23 +239,20 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
               {/* Field Details Form */}
               {isExpanded && (
                 <div className="p-3 pt-0 border-t border-zinc-800/80 space-y-3 text-xs font-mono mt-2">
+                  <div className="space-y-1">
+                    <label className="block text-[11px] text-zinc-400">
+                      Field Label
+                    </label>
+                    <input
+                      type="text"
+                      value={field.label || ''}
+                      onChange={(e) => handleLabelChange(idx, e.target.value)}
+                      className="w-full bg-zinc-950/60 backdrop-blur-sm border border-zinc-800 rounded px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-accent"
+                      placeholder="e.g. Work Email, Full Name, Company"
+                    />
+                  </div>
+
                   <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">
-                        Variable Key
-                      </label>
-                      <input
-                        type="text"
-                        value={field.name}
-                        onChange={(e) =>
-                          handleUpdateField(idx, {
-                            name: e.target.value.replace(/\s+/g, ''),
-                          })
-                        }
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none focus:border-accent"
-                        placeholder="fieldKey"
-                      />
-                    </div>
                     <div>
                       <label className="block text-[11px] text-zinc-400 mb-1">
                         Field Type
@@ -205,7 +262,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                         onChange={(e) =>
                           handleUpdateField(idx, { type: e.target.value as any })
                         }
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none focus:border-accent"
+                        className="w-full bg-zinc-950/60 backdrop-blur-sm border border-zinc-800 rounded px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-accent"
                       >
                         {FIELD_TYPES.map((t) => (
                           <option key={t.value} value={t.value}>
@@ -214,23 +271,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                         ))}
                       </select>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="block text-[11px] text-zinc-400 mb-1">
-                        Display Label
-                      </label>
-                      <input
-                        type="text"
-                        value={field.label || ''}
-                        onChange={(e) =>
-                          handleUpdateField(idx, { label: e.target.value })
-                        }
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none focus:border-accent"
-                        placeholder="Display Label"
-                      />
-                    </div>
                     <div>
                       <label className="block text-[11px] text-zinc-400 mb-1">
                         Placeholder
@@ -241,7 +282,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                         onChange={(e) =>
                           handleUpdateField(idx, { placeholder: e.target.value })
                         }
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none focus:border-accent"
+                        className="w-full bg-zinc-950/60 backdrop-blur-sm border border-zinc-800 rounded px-2.5 py-1.5 text-zinc-200 focus:outline-none focus:border-accent"
                         placeholder="e.g. Type here..."
                       />
                     </div>
@@ -256,14 +297,14 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                         onChange={(e) =>
                           handleUpdateField(idx, { required: e.target.checked })
                         }
-                        className="rounded border-zinc-700 bg-zinc-950 text-accent focus:ring-0 focus:ring-offset-0"
+                        className="rounded border-zinc-700 bg-zinc-950/80 text-accent focus:ring-0 focus:ring-offset-0 cursor-pointer"
                       />
                       <span className="text-[11px]">Required Field</span>
                     </label>
 
                     {(field.type === 'text' || field.type === 'textarea') && (
                       <div className="flex items-center gap-1 text-[11px]">
-                        <span className="text-zinc-500">Min Len:</span>
+                        <span className="text-zinc-500">Min Length:</span>
                         <input
                           type="number"
                           value={field.validation?.minLength || ''}
@@ -277,7 +318,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                               },
                             })
                           }
-                          className="w-14 bg-zinc-950 border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-200"
+                          className="w-14 bg-zinc-950/60 backdrop-blur-sm border border-zinc-800 rounded px-1.5 py-0.5 text-zinc-200"
                           placeholder="0"
                         />
                       </div>
@@ -288,7 +329,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                   {field.type === 'select' && (
                     <div className="space-y-1.5 pt-1 border-t border-zinc-800/60">
                       <label className="block text-[11px] text-zinc-400">
-                        Options (comma-separated or label:value)
+                        Options (comma-separated, e.g. Option 1, Option 2)
                       </label>
                       <input
                         type="text"
@@ -298,7 +339,7 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                                 .map((opt) =>
                                   typeof opt === 'string'
                                     ? opt
-                                    : `${opt.label}:${opt.value}`
+                                    : opt.label || opt.value
                                 )
                                 .join(', ')
                             : ''
@@ -314,12 +355,15 @@ export function FieldBuilder({ fields, onChange }: FieldBuilderProps) {
                                 const [l, v] = item.split(':');
                                 return { label: l.trim(), value: v.trim() };
                               }
-                              return { label: item, value: item.toLowerCase().replace(/\s+/g, '_') };
+                              return {
+                                label: item,
+                                value: labelToKey(item, 1),
+                              };
                             });
                           handleUpdateField(idx, { options: parsedOptions });
                         }}
-                        className="w-full bg-zinc-950 border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none focus:border-accent text-[11px]"
-                        placeholder="Option 1:opt1, Option 2:opt2"
+                        className="w-full bg-zinc-950/60 backdrop-blur-sm border border-zinc-800 rounded px-2 py-1 text-zinc-200 focus:outline-none focus:border-accent text-[11px]"
+                        placeholder="Option 1, Option 2, Option 3"
                       />
                     </div>
                   )}
