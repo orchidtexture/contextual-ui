@@ -326,81 +326,154 @@ export default async function DocsPage() {
 ```
 
 ### 4. Navbar (`navbarRegistry` & `<Navbar />`)
-Provides responsive navigation structure, mobile drawer toggles, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
+Provides responsive navigation structure, mobile drawer toggles, automatic link rendering, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
+
+When wrapped in `<ContextualSite>`, it resolves branding and links directly from the global application context without manual prop passing or context hooks.
+
+#### Pattern A: Declarative & Zero-Boilerplate (with `linkClassName`)
+Style auto-rendered links directly on `<Navbar.Links>` and `<Navbar.Menu>`:
 
 ```tsx
 import { Navbar } from 'contextual-ui';
 
-const navData = {
-  brand: { name: 'Contextual UI', href: '/' },
-  links: [
-    { id: '1', label: 'Features', href: '#features' },
-    { id: '2', label: 'Docs', href: '/docs' },
-  ]
-};
-
 export function Header() {
   return (
-    <Navbar.Root data={navData} className="flex justify-between p-4">
-      <Navbar.Brand href="/" className="font-bold text-xl" />
-      <Navbar.Content className="hidden md:flex gap-4">
-        {navData.links.map(link => (
-          <a key={link.id} href={link.href}>{link.label}</a>
-        ))}
-      </Navbar.Content>
-      <Navbar.Toggle className="md:hidden" />
-      <Navbar.Menu className="md:hidden flex flex-col mt-4">
-        {navData.links.map(link => (
-          <a key={link.id} href={link.href} className="py-2">{link.label}</a>
-        ))}
-      </Navbar.Menu>
+    <Navbar.Root className="flex justify-between items-center p-4">
+      {/* Automatically renders logo and name from site context */}
+      <Navbar.Brand className="font-bold text-xl flex items-center gap-2" />
+
+      {/* Automatically renders all schema links with linkClassName applied */}
+      <Navbar.Links 
+        className="hidden md:flex gap-6 items-center" 
+        linkClassName="hover:text-zinc-200 no-underline text-sm font-medium transition-colors" 
+      />
+
+      {/* Mobile drawer toggle with ARIA attributes */}
+      <Navbar.Toggle className="md:hidden p-2 text-zinc-400" />
+
+      {/* Responsive mobile menu */}
+      <Navbar.Menu 
+        className="md:hidden flex flex-col gap-2 mt-4" 
+        linkClassName="hover:text-zinc-200 text-base py-1 transition-colors" 
+      />
     </Navbar.Root>
   );
 }
 ```
 
-### 5. Footer (`footerRegistry` & `<Footer />`)
-Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph.
+#### Pattern B: Composable Links with Appended Custom Items
+`<Navbar.Links>` automatically renders all schema links with `linkClassName`, and appends any custom `<Navbar.Link>` children:
 
+```tsx
+<Navbar.Root className="flex justify-between items-center p-4">
+  <Navbar.Brand />
+
+  <Navbar.Links 
+    className="hidden md:flex gap-6 items-center" 
+    linkClassName="hover:text-zinc-200 no-underline text-sm font-medium transition-colors"
+  >
+    {/* Custom CTA / external link button appended to the links */}
+    <Navbar.Link 
+      href="https://github.com/orchidtexture/contextual-ui" 
+      external 
+      className="px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-xs"
+    >
+      GitHub
+    </Navbar.Link>
+  </Navbar.Links>
+
+  <Navbar.Toggle className="md:hidden" />
+
+  <Navbar.Menu 
+    className="md:hidden flex flex-col gap-2 mt-4" 
+    linkClassName="hover:text-zinc-200 text-base py-1 transition-colors" 
+  />
+</Navbar.Root>
+```
+
+#### Pattern C: Render Props for Complete Control
+Pass a function as child to `<Navbar.Links>` or `<Navbar.Menu>` to customize the iteration:
+
+```tsx
+<Navbar.Links className="hidden md:flex gap-6 items-center">
+  {(links) => links.map((link) => (
+    <Navbar.Link key={link.id} item={link} className="hover:text-zinc-200" />
+  ))}
+</Navbar.Links>
+```
+
+### 5. Footer (`footerRegistry` & `<Footer />`)
+Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph. Supports context-driven styling inheritance (`linkClassName`, `titleClassName`, `socialClassName`), zero-wrapper fragment rendering, and render props.
+
+#### Pattern A: Zero Boilerplate Auto-Rendering
 ```tsx
 import { Footer } from 'contextual-ui';
 
-const footerData = {
-  brand: {
-    name: 'Contextual UI',
-    description: 'Headless UI with built-in Agentic AI and Schema.org SEO.',
-  },
-  columns: [
-    {
-      id: 'resources',
-      title: 'Resources',
-      links: [
-        { id: '1', label: 'Docs', href: '/docs' },
-        { id: '2', label: 'Schema Graph', href: '/schema' },
-      ],
-    },
-  ],
-  socials: [
-    { id: '1', platform: 'github', href: 'https://github.com/tasuku-io' },
-  ],
-  copyright: {
-    holder: 'Tasuku Studio',
-  },
-};
-
-export function SiteFooter() {
+export function SiteFooter({ data }) {
   return (
-    <Footer.Root data={footerData} className="p-8 border-t">
+    <Footer.Root data={data.footer} className="bg-zinc-950 p-8">
       <Footer.Brand />
-      <Footer.Description />
-      <Footer.Columns>
-        <Footer.Column id="resources">
+      <Footer.Description className="text-sm text-zinc-400 mt-2" />
+      
+      <Footer.Columns 
+        className="grid grid-cols-4 gap-8 my-8" 
+        titleClassName="font-bold text-white mb-4"
+        linkClassName="text-zinc-400 hover:text-white block py-1" 
+      />
+
+      <Footer.Socials 
+        className="flex gap-4 my-4" 
+        socialClassName="text-zinc-400 hover:text-white" 
+      />
+
+      <Footer.Bottom 
+        className="border-t border-zinc-800 pt-8 flex justify-between"
+        linkClassName="text-xs text-zinc-500 hover:text-white"
+      />
+    </Footer.Root>
+  );
+}
+```
+
+#### Pattern B: Composable with Custom Elements & Render Props
+```tsx
+import { Footer } from 'contextual-ui';
+
+export function ComposableFooter() {
+  return (
+    <Footer.Root className="p-8 border-t border-zinc-800">
+      <Footer.Brand>
+        {(brand) => <span className="font-bold text-lg">{brand?.name}</span>}
+      </Footer.Brand>
+
+      <Footer.Columns className="grid grid-cols-3 gap-6 my-6" linkClassName="text-zinc-400 hover:text-zinc-200">
+        <Footer.Column id="resources" linkClassName="hover:underline">
           <Footer.ColumnTitle />
           <Footer.Links />
+          {/* Appended custom link sharing the column's inherited styles */}
+          <Footer.Link href="/custom-resource">Custom Resource</Footer.Link>
+        </Footer.Column>
+
+        <Footer.Column id="company">
+          <Footer.ColumnTitle className="text-zinc-100 font-semibold uppercase" />
+          <Footer.Links>
+            {(links) => (
+              <ul className="space-y-2">
+                {links.map((link) => (
+                  <li key={link.id}>
+                    <Footer.Link item={link} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Footer.Links>
         </Footer.Column>
       </Footer.Columns>
-      <Footer.Socials />
-      <Footer.Copyright />
+
+      <Footer.Bottom className="flex justify-between items-center text-sm">
+        <Footer.Copyright />
+        <Footer.Socials />
+      </Footer.Bottom>
     </Footer.Root>
   );
 }

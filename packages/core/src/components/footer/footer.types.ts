@@ -4,119 +4,122 @@ import {
   FooterColumn,
   FooterLinkItem,
   FooterSocialLink,
+  FooterBrand,
 } from './footer.schema';
 
-export interface FooterRootProps {
+export interface FooterRootProps extends React.HTMLAttributes<HTMLElement> {
   data?: FooterData;
   sectionKey?: string;
-  children: ReactNode;
+  linkClassName?: string;
+  socialClassName?: string;
+  titleClassName?: string;
+  children?: ReactNode;
   className?: string;
   injectJsonLd?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterBrandProps {
-  children?: ReactNode;
+export interface FooterBrandProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'children'> {
+  children?: ReactNode | ((brand?: FooterBrand) => ReactNode);
   className?: string;
   asChild?: boolean;
   href?: string;
-  [key: string]: any;
 }
 
-export interface FooterDescriptionProps {
-  children?: ReactNode;
+export interface FooterDescriptionProps extends Omit<React.HTMLAttributes<HTMLParagraphElement>, 'children'> {
+  children?: ReactNode | ((brand?: FooterBrand) => ReactNode);
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterContentProps {
-  children: ReactNode;
+export interface FooterColumnsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
+  columns?: FooterColumn[];
+  linkClassName?: string;
+  titleClassName?: string;
+  children?: ReactNode | ((columns: FooterColumn[]) => ReactNode);
+  renderItem?: (column: FooterColumn) => ReactNode;
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterColumnsProps {
-  children?: ReactNode;
-  className?: string;
-  asChild?: boolean;
-  [key: string]: any;
-}
-
-export interface FooterColumnProps {
+export interface FooterColumnProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   id?: string;
   column?: FooterColumn;
-  children?: ReactNode;
+  linkClassName?: string;
+  titleClassName?: string;
+  children?: ReactNode | ((column?: FooterColumn) => ReactNode);
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterColumnTitleProps {
-  children?: ReactNode;
+export interface FooterColumnTitleProps extends Omit<React.HTMLAttributes<HTMLHeadingElement>, 'children'> {
+  children?: ReactNode | ((title?: string) => ReactNode);
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterLinksProps {
+export interface FooterLinksProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
   columnId?: string;
   links?: FooterLinkItem[];
-  children?: ReactNode;
+  linkClassName?: string;
+  children?: ReactNode | ((links: FooterLinkItem[]) => ReactNode);
+  renderItem?: (item: FooterLinkItem) => ReactNode;
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterLinkProps {
+export interface FooterLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   item?: FooterLinkItem;
   href?: string;
   children?: ReactNode;
   className?: string;
   asChild?: boolean;
   external?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterSocialsProps {
-  children?: ReactNode;
+export interface FooterSocialsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
+  socials?: FooterSocialLink[];
+  socialClassName?: string;
+  children?: ReactNode | ((socials: FooterSocialLink[]) => ReactNode);
+  renderItem?: (item: FooterSocialLink) => ReactNode;
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
-export interface FooterSocialLinkProps {
+export interface FooterSocialLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   item?: FooterSocialLink;
   href?: string;
   platform?: string;
   children?: ReactNode;
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
+  external?: boolean;
 }
 
-export interface FooterCopyrightProps {
-  children?: ReactNode;
+export interface FooterCopyrightProps extends Omit<React.HTMLAttributes<HTMLParagraphElement>, 'children'> {
+  children?: ReactNode | ((data?: FooterData) => ReactNode);
   className?: string;
   asChild?: boolean;
   holder?: string;
   year?: number | string;
-  [key: string]: any;
 }
 
-export interface FooterBottomProps {
-  children: ReactNode;
+export interface FooterBottomProps extends Omit<React.HTMLAttributes<HTMLDivElement>, 'children'> {
+  linkClassName?: string;
+  children?: ReactNode | ((data?: FooterData) => ReactNode);
   className?: string;
   asChild?: boolean;
-  [key: string]: any;
 }
 
 export interface FooterContextValue {
   data?: FooterData;
   getColumnData: (id: string) => FooterColumn | undefined;
+  linkClassName?: string;
+  socialClassName?: string;
+  titleClassName?: string;
 }
 
 export interface FooterColumnContextValue {
   column?: FooterColumn;
+  linkClassName?: string;
+  titleClassName?: string;
 }

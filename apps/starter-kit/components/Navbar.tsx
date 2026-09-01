@@ -1,43 +1,37 @@
 'use client';
 
-import { Navbar, useContextualSiteContext } from 'contextual-ui';
-import type { SiteData } from '@/data/site.server';
+import { Navbar } from 'contextual-ui';
+import type { NavbarData } from 'contextual-ui';
 
 interface CustomNavbarProps {
-  data?: SiteData;
+  data?: NavbarData;
 }
 
-export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
-  const pageContext = useContextualSiteContext<SiteData>();
-  const data = explicitData ?? pageContext?.data;
-
+export function CustomNavbar({ data }: CustomNavbarProps = {}) {
   return (
     <header className="fixed top-0 left-0 right-0 h-16 backdrop-blur-md border-b border-base z-50 flex items-center px-6 md:px-16 shadow-sm">
       <div className="w-full mx-auto flex justify-between items-center">
-        <Navbar.Root className="w-full relative">
+        <Navbar.Root data={data} className="w-full relative">
           <div className="flex justify-between items-center w-full">
             <Navbar.Brand className="font-semibold font-mono text-base no-underline flex items-center gap-2.5">
-              <img
-                src={data?.navbar?.brand?.logo || '/images/onigiri_logo.svg'}
-                alt={data?.navbar?.brand?.name || 'Contextual Site Logo'}
-                className="w-7 h-7 rounded-md object-contain shadow-sm text-silver"
-              />
-              {data?.navbar?.brand?.name || 'Contextual'}
+              {(brand) => (
+                <>
+                  <img
+                    src={brand?.logo || '/images/onigiri_logo.svg'}
+                    alt={brand?.name || 'Contextual Site Logo'}
+                    className="w-7 h-7 rounded-md object-contain shadow-sm text-silver"
+                  />
+                  {brand?.name || 'Contextual'}
+                </>
+              )}
             </Navbar.Brand>
-            <Navbar.Content className="hidden md:flex gap-6 items-center">
-              {data?.navbar?.links.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.href}
-                  className="hover:text-silver no-underline text-sm font-medium transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-              <a
+            <Navbar.Links
+              className="hidden md:flex gap-6 items-center"
+              linkClassName="hover:text-silver no-underline text-sm font-medium transition-colors"
+            >
+              <Navbar.Link
                 href="https://github.com/orchidtexture/contextual-ui"
-                target="_blank"
-                rel="noopener noreferrer"
+                external
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono font-medium text-zinc-300 hover:text-white bg-zinc-900/80 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-colors ml-2"
                 aria-label="GitHub Repository"
               >
@@ -55,25 +49,18 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
                   />
                 </svg>
                 <span>GitHub</span>
-              </a>
-            </Navbar.Content>
+              </Navbar.Link>
+            </Navbar.Links>
             <Navbar.Toggle className="md:hidden p-2 text-zinc-400 hover:text-zinc-100 focus:outline-none cursor-pointer" />
           </div>
 
-          <Navbar.Menu className="absolute left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl">
-            {data?.navbar?.links.map((link) => (
-              <a
-                key={link.id}
-                href={link.href}
-                className="hover:text-silver no-underline text-base font-medium transition-colors py-1"
-              >
-                {link.label}
-              </a>
-            ))}
-            <a
+          <Navbar.Menu
+            className="absolute left-[-24px] right-[-24px] md:hidden bg-zinc-950/95 backdrop-blur-xl border-b border-base p-6 flex flex-col gap-4 shadow-2xl"
+            linkClassName="hover:text-silver no-underline text-base font-medium transition-colors py-1"
+          >
+            <Navbar.Link
               href="https://github.com/orchidtexture/contextual-ui"
-              target="_blank"
-              rel="noopener noreferrer"
+              external
               className="flex items-center gap-2 pt-3 mt-1 border-t border-zinc-800 text-zinc-300 hover:text-white transition-colors text-base font-medium"
             >
               <svg
@@ -90,10 +77,11 @@ export function CustomNavbar({ data: explicitData }: CustomNavbarProps = {}) {
                 />
               </svg>
               <span>GitHub Repository</span>
-            </a>
+            </Navbar.Link>
           </Navbar.Menu>
         </Navbar.Root>
       </div>
     </header>
   );
 }
+

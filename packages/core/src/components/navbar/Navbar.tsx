@@ -1,18 +1,18 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { NavbarDataSchema } from './navbar.schema';
-import { NavbarContext } from './navbar.context';
+import { NavbarContext, useNavbar } from './navbar.context';
 import { useContextualSiteContext, useIsContextualSite } from '../site/site.context';
 import {
   NavbarRootProps,
   NavbarBrandProps,
   NavbarToggleProps,
-  NavbarContentProps,
+  NavbarLinksProps,
   NavbarMenuProps,
   NavbarLinkProps,
-  NavbarContextValue
+  NavbarContextValue,
 } from './navbar.types';
 import { generateNavbarJsonLd } from './navbar.utils';
 
@@ -80,15 +80,28 @@ export function Root({
 }
 
 export function Brand({ children, asChild, className, href, ...props }: NavbarBrandProps) {
-  const { data } = React.useContext(NavbarContext)!;
+  const { data } = useNavbar();
   const Comp = asChild ? Slot : 'a';
   const targetHref = href || data?.brand?.href || '/';
   
+  if (typeof children === 'function') {
+    return (
+      <Comp
+        href={asChild ? href : targetHref}
+        data-contextual="navbar-brand"
+        className={className}
+        {...props}
+      >
+        {children(data?.brand)}
+      </Comp>
+    );
+  }
+
   // If no children, try to use data.brand
   if (!children && data?.brand) {
     return (
       <a 
-        href={href || data.brand.href} 
+        href={targetHref} 
         className={className}
         data-contextual="navbar-brand"
         {...props}
@@ -111,19 +124,61 @@ export function Brand({ children, asChild, className, href, ...props }: NavbarBr
   );
 }
 
-export function Content({ children, className }: NavbarContentProps) {
+export function Links({
+  links: explicitLinks,
+  linkClassName,
+  children,
+  renderItem,
+  asChild,
+  className,
+  ...props
+}: NavbarLinksProps) {
+  const navbarContext = useNavbar();
+  const { data } = navbarContext;
+  const resolvedLinks = explicitLinks || data?.links || [];
+  const effectiveLinkClass = linkClassName ?? navbarContext.linkClassName;
+  const Comp = asChild ? Slot : 'div';
+
+  const linksContextValue = useMemo<NavbarContextValue>(() => ({
+    ...navbarContext,
+    linkClassName: effectiveLinkClass,
+  }), [navbarContext, effectiveLinkClass]);
+
+  if (typeof children === 'function') {
+    return (
+      <NavbarContext.Provider value={linksContextValue}>
+        <Comp data-contextual="navbar-links" className={className} {...props}>
+          {children(resolvedLinks)}
+        </Comp>
+      </NavbarContext.Provider>
+    );
+  }
+
+  if (renderItem) {
+    return (
+      <NavbarContext.Provider value={linksContextValue}>
+        <Comp data-contextual="navbar-links" className={className} {...props}>
+          {resolvedLinks.map((item) => renderItem(item))}
+          {children}
+        </Comp>
+      </NavbarContext.Provider>
+    );
+  }
+
   return (
-    <div 
-      data-contextual="navbar-content"
-      className={className}
-    >
-      {children}
-    </div>
+    <NavbarContext.Provider value={linksContextValue}>
+      <Comp data-contextual="navbar-links" className={className} {...props}>
+        {resolvedLinks.map((link) => (
+          <Link key={link.id} item={link} className={effectiveLinkClass} />
+        ))}
+        {children}
+      </Comp>
+    </NavbarContext.Provider>
   );
 }
 
-export function Toggle({ children, asChild, className }: NavbarToggleProps) {
-  const { isOpen, toggle } = React.useContext(NavbarContext)!;
+export function Toggle({ children, asChild, className, ...props }: NavbarToggleProps) {
+  const { isOpen, toggle } = useNavbar();
   const Comp = asChild ? Slot : 'button';
 
   return (
@@ -134,6 +189,7 @@ export function Toggle({ children, asChild, className }: NavbarToggleProps) {
       data-contextual="navbar-toggle"
       onClick={toggle}
       className={className}
+      {...props}
     >
       {children || (
         <svg 
@@ -157,19 +213,55 @@ export function Toggle({ children, asChild, className }: NavbarToggleProps) {
   );
 }
 
-export function Menu({ children, className }: NavbarMenuProps) {
-  const { isOpen } = React.useContext(NavbarContext)!;
+export function Menu({
+  children,
+  linkClassName,
+  asChild,
+  className,
+  ...props
+}: NavbarMenuProps) {
+  const navbarContext = useNavbar();
+  const { isOpen, data } = navbarContext;
 
   if (!isOpen) return null;
 
+  const effectiveLinkClass = linkClassName ?? navbarContext.linkClassName;
+  const Comp = asChild ? Slot : 'div';
+
+  const menuContextValue = useMemo<NavbarContextValue>(() => ({
+    ...navbarContext,
+    linkClassName: effectiveLinkClass,
+  }), [navbarContext, effectiveLinkClass]);
+
+  if (typeof children === 'function') {
+    return (
+      <NavbarContext.Provider value={menuContextValue}>
+        <Comp 
+          data-contextual="navbar-menu"
+          data-state={isOpen ? 'open' : 'closed'}
+          className={className}
+          {...props}
+        >
+          {children(data)}
+        </Comp>
+      </NavbarContext.Provider>
+    );
+  }
+
   return (
-    <div 
-      data-contextual="navbar-menu"
-      data-state={isOpen ? 'open' : 'closed'}
-      className={className}
-    >
-      {children}
-    </div>
+    <NavbarContext.Provider value={menuContextValue}>
+      <Comp 
+        data-contextual="navbar-menu"
+        data-state={isOpen ? 'open' : 'closed'}
+        className={className}
+        {...props}
+      >
+        {data?.links && data.links.map((link) => (
+          <Link key={link.id} item={link} className={effectiveLinkClass} />
+        ))}
+        {children}
+      </Comp>
+    </NavbarContext.Provider>
   );
 }
 
@@ -182,6 +274,8 @@ export function Link({
   external,
   ...props
 }: NavbarLinkProps) {
+  const { linkClassName: contextLinkClass } = useNavbar();
+  const resolvedClass = className ?? contextLinkClass;
   const targetHref = href || item?.href || '#';
   const isExternal = external ?? item?.external ?? targetHref.startsWith('http');
   const target = props.target || (isExternal ? '_blank' : undefined);
@@ -196,7 +290,7 @@ export function Link({
         target={target}
         rel={rel}
         data-contextual="navbar-link"
-        className={className}
+        className={resolvedClass}
         {...props}
       >
         {item.label}
@@ -210,10 +304,11 @@ export function Link({
       target={asChild ? undefined : target}
       rel={asChild ? undefined : rel}
       data-contextual="navbar-link"
-      className={className}
+      className={resolvedClass}
       {...props}
     >
       {children}
     </Comp>
   );
 }
+

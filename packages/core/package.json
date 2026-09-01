@@ -1,6 +1,6 @@
 {
   "name": "contextual-ui",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.1",
   "description": "Headless UI components with built-in Agentic AI infrastructure and Schema.org SEO.",
   "license": "MIT",
   "main": "./dist/index.js",
