@@ -25,7 +25,9 @@ import {
   websiteRegistry,
   webpageRegistry,
   navbarRegistry,
+  footerRegistry,
   faqRegistry,
+  formRegistry,
 } from 'contextual-ui/server';
 import { z } from 'zod';
 
@@ -33,7 +35,9 @@ export const siteSchema = defineSchema({
   website: websiteRegistry(),
   webpage: webpageRegistry(),
   navbar: navbarRegistry(),
+  footer: footerRegistry(),
   faq: faqRegistry(),
+  forms: formRegistry(),
   announcement: {
     schema: z.object({
       enabled: z.boolean(),
@@ -59,6 +63,23 @@ const connector = staticConnector({
   ],
   faq: [{ id: '1', question: 'What is this?', answer: 'An SSOT UI kit.' }],
   navbar: { links: [{ id: '1', label: 'Home', href: '/' }] },
+  footer: {
+    brand: { name: 'My App', description: 'Contextual headless UI.' },
+    columns: [{ id: 'links', title: 'Links', links: [{ id: '1', label: 'Docs', href: '/docs' }] }],
+  },
+  forms: [
+    {
+      id: 'contact-sales',
+      name: 'Contact Sales',
+      endpoint: '/api/contact',
+      method: 'POST',
+      fields: [
+        { name: 'name', type: 'text', label: 'Full Name', required: true },
+        { name: 'email', type: 'email', label: 'Email', required: true },
+        { name: 'message', type: 'textarea', label: 'Message', required: true },
+      ],
+    },
+  ],
   announcement: { enabled: true, message: 'Welcome!' },
 });
 
@@ -276,35 +297,35 @@ export const siteSchema = defineSchema({
 });
 ```
 
-### 2. FAQ (`faqRegistry` & `<Faq />`)
-Handles collapsible state, accessible ARIA roles, and automatically generates Schema.org `FAQPage`, `Question`, and `Answer` nodes with linked `@id` identifiers.
+### 2. Organization (`organizationRegistry`)
+Defines brand and publisher identity, legal entity data, logo, social profile links (`sameAs`), and contact channels for Knowledge Graph schemas.
+
+```typescript
+import { defineSchema, organizationRegistry } from 'contextual-ui/server';
+
+export const siteSchema = defineSchema({
+  organization: organizationRegistry(),
+});
+```
+
+### 3. WebPage (`webpageRegistry` & `<WebPage />`)
+Defines route document metadata (title, canonical URL, description, language) and injects route-specific Schema.org JSON-LD scripts on server or client pages.
 
 ```tsx
-import { Faq } from 'contextual-ui';
+import { WebPage } from 'contextual-ui/server';
+import { siteApp } from '@/data/site.server';
 
-const data = [
-  { id: '1', question: 'What is Contextual UI?', answer: 'A headless library...' }
-];
-
-export function FaqSection() {
+export default async function DocsPage() {
+  const data = await siteApp.fetchData();
   return (
-    <Faq.Root data={data}>
-      {data.map((item) => (
-        <Faq.Item key={item.id} id={item.id}>
-          <Faq.Trigger className="accordion-trigger">
-            {item.question}
-          </Faq.Trigger>
-          <Faq.Content className="accordion-content">
-            {item.answer}
-          </Faq.Content>
-        </Faq.Item>
-      ))}
-    </Faq.Root>
+    <WebPage app={siteApp} id="docs">
+      <main>Documentation content</main>
+    </WebPage>
   );
 }
 ```
 
-### 3. Navbar (`navbarRegistry` & `<Navbar />`)
+### 4. Navbar (`navbarRegistry` & `<Navbar />`)
 Provides responsive navigation structure, mobile drawer toggles, and injects `SiteNavigationElement` linked upward to the root `WebSite`.
 
 ```tsx
@@ -338,7 +359,7 @@ export function Header() {
 }
 ```
 
-### 4. Footer (`footerRegistry` & `<Footer />`)
+### 5. Footer (`footerRegistry` & `<Footer />`)
 Provides structured footer navigation, columnar and flat link organization, social profiles, and copyright handling while injecting Schema.org `WPFooter` and `SiteNavigationElement` nodes into the global Knowledge Graph.
 
 ```tsx
@@ -385,7 +406,35 @@ export function SiteFooter() {
 }
 ```
 
-### 5. Breadcrumb (`breadcrumbRegistry` & `<Breadcrumb />`)
+### 6. FAQ (`faqRegistry` & `<Faq />`)
+Handles collapsible state, accessible ARIA roles, and automatically generates Schema.org `FAQPage`, `Question`, and `Answer` nodes with linked `@id` identifiers.
+
+```tsx
+import { Faq } from 'contextual-ui';
+
+const data = [
+  { id: '1', question: 'What is Contextual UI?', answer: 'A headless library...' }
+];
+
+export function FaqSection() {
+  return (
+    <Faq.Root data={data}>
+      {data.map((item) => (
+        <Faq.Item key={item.id} id={item.id}>
+          <Faq.Trigger className="accordion-trigger">
+            {item.question}
+          </Faq.Trigger>
+          <Faq.Content className="accordion-content">
+            {item.answer}
+          </Faq.Content>
+        </Faq.Item>
+      ))}
+    </Faq.Root>
+  );
+}
+```
+
+### 7. Breadcrumb (`breadcrumbRegistry` & `<Breadcrumb />`)
 Renders accessible breadcrumb hierarchy and emits Schema.org `BreadcrumbList` JSON-LD directly into the page DOM.
 
 ```tsx
@@ -428,41 +477,401 @@ export function PageBreadcrumbs() {
 }
 ```
 
-### 6. Form Factory (`createForm`)
-Type-safe form builder generated directly from standard Zod schemas.
+---
+
+## 📝 Forms & Agentic Actions
+
+Contextual UI provides two complementary form paradigms:
+1. **Dynamic CMS / Agentic Forms (`formRegistry` & `<AutoForm />`)**: Dynamic forms driven by CMS or connector schemas that compile in-memory Zod validators on the fly, render accessible UI, and emit Schema.org `PotentialAction` JSON-LD for AI search engines and autonomous agents.
+2. **Static Form Factory (`createForm`)**: Compile-time type-safe compound form components generated directly from standard static Zod schemas with zero boilerplate.
+
+---
+
+### A. Dynamic CMS & Agentic Forms (`formRegistry` + `<AutoForm />`)
+
+#### 1. Declare in Schema (`site.schema.ts`)
+Add `forms: formRegistry()` (or `formsRegistry()`) to your schema:
+
+```typescript
+import { defineSchema, formRegistry } from 'contextual-ui/server';
+
+export const siteSchema = defineSchema({
+  forms: formRegistry(),
+});
+```
+
+This automatically generates Schema.org `PotentialAction` objects (`@type: ContactAction`, `target: EntryPoint`, `object: PropertyValueSpecification[]`) in your site's Knowledge Graph (`/api/graph.json`), allowing AI agents and web crawlers to discover and execute form actions programmatically.
+
+#### 2. Form Data Structure (`FormEntity`)
+Define forms in your connector or headless CMS:
+
+```typescript
+import { FormEntity } from 'contextual-ui';
+
+const contactForm: FormEntity = {
+  id: 'contact-sales',
+  name: 'Contact Sales',
+  title: 'Get in Touch',
+  description: 'Reach out to our enterprise solutions team.',
+  actionType: 'ContactAction',
+  endpoint: '/api/contact',
+  method: 'POST',
+  submitLabel: 'Send Inquiry',
+  successMessage: 'Thank you! We will get back to you within 24 hours.',
+  fields: [
+    {
+      name: 'fullName',
+      type: 'text',
+      label: 'Full Name',
+      required: true,
+      placeholder: 'Jane Doe',
+      validation: { minLength: 2 },
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Work Email',
+      required: true,
+      placeholder: 'jane@company.com',
+    },
+    {
+      name: 'companySize',
+      type: 'select',
+      label: 'Company Size',
+      required: false,
+      placeholder: 'Select company size...',
+      options: [
+        { label: '1 - 10 employees', value: '1-10' },
+        { label: '11 - 50 employees', value: '11-50' },
+        { label: '50+ employees', value: '50+' },
+      ],
+    },
+    {
+      name: 'message',
+      type: 'textarea',
+      label: 'How can we help?',
+      required: true,
+      placeholder: 'Tell us about your project...',
+      validation: { minLength: 10, maxLength: 1000 },
+    },
+    {
+      name: 'acceptTerms',
+      type: 'boolean',
+      label: 'I agree to the privacy policy',
+      required: true,
+    },
+  ],
+};
+```
+
+#### 3. Render with `<AutoForm />`
+`<AutoForm />` dynamically compiles an in-memory Zod schema via `buildZodSchema(...)` and handles field state, real-time blur validation, and submission:
+
+```tsx
+'use client';
+import { AutoForm } from 'contextual-ui';
+
+export function ContactSection({ formsData }: { formsData: any }) {
+  return (
+    <AutoForm
+      data={formsData}
+      formId="contact-sales"
+      onSuccess={(data) => console.log('Submitted successfully:', data)}
+      className="max-w-xl mx-auto space-y-4"
+    />
+  );
+}
+```
+
+> **Note:** If no custom `onSubmit` is provided, `<AutoForm />` automatically sends a JSON `POST` (or configured `method`) request to the form's `endpoint`.
+
+#### 4. Customizing UI Slots (`AutoFormCustomComponents`)
+Override default headless elements with your design system or Tailwind styles using the `components` prop:
+
+```tsx
+<AutoForm
+  data={formsData}
+  formId="contact-sales"
+  components={{
+    Field: ({ children, className }) => (
+      <div className={`mb-4 ${className}`}>{children}</div>
+    ),
+    Label: ({ htmlFor, children }) => (
+      <label htmlFor={htmlFor} className="block text-sm font-medium text-zinc-200 mb-1">
+        {children}
+      </label>
+    ),
+    Input: ({ dataInvalid, ...props }) => (
+      <input
+        {...props}
+        className={`w-full px-3 py-2 bg-zinc-900 border rounded-lg text-sm ${
+          dataInvalid ? 'border-red-500' : 'border-zinc-700 focus:border-blue-500'
+        }`}
+      />
+    ),
+    TextArea: ({ dataInvalid, ...props }) => (
+      <textarea
+        {...props}
+        rows={4}
+        className={`w-full px-3 py-2 bg-zinc-900 border rounded-lg text-sm ${
+          dataInvalid ? 'border-red-500' : 'border-zinc-700 focus:border-blue-500'
+        }`}
+      />
+    ),
+    Select: ({ options, dataInvalid, children, ...props }) => (
+      <select
+        {...props}
+        className={`w-full px-3 py-2 bg-zinc-900 border rounded-lg text-sm ${
+          dataInvalid ? 'border-red-500' : 'border-zinc-700'
+        }`}
+      >
+        {children}
+      </select>
+    ),
+    Checkbox: ({ dataInvalid, ...props }) => (
+      <input
+        type="checkbox"
+        {...props}
+        className="h-4 w-4 rounded border-zinc-700 text-blue-600 focus:ring-blue-500"
+      />
+    ),
+    ErrorMessage: ({ children }) => (
+      <span className="text-xs text-red-400 mt-1 block">{children}</span>
+    ),
+    Submit: ({ isSubmitting, children, ...props }) => (
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-medium rounded-lg transition"
+        {...props}
+      >
+        {isSubmitting ? 'Submitting...' : children}
+      </button>
+    ),
+  }}
+/>
+```
+
+#### `<AutoForm />` Props Reference
+
+| Prop | Type | Description |
+| :--- | :--- | :--- |
+| `data` | `FormData` | Ingested forms data from connector/registry (single `FormEntity` or `FormEntity[]`). |
+| `formId` | `string` | Unique ID of the target form to render when `data` contains multiple forms. |
+| `form` | `FormEntity` | Explicit form entity definition (alternative to `data`). |
+| `action` | `string` | Submission API endpoint override. |
+| `method` | `'POST' \| 'GET' \| 'PUT' \| 'PATCH'` | HTTP method override (default: `'POST'`). |
+| `onSubmit` | `(values, form) => void \| Promise<void>` | Custom submit handler. If omitted, performs a `fetch()` POST to `endpoint`. |
+| `onError` | `(error: ZodError) => void` | Validation error callback triggered on failed submission. |
+| `onSuccess` | `(result: any) => void` | Success callback triggered after successful submission. |
+| `components` | `AutoFormCustomComponents` | Custom UI slot overrides (`Form`, `Field`, `Label`, `Input`, `TextArea`, `Select`, `Checkbox`, `ErrorMessage`, `Submit`, `Section`). |
+| `submitLabel` | `string` | Submit button text override. |
+| `title` | `React.ReactNode` | Form title override. |
+| `description` | `React.ReactNode` | Form description override. |
+| `className` | `string` | CSS class name applied to the form root element. |
+| `children` | `React.ReactNode` | Optional child slot to insert additional elements before the submit button. |
+
+---
+
+### B. Static Form Factory (`createForm`)
+
+When building developer-centric forms with static schemas, `createForm(schema)` produces strictly typed compound components tied directly to your Zod schema keys.
+
+#### 1. Define Schema & Call `createForm`
 
 ```tsx
 'use client';
 import { createForm } from 'contextual-ui';
 import { z } from 'zod';
 
-const ContactSchema = z.object({
-  email: z.string().email("Invalid email"),
-  message: z.string().min(10, "Message too short"),
+export const ContactSchema = z.object({
+  fullName: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  category: z.enum(['sales', 'support', 'billing']),
+  message: z.string().min(10, 'Message must be at least 10 characters'),
 });
 
-const Form = createForm(ContactSchema);
+export const ContactForm = createForm(ContactSchema);
+```
 
-export default function ContactSection() {
+#### 2. Compose Headless Form UI
+
+```tsx
+'use client';
+import { ContactForm } from './ContactForm';
+
+export function ContactPage() {
   return (
-    <Form.Root onSubmit={(data) => console.log(data)}>
-      <Form.Section title="Contact Us">
-        <Form.Field name="email">
-          <Form.Label>Email Address</Form.Label>
-          <Form.Input />
-          <Form.ErrorMessage />
-        </Form.Field>
-        <Form.Field name="message">
-          <Form.Label>Message</Form.Label>
-          <Form.TextArea />
-          <Form.ErrorMessage />
-        </Form.Field>
-      </Form.Section>
-      <Form.Submit>Send Message</Form.Submit>
-    </Form.Root>
+    <ContactForm.Root
+      onSubmit={async (data) => {
+        // data is fully typed as z.infer<typeof ContactSchema>
+        await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+      }}
+      className="max-w-md mx-auto space-y-4"
+    >
+      <ContactForm.Section title="Contact Us" description="Fill out the form below.">
+        {/* Full Name */}
+        <ContactForm.Field name="fullName">
+          <ContactForm.Label className="block text-sm font-medium mb-1">
+            Full Name
+          </ContactForm.Label>
+          <ContactForm.Input
+            placeholder="Jane Doe"
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          <ContactForm.ErrorMessage className="text-xs text-red-500 mt-1" />
+        </ContactForm.Field>
+
+        {/* Email */}
+        <ContactForm.Field name="email">
+          <ContactForm.Label className="block text-sm font-medium mb-1">
+            Work Email
+          </ContactForm.Label>
+          <ContactForm.Input
+            type="email"
+            placeholder="jane@company.com"
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          <ContactForm.ErrorMessage className="text-xs text-red-500 mt-1" />
+        </ContactForm.Field>
+
+        {/* Message */}
+        <ContactForm.Field name="message">
+          <ContactForm.Label className="block text-sm font-medium mb-1">
+            Message
+          </ContactForm.Label>
+          <ContactForm.TextArea
+            rows={4}
+            placeholder="How can we help?"
+            className="w-full px-3 py-2 border rounded-md"
+          />
+          <ContactForm.ErrorMessage className="text-xs text-red-500 mt-1" />
+        </ContactForm.Field>
+      </ContactForm.Section>
+
+      <ContactForm.Submit className="w-full py-2 bg-blue-600 text-white rounded-md disabled:opacity-50">
+        Send Message
+      </ContactForm.Submit>
+    </ContactForm.Root>
   );
 }
 ```
+
+#### `createForm` Subcomponents Reference
+
+| Component | Props | Description |
+| :--- | :--- | :--- |
+| `Form.Root` | `onSubmit`, `onError?`, `className?`, `id?`, `children` | Root `<form>` container that manages shared state, validation lifecycle, and async submit handling. |
+| `Form.Section` | `title?`, `description?`, `asChild?`, `className?`, `style?`, `children` | Semantic grouping container that renders an optional header (title + description) and content area. |
+| `Form.Field` | `name: keyof Schema`, `className?`, `children` | Scoped field context wrapper ensuring `Form.Label`, `Form.Input`, and `Form.ErrorMessage` are bound to the typed field. |
+| `Form.Label` | `asChild?`, `className?`, `style?`, `children` | Accessible label element that automatically binds `htmlFor` to the parent field `name`. |
+| `Form.Input` | `asChild?`, `...InputHTMLAttributes` | Controlled input element bound to field values, change handlers, blur validation, and `data-invalid`. |
+| `Form.TextArea` | `asChild?`, `...TextareaHTMLAttributes` | Controlled textarea element bound to field values, change handlers, blur validation, and `data-invalid`. |
+| `Form.Submit` | `asChild?`, `...ButtonHTMLAttributes` | Submit button automatically disabled during async `onSubmit` resolution (`data-contextual="form-submit"`). |
+| `Form.ErrorMessage` | `asChild?`, `className?`, `style?` | Conditionally renders the first active validation error string for the scoped field. |
+
+---
+
+### C. Dynamic Zod Builders & Schema Utilities
+
+Contextual UI exports helper utilities to build or inspect dynamic schemas programmatically:
+
+```typescript
+import {
+  buildZodSchema,
+  buildFieldZodSchema,
+  generateFormJsonLd,
+  exportFormAgentData,
+  FormField,
+} from 'contextual-ui';
+
+// Build a single field validator
+const singleField: FormField = {
+  name: 'email',
+  type: 'email',
+  required: true,
+};
+const emailValidator = buildFieldZodSchema(singleField);
+
+// Build an entire Zod object schema dynamically from field definitions
+const fullSchema = buildZodSchema([
+  { name: 'name', type: 'text', required: true, validation: { minLength: 2 } },
+  { name: 'age', type: 'number', required: false, validation: { min: 18, max: 120 } },
+]);
+
+// Export PotentialAction JSON-LD
+const jsonLdActions = generateFormJsonLd(formData);
+
+// Export plain structured agent data for AI tools
+const agentActions = exportFormAgentData(formData);
+```
+
+---
+
+### D. Form TypeScript Types Reference
+
+Contextual UI exports all TypeScript interfaces and Zod schemas for forms:
+
+```typescript
+import type {
+  // Static Form Types
+  FormRootProps,
+  FormFieldProps,
+  FormLabelProps,
+  FormInputProps,
+  FormTextAreaProps,
+  FormSubmitProps,
+  FormErrorMessageProps,
+  FormSectionProps,
+  FormContextValue,
+  FormItemContextValue,
+
+  // AutoForm Types
+  AutoFormProps,
+  AutoFormCustomComponents,
+  AutoFormFieldProps,
+  AutoFormLabelProps,
+  AutoFormInputProps,
+  AutoFormTextAreaProps,
+  AutoFormSelectProps,
+  AutoFormErrorMessageProps,
+  AutoFormSubmitProps,
+  AutoFormSectionProps,
+
+  // Schema & Entity Types
+  FormData,
+  FormEntity,
+  FormField,
+  FormFieldOption,
+  FormFieldValidation,
+} from 'contextual-ui';
+
+import {
+  FormDataSchema,
+  FormEntitySchema,
+  FormFieldSchema,
+  FormFieldOptionSchema,
+  FormFieldValidationSchema,
+} from 'contextual-ui';
+```
+
+#### Field Types & Validation Matrix
+
+| Field Type (`FormField['type']`) | Supported Validation Rules (`FormFieldValidation`) | Rendered Default Element (`AutoForm`) |
+| :--- | :--- | :--- |
+| `'text'` | `minLength`, `maxLength`, `pattern`, `customErrorMessage` | `<input type="text" />` |
+| `'email'` | `pattern`, `customErrorMessage` | `<input type="email" />` |
+| `'textarea'` | `minLength`, `maxLength`, `pattern`, `customErrorMessage` | `<textarea />` |
+| `'select'` | `options: Array<{ label, value } \| string>` | `<select>` with `<option>` items |
+| `'number'` | `min`, `max`, `customErrorMessage` | `<input type="number" />` (with `z.coerce.number()`) |
+| `'boolean'` | `customErrorMessage` (enforces `true` when required) | `<input type="checkbox" />` |
+| `'tel'` | `minLength`, `maxLength`, `pattern`, `customErrorMessage` | `<input type="tel" />` |
+| `'url'` | `pattern`, `customErrorMessage` | `<input type="url" />` |
+| `'password'` | `minLength`, `maxLength`, `pattern`, `customErrorMessage` | `<input type="password" />` |
 
 ---
 
