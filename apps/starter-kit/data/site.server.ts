@@ -40,6 +40,12 @@ const connector = staticConnector({
       description: 'Inspect the generated Schema.org JSON-LD graph.',
     },
     {
+      id: 'studio',
+      name: 'Studio Playground - Contextual UI',
+      url: '/studio',
+      description: 'Interactive playground and code generator for Contextual UI.',
+    },
+    {
       id: 'cms',
       name: 'CMS Dashboard - Contextual UI',
       url: '/cms',
@@ -109,7 +115,8 @@ const connector = staticConnector({
       { id: '1', label: 'Home', href: '/' },
       { id: '2', label: 'Docs', href: '/docs' },
       { id: '3', label: 'Schema Graph', href: '/schema' },
-      // { id: '4', label: 'CMS Dashboard', href: '/cms' },
+      { id: '4', label: 'Studio', href: '/studio' },
+      // { id: '5', label: 'CMS Dashboard', href: '/cms' },
     ]
   },
   footer: {

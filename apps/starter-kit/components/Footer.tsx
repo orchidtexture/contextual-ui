@@ -1,5 +1,6 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
 import { Footer as ContextualFooter, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 
@@ -8,9 +9,14 @@ interface CustomFooterProps {
 }
 
 export function Footer({ data: explicitData }: CustomFooterProps = {}) {
+  const pathname = usePathname();
   const pageContext = useContextualSiteContext<SiteData>();
   const data = explicitData ?? pageContext?.data;
   const footerData = data?.footer;
+
+  if (pathname?.startsWith('/studio')) {
+    return null;
+  }
 
   return (
     <ContextualFooter.Root className="border-t border-base py-12 px-6 mt-auto bg-zinc-950/80 backdrop-blur-sm">
