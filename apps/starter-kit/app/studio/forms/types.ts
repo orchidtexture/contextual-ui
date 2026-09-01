@@ -10,6 +10,20 @@ export interface ConsoleLog {
   payload: any;
 }
 
+export interface PromptOptions {
+  aiTarget: 'cursor' | 'claude' | 'chatgpt' | 'v0';
+  backendType: 'route-handler' | 'server-action';
+  integration: 'none' | 'resend' | 'supabase' | 'prisma' | 'drizzle';
+  customInstructions: string;
+}
+
+export const DEFAULT_PROMPT_OPTIONS: PromptOptions = {
+  aiTarget: 'cursor',
+  backendType: 'route-handler',
+  integration: 'none',
+  customInstructions: '',
+};
+
 export interface PresetOption {
   id: string;
   name: string;
