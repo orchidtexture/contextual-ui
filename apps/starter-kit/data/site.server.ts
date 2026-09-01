@@ -141,6 +141,7 @@ const connector = staticConnector({
         title: 'Community',
         links: [
           { id: '4', label: 'Tasuku Studio', href: 'https://tasuku.io', external: true },
+          { id: '5', label: 'GitHub Repository', href: 'https://github.com/orchidtexture/contextual-ui', external: true },
         ],
       },
     ],
@@ -149,7 +150,7 @@ const connector = staticConnector({
       { id: 'l2', label: 'Terms of Service', href: '/terms' },
     ],
     socials: [
-      { id: 's1', platform: 'GitHub', href: 'https://github.com/orchidtexture', label: 'GitHub' },
+      { id: 's1', platform: 'GitHub', href: 'https://github.com/orchidtexture/contextual-ui', label: 'GitHub' },
       { id: 's2', platform: 'Twitter', href: 'https://twitter.com/orchidtexture', label: 'Twitter / X' },
     ],
     copyright: {

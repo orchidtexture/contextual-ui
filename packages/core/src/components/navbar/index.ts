@@ -1,4 +1,4 @@
-import { Root, Brand, Content, Toggle, Menu } from './Navbar';
+import { Root, Brand, Content, Toggle, Menu, Link } from './Navbar';
 
 export const Navbar = {
   Root,
@@ -6,6 +6,7 @@ export const Navbar = {
   Content,
   Toggle,
   Menu,
+  Link,
 };
 
 export type { NavItem, NavbarData } from './navbar.schema';

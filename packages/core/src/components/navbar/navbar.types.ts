@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { NavbarData } from './navbar.schema';
+import { NavbarData, NavItem } from './navbar.schema';
 
 export interface NavbarRootProps {
   data?: NavbarData;
@@ -32,6 +32,15 @@ export interface NavbarToggleProps {
 export interface NavbarMenuProps {
   children: ReactNode;
   className?: string;
+}
+
+export interface NavbarLinkProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
+  item?: NavItem;
+  href?: string;
+  children?: ReactNode;
+  asChild?: boolean;
+  className?: string;
+  external?: boolean;
 }
 
 export interface NavbarContextValue {

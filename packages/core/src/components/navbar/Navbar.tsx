@@ -11,6 +11,7 @@ import {
   NavbarToggleProps,
   NavbarContentProps,
   NavbarMenuProps,
+  NavbarLinkProps,
   NavbarContextValue
 } from './navbar.types';
 import { generateNavbarJsonLd } from './navbar.utils';
@@ -169,5 +170,50 @@ export function Menu({ children, className }: NavbarMenuProps) {
     >
       {children}
     </div>
+  );
+}
+
+export function Link({
+  item,
+  href,
+  children,
+  asChild,
+  className,
+  external,
+  ...props
+}: NavbarLinkProps) {
+  const targetHref = href || item?.href || '#';
+  const isExternal = external ?? item?.external ?? targetHref.startsWith('http');
+  const target = props.target || (isExternal ? '_blank' : undefined);
+  const rel = props.rel || (isExternal ? 'noopener noreferrer' : undefined);
+
+  const Comp = asChild ? Slot : 'a';
+
+  if (!children && item?.label) {
+    return (
+      <a
+        href={targetHref}
+        target={target}
+        rel={rel}
+        data-contextual="navbar-link"
+        className={className}
+        {...props}
+      >
+        {item.label}
+      </a>
+    );
+  }
+
+  return (
+    <Comp
+      href={asChild ? href : targetHref}
+      target={asChild ? undefined : target}
+      rel={asChild ? undefined : rel}
+      data-contextual="navbar-link"
+      className={className}
+      {...props}
+    >
+      {children}
+    </Comp>
   );
 }

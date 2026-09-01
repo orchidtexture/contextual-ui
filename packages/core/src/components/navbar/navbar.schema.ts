@@ -5,6 +5,7 @@ export interface NavItem {
   label: string;
   href?: string;
   children?: NavItem[];
+  external?: boolean;
 }
 
 export const NavItemSchema: z.ZodType<NavItem> = z.lazy(() => z.object({
@@ -12,6 +13,7 @@ export const NavItemSchema: z.ZodType<NavItem> = z.lazy(() => z.object({
   label: z.string(),
   href: z.string().optional(),
   children: z.array(NavItemSchema).optional(),
+  external: z.boolean().optional(),
 }));
 
 export const NavbarDataSchema = z.object({
