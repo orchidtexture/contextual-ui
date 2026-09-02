@@ -1,6 +1,7 @@
 {
   "name": "contextual-ui-monorepo",
   "private": true,
+  "license": "MIT",
   "packageManager": "pnpm@11.20.0",
   "pnpm": {
     "allowBuilds": {
