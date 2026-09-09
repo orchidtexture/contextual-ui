@@ -383,4 +383,105 @@ describe('createContextualApp with baseUrl', () => {
       expect(meta.alternates?.canonical).toBe('/single');
     });
   });
+
+  describe('sitemap and robots integration', () => {
+    const multiPageConnector = {
+      async fetchData() {
+        return {
+          website: {
+            name: 'Contextual UI',
+            url: 'https://contextual.site',
+          },
+          webpage: [
+            { id: 'home', url: '/' },
+            { id: 'docs', url: '/docs' },
+            { id: 'cms', url: '/cms' },
+            { id: 'studio', url: '/studio/forms' },
+          ],
+        };
+      },
+    };
+
+    const app = createContextualApp({
+      schema,
+      connector: multiPageConnector,
+      baseUrl: 'https://contextual.site',
+    });
+
+    it('generates sitemap items with exclusions', async () => {
+      const sitemap = await app.getSitemap({
+        exclude: ['/cms', '/studio*'],
+      });
+
+      expect(sitemap).toHaveLength(2);
+      expect(sitemap.map((s) => s.url)).toEqual([
+        'https://contextual.site',
+        'https://contextual.site/docs',
+      ]);
+    });
+
+    it('generates compliant sitemap XML', async () => {
+      const xml = await app.generateSitemapXml({
+        exclude: ['/cms', '/studio*'],
+      });
+
+      expect(xml).toContain('<?xml version="1.0" encoding="UTF-8"?>');
+      expect(xml).toContain('<loc>https://contextual.site</loc>');
+      expect(xml).toContain('<loc>https://contextual.site/docs</loc>');
+      expect(xml).not.toContain('/cms');
+    });
+
+    it('handles sitemap route handler requests', async () => {
+      const handler = app.createSitemapHandler({
+        exclude: ['/cms', '/studio*'],
+      });
+      const res = await handler.GET(new Request('http://localhost/sitemap.xml'));
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get('content-type')).toBe('application/xml; charset=utf-8');
+      const text = await res.text();
+      expect(text).toContain('<loc>https://contextual.site</loc>');
+    });
+
+    it('generates robots data and plain text', async () => {
+      const robots = await app.getRobots({
+        disallow: ['/cms', '/studio'],
+        ai: {
+          defaultAiPolicy: 'disallow',
+          bots: { PerplexityBot: 'allow' },
+        },
+      });
+
+      expect(robots.sitemap).toBe('https://contextual.site/sitemap.xml');
+      expect(robots.host).toBe('contextual.site');
+
+      const txt = await app.generateRobotsTxt({
+        disallow: ['/cms', '/studio'],
+        ai: {
+          defaultAiPolicy: 'disallow',
+          bots: { PerplexityBot: 'allow' },
+        },
+      });
+
+      expect(txt).toContain('User-agent: *');
+      expect(txt).toContain('Disallow: /cms');
+      expect(txt).toContain('Disallow: /studio');
+      expect(txt).toContain('User-agent: GPTBot\nDisallow: /');
+      expect(txt).toContain('User-agent: PerplexityBot\nAllow: /');
+      expect(txt).toContain('Sitemap: https://contextual.site/sitemap.xml');
+    });
+
+    it('handles robots route handler requests', async () => {
+      const handler = app.createRobotsHandler({
+        disallow: ['/cms'],
+      });
+      const res = await handler.GET(new Request('http://localhost/robots.txt'));
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get('content-type')).toBe('text/plain; charset=utf-8');
+      const text = await res.text();
+      expect(text).toContain('User-agent: *');
+      expect(text).toContain('Disallow: /cms');
+    });
+  });
 });

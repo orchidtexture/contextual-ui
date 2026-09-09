@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
 
 const baseUrl = (
   process.env.SITE_URL ||
@@ -6,15 +7,10 @@ const baseUrl = (
   'https://contextual.site'
 ).replace(/\/+$/, '');
 
-export default function robots(): MetadataRoute.Robots {
-  return {
-    rules: [
-      {
-        userAgent: '*',
-        allow: '/',
-        disallow: ['/cms', '/cms/'],
-      },
-    ],
-    sitemap: `${baseUrl}/sitemap.xml`,
-  };
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  return siteApp.getRobots({
+    baseUrl,
+    disallow: ['/cms', '/cms/'],
+  });
 }
+

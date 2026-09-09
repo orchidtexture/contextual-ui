@@ -9,6 +9,25 @@ import type {
   MetadataTwitter,
   OGImage,
 } from './metadata.types';
+import {
+  SitemapItem,
+  SitemapOptions,
+  SitemapRouteHandlerOptions,
+  extractWebpages,
+  buildSitemapItems,
+  generateSitemapXml,
+  createSitemapRouteHandler,
+  createPagesSitemapRouteHandler,
+} from './sitemap';
+import {
+  NextRobotsResult,
+  RobotsOptions,
+  RobotsRouteHandlerOptions,
+  buildRobotsData,
+  generateRobotsTxt,
+  createRobotsRouteHandler,
+  createPagesRobotsRouteHandler,
+} from './robots';
 
 export interface ContextualAppOptions<
   TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any },
@@ -341,6 +360,43 @@ export function createContextualApp<
       }
 
       return result;
+    },
+    async getSitemap(sitemapOptions?: SitemapOptions): Promise<SitemapItem[]> {
+      const raw = await options.connector.fetchData();
+      const effectiveBaseUrl = sitemapOptions?.baseUrl || options.baseUrl || raw?.website?.url;
+      const webpages = extractWebpages(raw);
+      return buildSitemapItems(webpages, {
+        ...sitemapOptions,
+        baseUrl: effectiveBaseUrl,
+      });
+    },
+    async generateSitemapXml(sitemapOptions?: SitemapOptions): Promise<string> {
+      const items = await this.getSitemap(sitemapOptions);
+      return generateSitemapXml(items);
+    },
+    createSitemapHandler(handlerOptions?: SitemapRouteHandlerOptions) {
+      return createSitemapRouteHandler(async () => this.getSitemap(handlerOptions), handlerOptions);
+    },
+    createPagesSitemapHandler(handlerOptions?: SitemapRouteHandlerOptions) {
+      return createPagesSitemapRouteHandler(async () => this.getSitemap(handlerOptions), handlerOptions);
+    },
+    async getRobots(robotsOptions?: RobotsOptions): Promise<NextRobotsResult> {
+      const raw = await options.connector.fetchData();
+      const effectiveBaseUrl = robotsOptions?.baseUrl || options.baseUrl || raw?.website?.url;
+      return buildRobotsData({
+        ...robotsOptions,
+        baseUrl: effectiveBaseUrl,
+      });
+    },
+    async generateRobotsTxt(robotsOptions?: RobotsOptions): Promise<string> {
+      const robotsData = await this.getRobots(robotsOptions);
+      return generateRobotsTxt(robotsData);
+    },
+    createRobotsHandler(handlerOptions?: RobotsRouteHandlerOptions) {
+      return createRobotsRouteHandler(async () => this.getRobots(handlerOptions), handlerOptions);
+    },
+    createPagesRobotsHandler(handlerOptions?: RobotsRouteHandlerOptions) {
+      return createPagesRobotsRouteHandler(async () => this.getRobots(handlerOptions), handlerOptions);
     },
   };
 }

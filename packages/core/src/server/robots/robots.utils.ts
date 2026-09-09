@@ -1,7 +1,7 @@
 import {
   NextRobotsResult,
   RobotsOptions,
-  RobotsRule,
+  StrictRobotsRule,
   AiBotPolicy,
 } from './robots.types';
 
@@ -21,17 +21,19 @@ export const KNOWN_AI_BOTS: readonly string[] = [
  */
 export function buildRobotsData(options: RobotsOptions = {}): NextRobotsResult {
   const baseUrl = (options.baseUrl || '').replace(/\/+$/, '');
-  const rules: RobotsRule[] = [];
+  const rules: StrictRobotsRule[] = [];
 
   // 1. User-supplied rules or default wildcard rule
   if (options.rules) {
-    if (Array.isArray(options.rules)) {
-      rules.push(...options.rules);
-    } else {
-      rules.push(options.rules);
+    const rawRules = Array.isArray(options.rules) ? options.rules : [options.rules];
+    for (const rule of rawRules) {
+      rules.push({
+        ...rule,
+        userAgent: rule.userAgent || '*',
+      });
     }
   } else {
-    const defaultRule: RobotsRule = {
+    const defaultRule: StrictRobotsRule = {
       userAgent: '*',
       allow: options.allow !== undefined ? options.allow : '/',
       disallow: options.disallow !== undefined ? options.disallow : [],

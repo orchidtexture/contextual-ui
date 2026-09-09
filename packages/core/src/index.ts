@@ -90,6 +90,20 @@ export type {
 } from 'jsonld-graph-builder';
 
 export type * from './server/metadata.types';
+export type * from './server/sitemap/sitemap.types';
+export type * from './server/robots/robots.types';
+export {
+  extractWebpages,
+  buildSitemapItems,
+  generateSitemapXml,
+  normalizePath,
+  isPathExcluded,
+} from './server/sitemap/sitemap.utils';
+export {
+  buildRobotsData,
+  generateRobotsTxt,
+  KNOWN_AI_BOTS,
+} from './server/robots/robots.utils';
 
 export type { Thing, WithContext, Graph } from 'schema-dts';
 

@@ -3,6 +3,15 @@ export interface RobotsRule {
   allow?: string | string[];
   disallow?: string | string[];
   crawlDelay?: number;
+  other?: Record<string, string | number | Array<string | number>>;
+}
+
+export interface StrictRobotsRule {
+  userAgent: string | string[];
+  allow?: string | string[];
+  disallow?: string | string[];
+  crawlDelay?: number;
+  other?: Record<string, string | number | Array<string | number>>;
 }
 
 export type AiBotPolicy = 'allow' | 'disallow' | 'inherit';
@@ -78,7 +87,7 @@ export interface RobotsRouteHandlerOptions extends RobotsOptions {
 }
 
 export interface NextRobotsResult {
-  rules: RobotsRule | RobotsRule[];
+  rules: StrictRobotsRule[] | RobotsRule;
   sitemap?: string | string[];
   host?: string;
 }

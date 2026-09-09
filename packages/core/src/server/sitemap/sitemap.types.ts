@@ -18,6 +18,11 @@ export interface SitemapItem {
   changeFrequency?: SitemapChangeFrequency;
   priority?: number;
   alternateRefs?: SitemapAlternateRef[];
+  alternates?: {
+    languages?: Record<string, string>;
+  };
+  images?: string[];
+  videos?: any[];
 }
 
 export interface SitemapOptions {

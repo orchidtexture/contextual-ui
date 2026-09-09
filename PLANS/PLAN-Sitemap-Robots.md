@@ -179,31 +179,31 @@ export interface ContextualAppInstance<TSchema, TConnector> {
   - Returns `{ GET: (req: Request) => Response }` with `Content-Type: text/plain`.
 
 ### Phase 3: Wire into `createContextualApp`
-- [ ] Update `packages/core/src/server/createContextualApp.ts`:
+- [x] Update `packages/core/src/server/createContextualApp.ts`:
   - Implement `getSitemap(options)`
   - Implement `generateSitemapXml(options)`
   - Implement `createSitemapHandler(options)`
   - Implement `getRobots(options)`
   - Implement `generateRobotsTxt(options)`
   - Implement `createRobotsHandler(options)`
-- [ ] Export new types and functions in `packages/core/src/server/index.ts` and `packages/core/src/index.ts`.
+- [x] Export new types and functions in `packages/core/src/server/index.ts` and `packages/core/src/index.ts`.
 
 ### Phase 4: Unit Tests
-- [ ] Add `packages/core/src/server/sitemap/sitemap.test.ts`:
+- [x] Add `packages/core/src/server/sitemap/sitemap.test.ts`:
   - Empty webpage list vs populated webpage list.
   - URL canonicalization with trailing slash normalization.
   - Path exclusion rules (exact match and prefix/wildcard).
   - XML formatting and escaping.
-- [ ] Add `packages/core/src/server/robots/robots.test.ts`:
+- [x] Add `packages/core/src/server/robots/robots.test.ts`:
   - Basic allow/disallow generation.
   - AI bot preset rules (`GPTBot`, `ClaudeBot`, etc.).
   - Plain-text output format verification.
-- [ ] Add integration tests in `packages/core/src/server/createContextualApp.test.ts`.
+- [x] Add integration tests in `packages/core/src/server/createContextualApp.test.ts`.
 
 ### Phase 5: Starter Kit Adoption
-- [ ] Refactor `apps/starter-kit/app/sitemap.ts` to use `siteApp.getSitemap({ exclude: ['/cms', '/cms/*'] })`.
-- [ ] Refactor `apps/starter-kit/app/robots.ts` to use `siteApp.getRobots({ disallow: ['/cms', '/cms/'] })`.
-- [ ] Verify local build and test endpoint output in `apps/starter-kit`.
+- [x] Refactor `apps/starter-kit/app/sitemap.ts` to use `siteApp.getSitemap({ exclude: ['/cms', '/cms/*'] })`.
+- [x] Refactor `apps/starter-kit/app/robots.ts` to use `siteApp.getRobots({ disallow: ['/cms', '/cms/'] })`.
+- [x] Verify local build and test endpoint output in `apps/starter-kit`.
 
 ---
 
