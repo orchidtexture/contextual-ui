@@ -51,6 +51,18 @@ const connector = staticConnector({
       url: '/cms',
       description: 'Manage content and validate schemas.',
     },
+    {
+      id: 'privacy',
+      name: 'Privacy Policy - Contextual UI',
+      url: '/privacy',
+      description: 'Privacy policy and data protection information for Contextual UI.',
+    },
+    {
+      id: 'terms',
+      name: 'Terms of Service - Contextual UI',
+      url: '/terms',
+      description: 'Terms of service and usage agreements for Contextual UI.',
+    },
   ],
   faq: [
     { id: '1', question: 'What is Contextual UI?', answer: 'An open-source library that provides the building blocks for next-gen AI-ready websites.' },

@@ -204,4 +204,183 @@ describe('createContextualApp with baseUrl', () => {
       expect(webpageNodes[0]?.description).toBe('Docs page description');
     });
   });
+
+  describe('getMetadata helper for Next.js', () => {
+    const fullConnector = {
+      async fetchData() {
+        return {
+          organization: {
+            name: 'Tasuku Studio',
+            url: 'https://tasuku.io',
+            logo: '/images/onigiri_logo.svg',
+            sameAs: ['https://twitter.com/orchidtexture'],
+          },
+          website: {
+            name: 'Contextual UI',
+            url: 'https://contextual.site',
+            description: 'A headless UI and semantic SEO Knowledge Graph library.',
+          },
+          webpage: [
+            {
+              id: 'home',
+              name: 'Contextual UI - Home',
+              url: '/',
+              description: 'Home page description',
+            },
+            {
+              id: 'privacy',
+              name: 'Privacy Policy - Contextual UI',
+              url: '/privacy',
+              description: 'Privacy policy description',
+            },
+            {
+              id: 'docs',
+              name: 'Documentation - Contextual UI',
+              url: '/docs',
+              description: 'Docs page description',
+              inLanguage: 'en-US',
+            },
+          ],
+        };
+      },
+    };
+
+    it('returns Next.js Metadata with metadataBase, title, description, alternates, openGraph', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: fullConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const meta = await app.getMetadata('privacy');
+
+      expect(meta.metadataBase).toEqual(new URL('https://contextual.site'));
+      expect(meta.title).toBe('Privacy Policy - Contextual UI');
+      expect(meta.description).toBe('Privacy policy description');
+      expect(meta.alternates).toEqual({
+        canonical: '/privacy',
+      });
+      expect(meta.openGraph).toMatchObject({
+        title: 'Privacy Policy - Contextual UI',
+        description: 'Privacy policy description',
+        url: '/privacy',
+        siteName: 'Contextual UI',
+        type: 'website',
+        images: ['/images/onigiri_logo.svg'],
+      });
+      expect(meta.twitter).toMatchObject({
+        card: 'summary_large_image',
+        title: 'Privacy Policy - Contextual UI',
+        description: 'Privacy policy description',
+        site: '@orchidtexture',
+        images: ['/images/onigiri_logo.svg'],
+      });
+    });
+
+    it('defaults to home page or website metadata when pageId is omitted', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: fullConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const meta = await app.getMetadata();
+
+      expect(meta.metadataBase).toEqual(new URL('https://contextual.site'));
+      expect(meta.title).toBe('Contextual UI - Home');
+      expect(meta.description).toBe('Home page description');
+      expect(meta.alternates).toEqual({ canonical: '/' });
+      expect(meta.openGraph?.url).toBe('/');
+    });
+
+    it('supports overrides passed as second argument', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: fullConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const meta = await app.getMetadata('privacy', {
+        title: 'Custom Overridden Privacy Title',
+        openGraph: {
+          images: ['/custom-og-privacy.png'],
+        },
+      });
+
+      expect(meta.title).toBe('Custom Overridden Privacy Title');
+      expect(meta.openGraph?.images).toEqual(['/custom-og-privacy.png']);
+      expect(meta.openGraph?.title).toBe('Custom Overridden Privacy Title');
+      expect(meta.description).toBe('Privacy policy description');
+      expect(meta.alternates?.canonical).toBe('/privacy');
+    });
+
+    it('supports options object as first argument', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: fullConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const meta = await app.getMetadata({
+        pageId: 'docs',
+        baseUrl: 'https://custom-domain.com',
+        metadataOverrides: {
+          keywords: ['documentation', 'nextjs'],
+        },
+      });
+
+      expect(meta.metadataBase).toEqual(new URL('https://custom-domain.com'));
+      expect(meta.title).toBe('Documentation - Contextual UI');
+      expect(meta.alternates?.canonical).toBe('/docs');
+      expect(meta.openGraph?.locale).toBe('en-US');
+      expect(meta.keywords).toEqual(['documentation', 'nextjs']);
+    });
+
+    it('gracefully handles missing pageId by providing fallback url and website title', async () => {
+      const app = createContextualApp({
+        schema,
+        connector: fullConnector,
+        baseUrl: 'https://contextual.site',
+      });
+
+      const meta = await app.getMetadata('terms');
+
+      expect(meta.metadataBase).toEqual(new URL('https://contextual.site'));
+      expect(meta.title).toBe('Contextual UI');
+      expect(meta.description).toBe('A headless UI and semantic SEO Knowledge Graph library.');
+      expect(meta.alternates?.canonical).toBe('/terms');
+      expect(meta.openGraph?.url).toBe('/terms');
+    });
+
+    it('handles single page (non-array) webpage connector', async () => {
+      const singlePageConnector = {
+        async fetchData() {
+          return {
+            website: {
+              name: 'Single Site',
+              url: 'https://singlesite.com',
+            },
+            webpage: {
+              name: 'Single Page Title',
+              url: '/single',
+              description: 'Single page description',
+            },
+          };
+        },
+      };
+
+      const app = createContextualApp({
+        schema,
+        connector: singlePageConnector,
+        baseUrl: 'https://singlesite.com',
+      });
+
+      const meta = await app.getMetadata();
+
+      expect(meta.metadataBase).toEqual(new URL('https://singlesite.com'));
+      expect(meta.title).toBe('Single Page Title');
+      expect(meta.description).toBe('Single page description');
+      expect(meta.alternates?.canonical).toBe('/single');
+    });
+  });
 });

@@ -464,6 +464,8 @@ export default async function RootLayout({
 import { WebPage } from 'contextual-ui/server';
 import { Navbar, Faq, Breadcrumb, Footer } from 'contextual-ui';
 
+export const generateMetadata = () => siteApp.getMetadata('home');
+
 export default async function HomePage() {
   const data = await siteApp.fetchData();
 
@@ -2187,6 +2189,322 @@ export const siteApp = createContextualApp({
   );
 }
 
+function HelpersSection({ data }: { data: SiteData }) {
+  const [activeTab, setActiveTab] = useState<'page' | 'output' | 'overrides'>('page');
+  const [selectedPageId, setSelectedPageId] = useState('privacy');
+
+  const pages = (data.webpage && Array.isArray(data.webpage)) ? data.webpage : [];
+  const selectedPage = pages.find((p) => p.id === selectedPageId) || pages[0] || {
+    id: 'privacy',
+    name: 'Privacy Policy - Contextual UI',
+    url: '/privacy',
+    description: 'Privacy policy and data protection information for Contextual UI.',
+  };
+
+  const baseUrl = data.website?.url || 'https://contextual.site';
+  const siteName = data.website?.name || data.organization?.name || 'Contextual UI';
+  const logo = data.organization?.logo || '/images/onigiri_logo.svg';
+
+  const pageId = selectedPage.id || 'privacy';
+  const pageName = selectedPage.name || siteName;
+  const pageUrl = selectedPage.url || `/${pageId}`;
+  const pageDesc = selectedPage.description || data.website?.description || '';
+  const pageComponent = pageId.charAt(0).toUpperCase() + pageId.slice(1);
+
+  const pageUsageCode = `// app/${pageId === 'home' ? '' : `${pageId}/`}page.tsx
+import { siteApp } from '@/data/site.server';
+import { WebPage } from 'contextual-ui/server';
+
+// Zero duplication! Pulls title, description, and canonical from siteApp SSOT
+export const generateMetadata = () => siteApp.getMetadata('${pageId}');
+
+export default async function ${pageComponent}Page() {
+  const data = await siteApp.fetchData();
+
+  return (
+    <WebPage app={siteApp} id="${pageId}">
+      <main className="max-w-4xl mx-auto px-6 py-12">
+        <h1 className="text-3xl font-bold">${pageName}</h1>
+        <p className="mt-4 text-zinc-400">${pageDesc}</p>
+      </main>
+    </WebPage>
+  );
+}`;
+
+  const overridesCode = `// app/${pageId}/page.tsx
+import { siteApp } from '@/data/site.server';
+
+// Zero duplication: extend or override any field effortlessly
+export const generateMetadata = () =>
+  siteApp.getMetadata('${pageId}', {
+    title: '${pageName} | Custom Brand',
+    openGraph: {
+      images: ['/custom-banner.png'],
+    },
+    keywords: ['contextual-ui', 'nextjs', 'schema.org', '${pageId}'],
+  });`;
+
+  const outputObject = {
+    metadataBase: `new URL("${baseUrl}")`,
+    title: pageName,
+    description: pageDesc,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      title: pageName,
+      description: pageDesc,
+      url: pageUrl,
+      siteName: siteName,
+      type: 'website',
+      images: [logo],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: pageName,
+      description: pageDesc,
+      site: '@orchidtexture',
+      images: [logo],
+    },
+  };
+
+  const metadataOutput = JSON.stringify(outputObject, null, 2).replace(
+    `"new URL(\\"${baseUrl}\\")"`,
+    `new URL("${baseUrl}")`
+  );
+
+  const helperFields: SchemaField[] = [
+    {
+      name: 'pageIdOrOptions',
+      type: 'string | GetMetadataOptions',
+      required: false,
+      schemaOrgMapping: 'WebPage.@id / url',
+      description: 'Page identifier (e.g. "privacy", "home") or options object. Defaults to "home" or root website when omitted.',
+    },
+    {
+      name: 'overrides',
+      type: 'Partial<Metadata>',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Custom metadata overrides (e.g. title, openGraph images, twitter card, keywords, robots).',
+    },
+    {
+      name: 'returns',
+      type: 'Promise<Metadata>',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Next.js App Router-compatible Metadata object with metadataBase, title, description, alternates, openGraph, and twitter.',
+    },
+  ];
+
+  return (
+    <section id="helpers" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-xl font-bold">Helpers: siteApp.getMetadata()</h2>
+        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
+          Next.js App Router
+        </span>
+      </div>
+      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+        Next.js Metadata helper that eliminates duplication between your data connector, Schema.org JSON-LD graphs, and HTML <code className="code-short">&lt;head&gt;</code> meta tags. Since <code className="code-short">siteApp</code> already knows each page&apos;s title, description, canonical URL, and base URL from your Single Source of Truth (SSOT), <code className="code-short">siteApp.getMetadata(pageId)</code> generates fully typed, route-accurate Next.js <code className="code-short">Metadata</code> in a single line.
+      </p>
+
+      {/* Highlights Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Sparkles className="w-4 h-4" />
+            <span>Zero Duplication</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Pulls title, description, and canonical URL from the same schema powering <code className="code-short">&lt;WebPage /&gt;</code> and <code className="code-short">/api/graph.json</code>.
+          </p>
+        </div>
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Globe className="w-4 h-4" />
+            <span>Canonical &amp; Base URL</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Automatically attaches <code className="code-short">metadataBase: new URL(baseUrl)</code> and binds canonical alternates seamlessly across relative paths.
+          </p>
+        </div>
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Layers className="w-4 h-4" />
+            <span>Social &amp; SEO Ready</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Auto-populates <code className="code-short">openGraph</code> and <code className="code-short">twitter</code> cards with brand logos, handles, and OpenGraph website types.
+          </p>
+        </div>
+      </div>
+
+      {/* Interactive Page Selector & Live Search Engine Preview */}
+      <div className="mb-6 p-4 rounded-xl border border-zinc-800 bg-zinc-950/60 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">
+              Interactive Route Selector
+            </span>
+            <p className="text-xs text-zinc-400">
+              Select a page configured in your schema connector to inspect its generated Next.js metadata:
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {pages.map((p) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => setSelectedPageId(p.id || 'home')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer ${
+                  selectedPageId === p.id
+                    ? 'bg-accent text-zinc-950 font-semibold shadow-sm'
+                    : 'bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-700'
+                }`}
+              >
+                {p.id}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Live SERP & Social Preview Card */}
+        <div className="p-3.5 bg-zinc-900/70 rounded-lg border border-zinc-800 space-y-1.5 font-sans">
+          <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+            <span>SERP &amp; OpenGraph Preview</span>
+            <span className="text-zinc-600">·</span>
+            <span className="text-accent truncate">{baseUrl}{selectedPage.url}</span>
+          </div>
+          <div className="text-sm font-semibold text-blue-400 hover:underline cursor-pointer">
+            {selectedPage.name || siteName}
+          </div>
+          <div className="text-xs text-zinc-400 leading-relaxed">
+            {selectedPage.description || 'No description provided in schema.'}
+          </div>
+        </div>
+      </div>
+
+      {/* Tab Switcher & Code Box */}
+      <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
+        <div className="flex ml-auto border border-base rounded-md overflow-hidden">
+          <button
+            onClick={() => setActiveTab('page')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'page'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileCode className="w-3.5 h-3.5" />
+            <span>Next.js Page</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('output')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'output'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileJson className="w-3.5 h-3.5" />
+            <span>Metadata Output</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('overrides')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'overrides'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span>With Overrides</span>
+          </button>
+        </div>
+        <span className="text-sm text-zinc-400 font-medium">
+          {activeTab === 'page' && `app/${selectedPage.id === 'home' ? '' : `${selectedPage.id}/`}page.tsx: Zero duplication with export const generateMetadata.`}
+          {activeTab === 'output' && `Output returned by siteApp.getMetadata('${selectedPage.id}') ready for Next.js App Router.`}
+          {activeTab === 'overrides' && 'Pass custom overrides (images, keywords, custom title) as optional second argument.'}
+        </span>
+      </div>
+
+      <pre
+        tabIndex={0}
+        suppressHydrationWarning
+        className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner mb-8"
+      >
+        <code
+          className={activeTab === 'output' ? 'language-json' : 'language-typescript'}
+          dangerouslySetInnerHTML={{
+            __html: highlightCode(
+              activeTab === 'page'
+                ? pageUsageCode
+                : activeTab === 'output'
+                ? metadataOutput
+                : overridesCode,
+              activeTab === 'output' ? 'json' : 'typescript'
+            ),
+          }}
+        />
+      </pre>
+
+      {/* Schema / API Table */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold font-mono text-zinc-200 uppercase tracking-wider">
+          API Parameters &amp; Return Types
+        </h3>
+        <div className="border border-base rounded-xl overflow-hidden shadow-inner">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-base bg-zinc-900/80 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-3.5 font-semibold">Parameter</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Type</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Requirement</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800 font-mono">
+                {helperFields.map((field) => (
+                  <tr key={field.name} className="hover:bg-zinc-900/40 transition-colors">
+                    <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
+                      {field.name}
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
+                        {field.type}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      {field.required ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
+                          Required
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
+                          Optional
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3.5 font-sans text-zinc-300 text-xs min-w-[200px] leading-relaxed">
+                      {field.description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ShowcaseSection({
   id,
   title,
@@ -2388,6 +2706,10 @@ export function DocsClient({ data }: { data: SiteData }) {
     { id: 'connectors', label: 'Connectors', desc: 'Data Ingestion & Adapters' },
   ];
 
+  const helperNavItems = [
+    { id: 'helpers', label: 'getMetadata()', desc: 'Next.js Metadata SSOT' },
+  ];
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -2412,6 +2734,7 @@ export function DocsClient({ data }: { data: SiteData }) {
       'auto-form',
       'create-form',
       'connectors',
+      'helpers',
     ];
     sections.forEach((id) => {
       const el = document.getElementById(id);
@@ -2508,6 +2831,8 @@ export function SinglePageApp() {
   const webpageCode = `import { siteApp } from '@/data/site.server';
 import { WebPage } from 'contextual-ui/server';
 import { DocsClient } from './DocsClient';
+
+export const generateMetadata = () => siteApp.getMetadata('docs');
 
 export default async function DocsPage() {
   const data = await siteApp.fetchData();
@@ -3722,7 +4047,7 @@ export default async function DocsPage() {
 
       <div className="flex flex-col lg:flex-row gap-12 items-start relative">
         {/* Left Side Menu */}
-        <aside className="hidden lg:block lg:sticky lg:top-24 w-64 shrink-0 space-y-6">
+        <aside className="hidden lg:block lg:sticky lg:top-24 w-64 shrink-0 max-h-[calc(100vh-7rem)] overflow-y-auto pr-3 pb-8 scrollbar-thin">
           <div className="backdrop-blur-sm shadow-sm space-y-6">
             {/* Subsection 1: Getting Started */}
             <div className="space-y-2">
@@ -3847,6 +4172,37 @@ export default async function DocsPage() {
                 })}
               </nav>
             </div>
+
+            {/* Subsection 5: Helpers */}
+            <div className="space-y-2 pt-3 border-t border-base">
+              <h3 className="text-[11px] font-mono uppercase tracking-wider font-semibold text-zinc-400 px-3 pt-1">
+                Helpers
+              </h3>
+              <nav className="space-y-1">
+                {helperNavItems.map((item) => {
+                  const isActive = activeId === item.id;
+                  return (
+                    <a
+                      key={item.id}
+                      href={`#${item.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
+                        setActiveId(item.id);
+                      }}
+                      className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
+                        isActive
+                          ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
+                          : 'text-zinc-400 hover:text-zinc-100 hover:bg-zinc-900/30'
+                      }`}
+                    >
+                      <span className="font-semibold text-xs leading-snug">{item.label}</span>
+                      <span className="text-[11px] text-zinc-500 truncate">{item.desc}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+            </div>
           </div>
         </aside>
 
@@ -3854,7 +4210,7 @@ export default async function DocsPage() {
         <div className="flex-1 min-w-0 space-y-12 w-full">
           {/* Mobile Navigation Pills */}
           <div className="flex lg:hidden overflow-x-auto gap-2 pb-2 border-b border-base w-full">
-            {[...quickstartNavItems, ...componentNavItems, ...formNavItems, ...connectorNavItems].map((item) => {
+            {[...quickstartNavItems, ...componentNavItems, ...formNavItems, ...connectorNavItems, ...helperNavItems].map((item) => {
               const isActive = activeId === item.id;
               return (
                 <a
@@ -4092,6 +4448,9 @@ export default async function DocsPage() {
 
           {/* Connectors Section */}
           <ConnectorsSection />
+
+          {/* Helpers Section */}
+          <HelpersSection data={data} />
         </div>
       </div>
     </div>

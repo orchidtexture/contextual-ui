@@ -2,6 +2,8 @@ import { siteApp } from '@/data/site.server';
 import { WebPage } from 'contextual-ui/server';
 import { CMSClient } from './CMSClient';
 
+export const generateMetadata = () => siteApp.getMetadata('cms');
+
 export default async function CMSPage() {
   const data = await siteApp.fetchData();
 

@@ -153,6 +153,9 @@ import { siteApp } from '@/data/site.server';
 import { WebPage } from 'contextual-ui/server';
 import { HomeClient } from './HomeClient';
 
+// Zero duplication: pulls title, description, and canonical from siteApp SSOT
+export const generateMetadata = () => siteApp.getMetadata('home');
+
 export default async function HomePage() {
   const data = await siteApp.fetchData();
   return (

@@ -124,6 +124,9 @@ import { siteApp } from '@/data/site.server';
 import { WebPage } from 'contextual-ui/server';
 import { DocsClient } from './DocsClient';
 
+// Zero duplication! Pulls title, description, and canonical from siteApp SSOT
+export const generateMetadata = () => siteApp.getMetadata('docs');
+
 export default async function DocsPage() {
   const data = await siteApp.fetchData();
 
@@ -220,6 +223,60 @@ Contextual UI components distinguish between two fundamental types of structured
   1. Rendered as interactive navigation breadcrumbs on the specific page.
   2. Injected directly into that page's HTML `<head>` / DOM for search crawlers visiting that exact URL.
   3. *Not* forced into the global `/api/graph.json` knowledge graph, avoiding unnecessary coupling between ephemeral page paths and centralized data schemas.
+
+---
+
+## 🔍 Next.js Metadata Helper (`siteApp.getMetadata`)
+
+Because `siteApp` already knows the page title, description, canonical URL, base URL, and social branding from your connector, you can generate complete Next.js `Metadata` with **zero duplication**:
+
+```typescript
+// app/privacy/page.tsx or app/page.tsx
+import { siteApp } from '@/data/site.server';
+
+// Pulls title, description, and canonical from siteApp SSOT
+export const generateMetadata = () => siteApp.getMetadata('privacy');
+```
+
+This returns a typed Next.js-compatible `Metadata` object:
+
+```typescript
+{
+  metadataBase: new URL(baseUrl),
+  title: page.name,
+  description: page.description,
+  alternates: {
+    canonical: page.url,
+  },
+  openGraph: {
+    title: page.name,
+    description: page.description,
+    url: page.url,
+    siteName: website.name,
+    type: 'website',
+    images: ['...'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: page.name,
+    description: page.description,
+    site: '@twitterhandle',
+    images: ['...'],
+  }
+}
+```
+
+You can also pass overrides as an optional second argument:
+
+```typescript
+export const generateMetadata = () =>
+  siteApp.getMetadata('privacy', {
+    title: 'Custom Title Override',
+    openGraph: {
+      images: ['/custom-privacy-og.png'],
+    },
+  });
+```
 
 ---
 

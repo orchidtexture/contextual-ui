@@ -1,6 +1,14 @@
 import { createGraphRouteHandler, GraphRouteHandlerOptions } from './createGraphRouteHandler';
 import { InferData } from '../registry/defineSchema';
 import { buildGraph, JsonLdObject } from 'jsonld-graph-builder';
+import type {
+  Metadata,
+  GetMetadataOptions,
+  MetadataAlternates,
+  MetadataOpenGraph,
+  MetadataTwitter,
+  OGImage,
+} from './metadata.types';
 
 export interface ContextualAppOptions<
   TSchema extends { hydrate: (d: any) => any; parse: (d: any) => any; config?: any },
@@ -147,6 +155,192 @@ export function createContextualApp<
     },
     createGraphRouteHandler(handlerOptions?: GetGraphOptions<TSchema>) {
       return this.createGraphHandler(handlerOptions);
+    },
+    async getMetadata(
+      pageIdOrOptions?: string | GetMetadataOptions<TSchema>,
+      overrides?: Partial<Metadata>
+    ): Promise<Metadata> {
+      let targetPageId: string | undefined;
+      let targetPageUrl: string | undefined;
+      let customBaseUrl: string | undefined;
+      let dataOverrides: Partial<InferData<TSchema>> | undefined;
+      let metadataOverrides: Partial<Metadata> | undefined;
+
+      if (typeof pageIdOrOptions === 'string') {
+        targetPageId = pageIdOrOptions;
+        metadataOverrides = overrides;
+      } else if (pageIdOrOptions && typeof pageIdOrOptions === 'object') {
+        targetPageId = pageIdOrOptions.pageId;
+        targetPageUrl = pageIdOrOptions.pageUrl;
+        customBaseUrl = pageIdOrOptions.baseUrl;
+        dataOverrides = pageIdOrOptions.dataOverrides;
+        metadataOverrides = pageIdOrOptions.metadataOverrides || overrides;
+      } else {
+        metadataOverrides = overrides;
+      }
+
+      const raw = await options.connector.fetchData();
+      const effectiveBaseUrl = customBaseUrl || options.baseUrl || raw?.website?.url;
+
+      let metadataBase: URL | undefined = undefined;
+      if (effectiveBaseUrl) {
+        try {
+          metadataBase = new URL(effectiveBaseUrl);
+        } catch {
+          // Ignore invalid absolute URLs
+        }
+      }
+
+      const webpageKey = raw && ('webpage' in raw) ? 'webpage' : (raw && ('webpages' in raw) ? 'webpages' : undefined);
+      let page: any = undefined;
+
+      if (webpageKey && raw[webpageKey]) {
+        const webpageData = raw[webpageKey];
+        if (Array.isArray(webpageData)) {
+          if (targetPageId || targetPageUrl) {
+            page = webpageData.find(
+              (p) =>
+                (targetPageId && (p.id === targetPageId || p.url === targetPageId || p.url === `/${targetPageId}` || p.id === targetPageId.replace(/^\//, ''))) ||
+                (targetPageUrl && (p.url === targetPageUrl || p.url === `/${targetPageUrl}` || p.id === targetPageUrl.replace(/^\//, '')))
+            );
+          }
+          if (!page && !targetPageId && !targetPageUrl) {
+            page = webpageData.find((p) => p.id === 'home' || p.url === '/') || webpageData[0];
+          }
+        } else if (typeof webpageData === 'object') {
+          page = webpageData;
+        }
+      }
+
+      // If page was not found in data but targetPageId was provided, provide a fallback structure
+      if (!page && targetPageId) {
+        page = {
+          id: targetPageId,
+          name: undefined,
+          url: targetPageId.startsWith('/') ? targetPageId : `/${targetPageId}`,
+          description: undefined,
+        };
+      }
+
+      // Apply dataOverrides if provided
+      if (dataOverrides && webpageKey && dataOverrides[webpageKey as keyof InferData<TSchema>]) {
+        const overrideVal = dataOverrides[webpageKey as keyof InferData<TSchema>];
+        const pageOverride = Array.isArray(overrideVal) ? overrideVal[0] : overrideVal;
+        page = { ...(page || {}), ...(pageOverride || {}) };
+      }
+
+      const title = metadataOverrides?.title !== undefined
+        ? metadataOverrides.title
+        : (page?.name || page?.title || raw?.website?.name || undefined);
+      const description = metadataOverrides?.description !== undefined
+        ? metadataOverrides.description
+        : (page?.description || raw?.website?.description || undefined);
+
+      let alternates: MetadataAlternates | undefined = undefined;
+      const canonicalUrl = metadataOverrides?.alternates?.canonical !== undefined
+        ? metadataOverrides.alternates.canonical
+        : (page?.url || (targetPageId === 'home' || page?.id === 'home' ? '/' : undefined));
+      if (canonicalUrl) {
+        alternates = {
+          canonical: canonicalUrl,
+        };
+      }
+      if (page?.languages) {
+        alternates = { ...(alternates || {}), languages: page.languages };
+      }
+
+      let images: OGImage[] | undefined = undefined;
+      if (page?.images && Array.isArray(page.images) && page.images.length > 0) {
+        images = page.images;
+      } else if (page?.image) {
+        images = [page.image];
+      } else if (raw?.website?.image) {
+        images = [raw.website.image];
+      } else if (raw?.website?.images && Array.isArray(raw.website.images) && raw.website.images.length > 0) {
+        images = raw.website.images;
+      } else if (raw?.organization?.logo) {
+        images = [raw.organization.logo];
+      }
+
+      const locale = page?.inLanguage || raw?.website?.inLanguage || undefined;
+      const siteName = raw?.website?.name || raw?.organization?.name || undefined;
+
+      const openGraph: MetadataOpenGraph = {
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+        ...(page?.url ? { url: page.url } : {}),
+        ...(siteName ? { siteName } : {}),
+        ...(locale ? { locale } : {}),
+        type: (page?.type || 'website'),
+        ...(images && images.length > 0 ? { images } : {}),
+        ...(page?.openGraph || {}),
+      };
+
+      let twitterSite: string | undefined = undefined;
+      if (raw?.organization?.twitter) {
+        twitterSite = raw.organization.twitter.startsWith('@')
+          ? raw.organization.twitter
+          : `@${raw.organization.twitter}`;
+      } else if (Array.isArray(raw?.organization?.sameAs)) {
+        const twitterUrl = raw.organization.sameAs.find(
+          (url: string) => typeof url === 'string' && (url.includes('twitter.com/') || url.includes('x.com/'))
+        );
+        if (twitterUrl) {
+          const match = twitterUrl.match(/(?:twitter\.com|x\.com)\/([a-zA-Z0-9_]+)/);
+          if (match && match[1]) {
+            twitterSite = `@${match[1]}`;
+          }
+        }
+      }
+
+      const twitter: MetadataTwitter = {
+        card: 'summary_large_image',
+        ...(title ? { title } : {}),
+        ...(description ? { description } : {}),
+        ...(twitterSite ? { site: twitterSite } : {}),
+        ...(images && images.length > 0 ? { images } : {}),
+        ...(page?.twitter || {}),
+      };
+
+      const result: Metadata = {
+        ...(metadataBase ? { metadataBase } : {}),
+        ...(title !== undefined ? { title } : {}),
+        ...(description !== undefined ? { description } : {}),
+        ...(alternates ? { alternates } : {}),
+        openGraph,
+        twitter,
+      };
+
+      if (metadataOverrides) {
+        if (metadataOverrides.openGraph) {
+          result.openGraph = {
+            ...(result.openGraph || {}),
+            ...metadataOverrides.openGraph,
+          };
+        }
+        if (metadataOverrides.twitter) {
+          result.twitter = {
+            ...(result.twitter || {}),
+            ...metadataOverrides.twitter,
+          };
+        }
+        if (metadataOverrides.alternates) {
+          result.alternates = {
+            ...(result.alternates || {}),
+            ...metadataOverrides.alternates,
+          };
+        }
+        for (const [key, value] of Object.entries(metadataOverrides)) {
+          if (key === 'openGraph' || key === 'twitter' || key === 'alternates') {
+            continue;
+          }
+          if (value !== undefined) {
+            (result as any)[key] = value;
+          }
+        }
+      }
+
+      return result;
     },
   };
 }

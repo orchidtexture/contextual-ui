@@ -2,6 +2,8 @@ import { siteApp } from '@/data/site.server';
 import { WebPage } from 'contextual-ui/server';
 import { SchemaClient } from './SchemaClient';
 
+export const generateMetadata = () => siteApp.getMetadata('schema');
+
 export default async function SchemaPage() {
   const handler = siteApp.createGraphHandler({
     includeAll: true,
