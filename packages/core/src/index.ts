@@ -89,6 +89,8 @@ export type {
   JsonLdGraphResult,
 } from 'jsonld-graph-builder';
 
+export type * from './server/metadata.types';
+
 export type { Thing, WithContext, Graph } from 'schema-dts';
 
 
