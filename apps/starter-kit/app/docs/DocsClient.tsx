@@ -31,8 +31,20 @@ import {
   Globe,
   ShieldCheck,
   ArrowRight,
+  FileText,
 } from 'lucide-react';
-import { Breadcrumb, Navbar, Faq, Footer, createForm, AutoForm } from 'contextual-ui';
+import {
+  Breadcrumb,
+  Navbar,
+  Faq,
+  Footer,
+  createForm,
+  AutoForm,
+  buildSitemapItems,
+  generateSitemapXml,
+  buildRobotsData,
+  generateRobotsTxt,
+} from 'contextual-ui';
 import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
 
@@ -369,18 +381,20 @@ export const siteSchema = defineSchema({
 import { staticConnector } from 'contextual-ui-connector-static';
 import { createContextualApp, InferData } from 'contextual-ui/server';
 
+const baseUrl = process.env.SITE_URL || 'https://example.com';
+
 // 2. Configure a data connector (Static Config, Headless CMS, or Database)
 const connector = staticConnector({
   organization: {
     name: 'Acme Corp',
-    url: 'https://example.com',
+    url: baseUrl,
     logo: '/images/logo.svg',
     description: 'Creator of modern web tools.',
     sameAs: ['https://github.com/acme', 'https://twitter.com/acme'],
   },
   website: {
     name: 'Acme App',
-    url: 'https://example.com',
+    url: baseUrl,
     description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
   },
   webpage: [
@@ -413,19 +427,15 @@ const connector = staticConnector({
   ],
   footer: {
     brand: { name: 'Acme', href: '/' },
-    copyright: { holder: 'Acme Corp', year: 2025 },
-  },
-  announcement: {
-    enabled: true,
-    message: 'Welcome to our Next.js application!',
+    copyright: { holder: 'Acme Corp', year: 2026 },
   },
 });
 
-// 3. Initialize the compiled Contextual App instance with baseUrl for canonical @graph IDs
+// 3. Initialize the compiled Contextual App instance with baseUrl
 export const siteApp = createContextualApp({
   schema: siteSchema,
   connector,
-  baseUrl: 'https://example.com',
+  baseUrl,
 });
 
 export type SiteData = InferData<typeof siteSchema>;`;
@@ -433,6 +443,8 @@ export type SiteData = InferData<typeof siteSchema>;`;
   const layoutCode = `import type { Metadata } from 'next';
 import { siteApp } from '@/data/site.server';
 import { ContextualSite } from 'contextual-ui';
+import { CustomNavbar } from '@/components/Navbar';
+import { CustomFooter } from '@/components/Footer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -449,73 +461,112 @@ export default async function RootLayout({
   const data = await siteApp.fetchData();
 
   return (
-    <html lang="en">
-      <body>
-        {/* ContextualSite provides React context to all layout components */}
-        <ContextualSite data={data}>
-          {children}
+    <html lang="en" className="h-full">
+      <body className="min-h-full flex flex-col">
+        {/* ContextualSite distributes site data via React context to all client & server components */}
+        <ContextualSite data={data} className="min-h-full flex flex-col flex-1">
+          <CustomNavbar />
+          <div className="flex-1">{children}</div>
+          <CustomFooter />
         </ContextualSite>
       </body>
     </html>
   );
 }`;
 
+  const navbarCode = `'use client';
+
+import { Navbar } from 'contextual-ui';
+import type { NavbarData } from 'contextual-ui';
+
+interface CustomNavbarProps {
+  data?: NavbarData; // Optional! Automatically read from ContextualSite if omitted
+}
+
+export function CustomNavbar({ data }: CustomNavbarProps = {}) {
+  // Contextual UI components are headless: style with Tailwind, CSS modules, or Radix
+  return (
+    <Navbar.Root data={data} className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
+      <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
+        <Navbar.Brand className="font-bold font-mono text-base flex items-center gap-2.5 text-zinc-900 dark:text-zinc-50" />
+
+        <Navbar.Links
+          className="hidden md:flex gap-6 items-center"
+          linkClassName="text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 no-underline text-sm font-medium transition-colors"
+        />
+
+        <Navbar.Toggle className="md:hidden p-2 text-zinc-600 dark:text-zinc-400 focus:outline-none cursor-pointer rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" />
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <Navbar.Menu
+        className="md:hidden bg-white/95 dark:bg-black/95 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 flex flex-col gap-2 shadow-xl"
+        linkClassName="text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-zinc-50 text-base font-medium py-2 px-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
+      />
+    </Navbar.Root>
+  );
+}`;
+
   const pageCode = `import { siteApp } from '@/data/site.server';
 import { WebPage } from 'contextual-ui/server';
-import { Navbar, Faq, Breadcrumb, Footer } from 'contextual-ui';
+import { Faq } from 'contextual-ui';
 
+// Zero duplication! Automatically pulls title, description, and canonical URL from SSOT
 export const generateMetadata = () => siteApp.getMetadata('home');
 
 export default async function HomePage() {
   const data = await siteApp.fetchData();
 
   return (
+    // Scopes the Schema.org JSON-LD graph specifically to this route
     <WebPage app={siteApp} id="home">
-      <main className="min-h-screen flex flex-col justify-between">
-        {/* 1. Navbar: Automatically reads navigation & brand from ContextualSite context */}
-        <Navbar.Root className="flex justify-between items-center px-6 py-4 border-b border-zinc-800">
-          <Navbar.Brand className="font-bold text-lg flex items-center gap-2" />
-          <Navbar.Links
-            className="hidden md:flex gap-6 items-center"
-            linkClassName="hover:text-zinc-200 no-underline text-sm font-medium transition-colors"
-          />
-          <Navbar.Toggle className="md:hidden p-2 text-zinc-400" />
-          <Navbar.Menu
-            className="md:hidden flex flex-col gap-2 mt-4"
-            linkClassName="hover:text-zinc-200 text-base py-1 transition-colors"
-          />
-        </Navbar.Root>
+      <main className="max-w-4xl mx-auto px-6 py-12 space-y-10">
+        <header className="space-y-4">
+          <h1 className="text-4xl font-extrabold tracking-tight">Acme App</h1>
+          <p className="text-lg text-zinc-400">Headless UI with automated Schema.org SEO and Agentic AI graphs.</p>
+        </header>
 
-        <div className="max-w-4xl mx-auto px-6 py-12 flex-1 space-y-10 w-full">
-          {/* 2. Breadcrumbs: Injects Schema.org BreadcrumbList automatically */}
-          <Breadcrumb.Root
-            data={[
-              { id: '1', label: 'Home', url: '/' },
-              { id: '2', label: 'Docs', url: '/docs' },
-              { id: '3', label: 'Quickstart' },
-            ]}
-          >
-            <Breadcrumb.List className="flex items-center gap-2 text-sm text-zinc-400">
-              {/* Breadcrumb items & separators */}
-            </Breadcrumb.List>
-          </Breadcrumb.Root>
-
-          {/* 3. FAQ: Injects Schema.org FAQPage automatically */}
-          <section className="space-y-4">
-            <h2 className="text-xl font-bold">Frequently Asked Questions</h2>
-            <Faq.Root className="space-y-3">
-              {/* Accordion FAQ items automatically bound from schema data */}
-            </Faq.Root>
-          </section>
-        </div>
-
-        {/* 4. Footer: Injects Schema.org WPFooter automatically */}
-        <Footer.Root className="border-t border-zinc-800 px-6 py-8">
-          {/* Brand, columnar links, socials & copyright */}
-        </Footer.Root>
+        {/* Headless FAQ Accordion automatically bound to schema data */}
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold">Frequently Asked Questions</h2>
+          <Faq.Root className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
+            {data?.faq?.map((item) => (
+              <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-zinc-200 dark:border-zinc-800 last:border-b-0 pb-4 last:pb-0">
+                <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
+                  {item.question}
+                </Faq.Trigger>
+                <Faq.Content className="mt-2 text-zinc-400 text-sm leading-relaxed">
+                  {item.answer}
+                </Faq.Content>
+              </Faq.Item>
+            ))}
+          </Faq.Root>
+        </section>
       </main>
     </WebPage>
   );
+}`;
+
+  const sitemapRobotsCode = `// app/sitemap.ts
+import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Automatically derives canonical sitemap from connector routes
+  return siteApp.getSitemap({
+    exclude: ['/cms', '/cms/*'],
+  });
+}
+
+// app/robots.ts
+import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  // Configures search & AI crawler permissions and auto-attaches sitemap & host
+  return siteApp.getRobots({
+    disallow: ['/cms', '/cms/'],
+  });
 }`;
 
   const routeCode = `import { siteApp } from '@/data/site.server';
@@ -547,13 +598,27 @@ export const { GET } = siteApp.createGraphHandler({
               1
             </span>
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">Install Dependencies</h3>
+              <h3 className="text-base font-semibold text-zinc-100">Create Next.js App &amp; Install Dependencies</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Install <code className="code-short">contextual-ui</code>, the static data connector, and <code className="code-short">zod</code> into your Next.js project.
+                Initialize a blank Next.js App Router project (or use an existing project) and install <code className="code-short">contextual-ui</code>, the static connector, and <code className="code-short">zod</code>.
               </p>
             </div>
           </div>
-          <div className="pl-9">
+          <div className="pl-9 space-y-3">
+            <div className="rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 shadow-lg">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/60">
+                <div className="flex items-center gap-2">
+                  <Terminal className="w-3.5 h-3.5 text-accent" />
+                  <span className="text-xs font-mono text-zinc-300 font-medium">Create Next.js App (Optional)</span>
+                </div>
+              </div>
+              <div className="p-4 bg-zinc-900/90 font-mono text-xs text-zinc-200">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-accent select-none font-bold">$</span>
+                  <span>pnpm create next-app@latest my-app --yes &amp;&amp; cd my-app</span>
+                </div>
+              </div>
+            </div>
             <InstallCommandBox />
           </div>
         </div>
@@ -565,9 +630,9 @@ export const { GET } = siteApp.createGraphHandler({
               2
             </span>
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">Define your Site Schema</h3>
+              <h3 className="text-base font-semibold text-zinc-100">Define your Site Schema (SSOT)</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Create <code className="code-short">data/site.schema.ts</code>. Using <code className="code-short">defineSchema</code>, register pre-built Schema.org registries (<code className="code-short">website</code>, <code className="code-short">navbar</code>, <code className="code-short">footer</code>, <code className="code-short">faq</code>, <code className="code-short">organization</code>) or any custom Zod schemas.
+                Create <code className="code-short">data/site.schema.ts</code>. Using <code className="code-short">defineSchema</code>, register pre-built Schema.org registries (<code className="code-short">organization</code>, <code className="code-short">website</code>, <code className="code-short">webpage</code>, <code className="code-short">navbar</code>, <code className="code-short">footer</code>, <code className="code-short">faq</code>) or any custom Zod schemas.
               </p>
             </div>
           </div>
@@ -583,14 +648,23 @@ export const { GET } = siteApp.createGraphHandler({
               3
             </span>
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">Configure Server Connector & App Instance</h3>
+              <h3 className="text-base font-semibold text-zinc-100">Configure Server Connector &amp; App Instance</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
                 Create <code className="code-short">data/site.server.ts</code>. Bind your schema with <code className="code-short">createContextualApp</code> and a connector (static configuration, headless CMS, or database ORM).
               </p>
             </div>
           </div>
-          <div className="pl-9">
+          <div className="pl-9 space-y-3">
             <CodeSnippet filename="data/site.server.ts" code={serverCode} lang="typescript" />
+            <div className="p-3.5 bg-zinc-900/60 rounded-xl border border-zinc-800 flex items-start gap-3">
+              <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+              <div className="text-xs text-zinc-300 leading-relaxed space-y-1">
+                <strong className="text-zinc-100 font-semibold block">Schema Accuracy Guardrails</strong>
+                <span>
+                  Centralizing site metadata prevents data drift between your visual UI, metadata tags, and search engine graphs. In step 6, <code className="code-short">&lt;WebPage app=&#123;siteApp&#125; id=&quot;home&quot;&gt;</code> scopes the Schema.org JSON-LD graph strictly to the current route—ensuring search engines only receive structured data for entities actually rendered on that page.
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -603,7 +677,7 @@ export const { GET } = siteApp.createGraphHandler({
             <div>
               <h3 className="text-base font-semibold text-zinc-100">Wrap Root Layout with ContextualSite</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                In <code className="code-short">app/layout.tsx</code> (Server Component), fetch shared data and wrap children in <code className="code-short">&lt;ContextualSite&gt;</code> to distribute site context (Navbar, Footer, Brand) to all child components.
+                In <code className="code-short">app/layout.tsx</code> (Server Component), fetch shared data and wrap children in <code className="code-short">&lt;ContextualSite data=&#123;data&#125;&gt;</code>. This distributes validated site data (brand, links, copyright) to all layout components via React Context.
               </p>
             </div>
           </div>
@@ -619,14 +693,14 @@ export const { GET } = siteApp.createGraphHandler({
               5
             </span>
             <div>
-              <h3 className="text-base font-semibold text-zinc-100">Render WebPage &amp; Headless UI Components</h3>
+              <h3 className="text-base font-semibold text-zinc-100">Implement Headless Navbar &amp; Footer Client Components</h3>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Wrap your route in <code className="code-short">&lt;WebPage app=&#123;siteApp&#125; ...&gt;</code> (from <code className="code-short">contextual-ui/server</code>) to compile and inject the route-specific Schema.org JSON-LD graph. Render headless components like <code className="code-short">&lt;Navbar.Root&gt;</code>, <code className="code-short">&lt;Faq.Root&gt;</code>, and <code className="code-short">&lt;Footer.Root&gt;</code> without prop-drilling.
+                Contextual UI components (<code className="code-short">&lt;Navbar.Root&gt;</code>, <code className="code-short">&lt;Footer.Root&gt;</code>) are headless client components. Because they sit inside <code className="code-short">&lt;ContextualSite&gt;</code>, they automatically read brand and navigation data from context without needing explicit props!
               </p>
             </div>
           </div>
           <div className="pl-9">
-            <CodeSnippet filename="app/page.tsx" code={pageCode} lang="tsx" />
+            <CodeSnippet filename="components/Navbar.tsx" code={navbarCode} lang="tsx" />
           </div>
         </div>
 
@@ -637,6 +711,42 @@ export const { GET } = siteApp.createGraphHandler({
               6
             </span>
             <div>
+              <h3 className="text-base font-semibold text-zinc-100">Render WebPage &amp; Route-Specific Content</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                In <code className="code-short">app/page.tsx</code>, export <code className="code-short">generateMetadata</code> using <code className="code-short">siteApp.getMetadata(&apos;home&apos;)</code> (zero duplication), and wrap your page in <code className="code-short">&lt;WebPage app=&#123;siteApp&#125; id=&quot;home&quot;&gt;</code> to inject the route-specific Schema.org JSON-LD graph.
+              </p>
+            </div>
+          </div>
+          <div className="pl-9">
+            <CodeSnippet filename="app/page.tsx" code={pageCode} lang="tsx" />
+          </div>
+        </div>
+
+        {/* Step 7 */}
+        <div className="docs-step">
+          <div className="flex items-start gap-3">
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
+              7
+            </span>
+            <div>
+              <h3 className="text-base font-semibold text-zinc-100">Add Automated Sitemap &amp; Robots.txt</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
+                Generate <code className="code-short">sitemap.xml</code> and <code className="code-short">robots.txt</code> in 3 lines each. Contextual UI automatically indexes all routes defined in your connector and manages AI crawler permissions (GPTBot, ClaudeBot, PerplexityBot).
+              </p>
+            </div>
+          </div>
+          <div className="pl-9">
+            <CodeSnippet filename="app/sitemap.ts & app/robots.ts" code={sitemapRobotsCode} lang="typescript" />
+          </div>
+        </div>
+
+        {/* Step 8 */}
+        <div className="docs-step">
+          <div className="flex items-start gap-3">
+            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
+              8
+            </span>
+            <div>
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-semibold text-zinc-100">Expose AI Knowledge Graph API</h3>
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono text-accent bg-accent/10 border border-accent/20">
@@ -644,7 +754,7 @@ export const { GET } = siteApp.createGraphHandler({
                 </span>
               </div>
               <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Expose a machine-readable JSON-LD endpoint at <code className="code-short">app/api/graph.json/route.ts</code> in 4 lines. Use <code className="code-short">includeAll: true</code> to export all sections (including FAQ), or use <code className="code-short">excludeKeys</code> / <code className="code-short">includeKeys</code> to keep specific parts private.
+                Expose a machine-readable JSON-LD Knowledge Graph endpoint at <code className="code-short">app/api/graph.json/route.ts</code> in 4 lines. AI Agents (Claude, ChatGPT, Perplexity) use this endpoint to understand your entire site hierarchy.
               </p>
             </div>
           </div>
@@ -2505,6 +2615,738 @@ export const generateMetadata = () =>
   );
 }
 
+function SitemapSection({ data }: { data: SiteData }) {
+  const [activeTab, setActiveTab] = useState<'nextjs' | 'route' | 'output' | 'custom'>('nextjs');
+  const [excludeCms, setExcludeCms] = useState(true);
+  const [excludeStudio, setExcludeStudio] = useState(false);
+  const [defaultPriority, setDefaultPriority] = useState(0.8);
+
+  const rawPages = (data.webpage && Array.isArray(data.webpage)) ? data.webpage : [];
+  const baseUrl = (data.website?.url || 'https://contextual.site').replace(/\/+$/, '');
+
+  const excludePatterns: string[] = [
+    ...(excludeCms ? ['/cms', '/cms/*'] : []),
+    ...(excludeStudio ? ['/studio', '/studio/*'] : []),
+  ];
+
+  const computedItems = buildSitemapItems(rawPages, {
+    baseUrl,
+    exclude: excludePatterns,
+    defaultPriority,
+  });
+
+  const liveXml = generateSitemapXml(computedItems);
+
+  const nextjsUsageCode = `// app/sitemap.ts
+import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
+
+const baseUrl = (process.env.SITE_URL || 'https://contextual.site').replace(/\\/+$/, '');
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Derives all route items directly from your connector schema
+  return siteApp.getSitemap({
+    baseUrl,
+    exclude: [${excludePatterns.map((p) => `'${p}'`).join(', ')}],
+    defaultPriority: ${defaultPriority},
+  });
+}`;
+
+  const routeHandlerCode = `// app/sitemap.xml/route.ts (or Remix / Astro / TanStack loader)
+import { siteApp } from '@/data/site.server';
+
+// Returns a standard Web API Response with Content-Type: application/xml; charset=utf-8
+export const { GET } = siteApp.createSitemapHandler({
+  exclude: [${excludePatterns.map((p) => `'${p}'`).join(', ')}],
+  defaultPriority: ${defaultPriority},
+  cacheControl: 'public, max-age=3600, s-maxage=86400',
+});`;
+
+  const customRoutesCode = `// app/sitemap.ts with additional dynamic routes
+import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  return siteApp.getSitemap({
+    exclude: ['/cms', '/cms/*'],
+    // Seamlessly append dynamic database routes or blog posts
+    additionalRoutes: [
+      {
+        url: 'https://contextual.site/blog/agentic-ai-seo',
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.9,
+      },
+    ],
+  });
+}`;
+
+  const sitemapFields: SchemaField[] = [
+    {
+      name: 'options.baseUrl',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WebSite.url',
+      description: 'Base canonical domain (e.g. "https://example.com"). Defaults to siteApp.baseUrl or data.website.url.',
+    },
+    {
+      name: 'options.exclude',
+      type: 'string[]',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Paths or glob patterns to omit (e.g. ["/cms", "/cms/*", "/admin", "/studio*"]).',
+    },
+    {
+      name: 'options.additionalRoutes',
+      type: 'SitemapItem[]',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Additional routes or dynamic records outside the primary schema to append with deduplication.',
+    },
+    {
+      name: 'options.defaultPriority',
+      type: 'number',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Default priority (0.0 to 1.0). Root "/" defaults to 1.0, subpages default to 0.8.',
+    },
+    {
+      name: 'options.defaultChangeFrequency',
+      type: 'SitemapChangeFrequency',
+      required: false,
+      schemaOrgMapping: '—',
+      description: '"always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never". Root defaults to "daily", subpages to "weekly".',
+    },
+    {
+      name: 'returns (getSitemap)',
+      type: 'Promise<MetadataRoute.Sitemap>',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Array of items typed directly for Next.js App Router app/sitemap.ts export.',
+    },
+    {
+      name: 'returns (generateSitemapXml)',
+      type: 'Promise<string>',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'RFC-compliant XML string conforming to Sitemaps 0.9 specification with entity escaping.',
+    },
+    {
+      name: 'returns (createSitemapHandler)',
+      type: '{ GET: (req: Request) => Promise<Response> }',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Standard Web Response route handler for Next.js, Remix, Astro, or TanStack.',
+    },
+  ];
+
+  return (
+    <section id="sitemap" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-xl font-bold">Helpers: siteApp.getSitemap() &amp; XML Generation</h2>
+        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
+          Sitemap 0.9 Protocol
+        </span>
+      </div>
+      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+        Automated sitemap generator that derives route URLs directly from your connector schema (<code className="code-short">webpage: [...]</code>). Eliminates maintaining hardcoded XML files or duplicate route lists. Provides typed Next.js App Router metadata, web-standard route handlers, and static XML formatting.
+      </p>
+
+      {/* Highlights Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Sparkles className="w-4 h-4" />
+            <span>Schema Route Discovery</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Automatically indexes every route configured in your schema connector with canonical URL formatting against <code className="code-short">baseUrl</code>.
+          </p>
+        </div>
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Globe className="w-4 h-4" />
+            <span>Smart Priority &amp; Frequency</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Defaults root (<code className="code-short">/</code>) to priority 1.0 and daily crawl, while subpages default to 0.8 and weekly crawl.
+          </p>
+        </div>
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Exclusions &amp; Wildcards</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Easily omit private paths via glob patterns (e.g. <code className="code-short">exclude: [&apos;/cms&apos;, &apos;/cms/*&apos;]</code>) or custom filter functions.
+          </p>
+        </div>
+      </div>
+
+      {/* Interactive Controls & Live Preview Card */}
+      <div className="mb-6 p-4 rounded-xl border border-zinc-800 bg-zinc-950/60 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">
+              Interactive Filter Simulator
+            </span>
+            <p className="text-xs text-zinc-400">
+              Toggle exclusions and priorities to see the live output update dynamically:
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setExcludeCms(!excludeCms)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                excludeCms
+                  ? 'bg-rose-950/60 text-rose-300 border border-rose-800/60 font-semibold'
+                  : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+              }`}
+            >
+              <span>Exclude /cms</span>
+              <span className="text-[10px] font-bold">{excludeCms ? 'ON' : 'OFF'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setExcludeStudio(!excludeStudio)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-mono font-medium transition-colors cursor-pointer flex items-center gap-1.5 ${
+                excludeStudio
+                  ? 'bg-rose-950/60 text-rose-300 border border-rose-800/60 font-semibold'
+                  : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'
+              }`}
+            >
+              <span>Exclude /studio</span>
+              <span className="text-[10px] font-bold">{excludeStudio ? 'ON' : 'OFF'}</span>
+            </button>
+            <div className="flex items-center gap-1.5 pl-2 border-l border-zinc-800">
+              <span className="text-xs text-zinc-400 font-mono">Priority:</span>
+              <select
+                value={defaultPriority}
+                onChange={(e) => setDefaultPriority(parseFloat(e.target.value))}
+                className="bg-zinc-900 border border-zinc-800 rounded px-2 py-0.5 text-xs text-accent font-mono cursor-pointer"
+              >
+                <option value="0.5">0.5</option>
+                <option value="0.7">0.7</option>
+                <option value="0.8">0.8 (default)</option>
+                <option value="0.9">0.9</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Status Summary */}
+        <div className="p-3 bg-zinc-900/60 rounded-lg border border-zinc-800 flex items-center justify-between text-xs font-mono">
+          <div className="flex items-center gap-2 text-zinc-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+            <span>Indexed Routes: <strong className="text-zinc-200">{computedItems.length} pages</strong></span>
+          </div>
+          <span className="text-zinc-500 truncate max-w-xs">{baseUrl}/sitemap.xml</span>
+        </div>
+      </div>
+
+      {/* Tab Switcher & Code Box */}
+      <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
+        <div className="flex ml-auto border border-base rounded-md overflow-hidden">
+          <button
+            onClick={() => setActiveTab('nextjs')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'nextjs'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileCode className="w-3.5 h-3.5" />
+            <span>app/sitemap.ts</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('route')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'route'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Route Handler</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('output')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'output'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Live XML Output</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('custom')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'custom'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Code2 className="w-3.5 h-3.5" />
+            <span>Custom Routes</span>
+          </button>
+        </div>
+        <span className="text-sm text-zinc-400 font-medium">
+          {activeTab === 'nextjs' && 'Zero-boilerplate export for Next.js App Router app/sitemap.ts.'}
+          {activeTab === 'route' && 'Standard Web API Response route handler (Remix, Next.js Route Handlers, Astro).'}
+          {activeTab === 'output' && 'Live rendered XML output compliant with the Sitemaps 0.9 protocol.'}
+          {activeTab === 'custom' && 'Append external routes or dynamic database items with automatic deduplication.'}
+        </span>
+      </div>
+
+      <pre
+        tabIndex={0}
+        suppressHydrationWarning
+        className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner mb-8"
+      >
+        <code
+          className={activeTab === 'output' ? 'language-jsx' : 'language-typescript'}
+          dangerouslySetInnerHTML={{
+            __html: highlightCode(
+              activeTab === 'nextjs'
+                ? nextjsUsageCode
+                : activeTab === 'route'
+                ? routeHandlerCode
+                : activeTab === 'output'
+                ? liveXml
+                : customRoutesCode,
+              activeTab === 'output' ? 'jsx' : 'typescript'
+            ),
+          }}
+        />
+      </pre>
+
+      {/* Schema / API Table */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold font-mono text-zinc-200 uppercase tracking-wider">
+          API Parameters &amp; Return Types
+        </h3>
+        <div className="border border-base rounded-xl overflow-hidden shadow-inner">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-base bg-zinc-900/80 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-3.5 font-semibold">Parameter</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Type</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Requirement</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800 font-mono">
+                {sitemapFields.map((field) => (
+                  <tr key={field.name} className="hover:bg-zinc-900/40 transition-colors">
+                    <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
+                      {field.name}
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
+                        {field.type}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      {field.required ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
+                          Required
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
+                          Optional
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3.5 font-sans text-zinc-300 text-xs min-w-[200px] leading-relaxed">
+                      {field.description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function RobotsSection({ data }: { data: SiteData }) {
+  const [activeTab, setActiveTab] = useState<'nextjs' | 'ai' | 'route' | 'output'>('nextjs');
+  const [defaultAiPolicy, setDefaultAiPolicy] = useState<'allow' | 'disallow'>('disallow');
+  const [perplexityOverride, setPerplexityOverride] = useState<'allow' | 'disallow'>('allow');
+  const [disallowCms, setDisallowCms] = useState(true);
+
+  const baseUrl = (data.website?.url || 'https://contextual.site').replace(/\/+$/, '');
+
+  const computedRobotsData = buildRobotsData({
+    baseUrl,
+    disallow: disallowCms ? ['/cms', '/cms/'] : [],
+    ai: {
+      defaultAiPolicy,
+      bots: {
+        PerplexityBot: perplexityOverride,
+      },
+    },
+  });
+
+  const liveRobotsTxt = generateRobotsTxt(computedRobotsData);
+
+  const nextjsUsageCode = `// app/robots.ts
+import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
+
+const baseUrl = (process.env.SITE_URL || 'https://contextual.site').replace(/\\/+$/, '');
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  // Configures crawler rules and auto-binds sitemap & host
+  return siteApp.getRobots({
+    baseUrl,
+    disallow: [${disallowCms ? "'/cms', '/cms/'" : ''}],
+  });
+}`;
+
+  const aiUsageCode = `// app/robots.ts with Agentic AI Bot Controls
+import type { MetadataRoute } from 'next';
+import { siteApp } from '@/data/site.server';
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  return siteApp.getRobots({
+    disallow: ['/cms', '/cms/'],
+    ai: {
+      // Global policy for all recognized AI crawlers (GPTBot, ClaudeBot, etc.)
+      defaultAiPolicy: '${defaultAiPolicy}',
+      bots: {
+        // Granular per-crawler overrides
+        PerplexityBot: '${perplexityOverride}',
+      },
+    },
+  });
+}`;
+
+  const routeHandlerCode = `// app/robots.txt/route.ts (or Remix / Astro / TanStack loader)
+import { siteApp } from '@/data/site.server';
+
+// Returns a standard Web API Response with Content-Type: text/plain; charset=utf-8
+export const { GET } = siteApp.createRobotsHandler({
+  disallow: ['/cms', '/cms/'],
+  ai: {
+    defaultAiPolicy: 'disallow',
+    bots: {
+      PerplexityBot: 'allow',
+    },
+  },
+  cacheControl: 'public, max-age=3600, s-maxage=86400',
+});`;
+
+  const robotsFields: SchemaField[] = [
+    {
+      name: 'options.baseUrl',
+      type: 'string',
+      required: false,
+      schemaOrgMapping: 'WebSite.url',
+      description: 'Base canonical domain. Used to formulate "Sitemap: ${baseUrl}/sitemap.xml" and "Host: hostname".',
+    },
+    {
+      name: 'options.disallow',
+      type: 'string | string[]',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Paths forbidden for standard crawlers (e.g. ["/cms", "/cms/"]).',
+    },
+    {
+      name: 'options.allow',
+      type: 'string | string[]',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Paths explicitly permitted (defaults to "/").',
+    },
+    {
+      name: 'options.ai',
+      type: 'RobotsAiOptions',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Preset policies for AI training and search bots (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, CCBot, Bytespider).',
+    },
+    {
+      name: 'options.sitemap',
+      type: 'string | string[] | boolean',
+      required: false,
+      schemaOrgMapping: '—',
+      description: 'Sitemap URL directive. Defaults to true ("${baseUrl}/sitemap.xml"). Set false to suppress.',
+    },
+    {
+      name: 'returns (getRobots)',
+      type: 'Promise<MetadataRoute.Robots>',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Structured object typed directly for Next.js App Router app/robots.ts export.',
+    },
+    {
+      name: 'returns (generateRobotsTxt)',
+      type: 'Promise<string>',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'RFC 9309 compliant robots.txt plain-text representation.',
+    },
+    {
+      name: 'returns (createRobotsHandler)',
+      type: '{ GET: (req: Request) => Promise<Response> }',
+      required: true,
+      schemaOrgMapping: '—',
+      description: 'Standard Web Response route handler for Next.js, Remix, Astro, or TanStack.',
+    },
+  ];
+
+  return (
+    <section id="robots" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+      <div className="flex items-center gap-2 mb-3">
+        <h2 className="text-xl font-bold">Helpers: siteApp.getRobots() &amp; AI Agent Controls</h2>
+        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
+          RFC 9309 &amp; Agentic AI
+        </span>
+      </div>
+      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+        Configures search engine indexing policies, automatically links your canonical sitemap and host, and provides first-class controls for LLM search bots (<code className="code-short">PerplexityBot</code>) and AI training crawlers (<code className="code-short">GPTBot</code>, <code className="code-short">ClaudeBot</code>, <code className="code-short">Google-Extended</code>).
+      </p>
+
+      {/* Highlights Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Globe className="w-4 h-4" />
+            <span>Auto Sitemap &amp; Host</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Automatically extracts domain host and advertises <code className="code-short">Sitemap: https://.../sitemap.xml</code> based on your connector URL.
+          </p>
+        </div>
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <Bot className="w-4 h-4" />
+            <span>Agentic AI Presets</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            One-line toggle to allow or disallow all major AI bots, with granular per-bot override capabilities.
+          </p>
+        </div>
+        <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/40">
+          <div className="flex items-center gap-2 text-accent font-semibold text-xs mb-1">
+            <ShieldCheck className="w-4 h-4" />
+            <span>Multi-Framework</span>
+          </div>
+          <p className="text-xs text-zinc-400 leading-relaxed">
+            Drop into Next.js App Router <code className="code-short">app/robots.ts</code>, or export standard Web API handlers for Remix, Astro, and TanStack.
+          </p>
+        </div>
+      </div>
+
+      {/* Interactive AI Crawler Controls */}
+      <div className="mb-6 p-4 rounded-xl border border-zinc-800 bg-zinc-950/60 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-400">
+              Interactive AI Policy Simulator
+            </span>
+            <p className="text-xs text-zinc-400">
+              Configure AI crawler policies to see the generated rules in real time:
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+              <span className="text-xs font-mono text-zinc-400 px-1.5">All AI Bots:</span>
+              <button
+                type="button"
+                onClick={() => setDefaultAiPolicy('allow')}
+                className={`px-2 py-0.5 rounded text-xs font-mono font-medium transition-colors cursor-pointer ${
+                  defaultAiPolicy === 'allow'
+                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 font-semibold'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Allow
+              </button>
+              <button
+                type="button"
+                onClick={() => setDefaultAiPolicy('disallow')}
+                className={`px-2 py-0.5 rounded text-xs font-mono font-medium transition-colors cursor-pointer ${
+                  defaultAiPolicy === 'disallow'
+                    ? 'bg-rose-950/80 text-rose-300 border border-rose-800/80 font-semibold'
+                    : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                Disallow
+              </button>
+            </div>
+            <div className="flex items-center gap-1.5 bg-zinc-900 border border-zinc-800 rounded-lg p-1">
+              <span className="text-xs font-mono text-zinc-400 px-1.5">PerplexityBot:</span>
+              <button
+                type="button"
+                onClick={() => setPerplexityOverride(perplexityOverride === 'allow' ? 'disallow' : 'allow')}
+                className={`px-2 py-0.5 rounded text-xs font-mono font-medium transition-colors cursor-pointer ${
+                  perplexityOverride === 'allow'
+                    ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/80 font-semibold'
+                    : 'bg-rose-950/80 text-rose-300 border border-rose-800/80 font-semibold'
+                }`}
+              >
+                {perplexityOverride.toUpperCase()}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Live Status Summary */}
+        <div className="p-3 bg-zinc-900/60 rounded-lg border border-zinc-800 flex items-center justify-between text-xs font-mono">
+          <div className="flex items-center gap-2 text-zinc-400">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+            <span>Target Endpoint: <strong className="text-zinc-200">/robots.txt</strong></span>
+          </div>
+          <span className="text-zinc-500 truncate max-w-xs">Host: {computedRobotsData.host || 'contextual.site'}</span>
+        </div>
+      </div>
+
+      {/* Tab Switcher & Code Box */}
+      <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
+        <div className="flex ml-auto border border-base rounded-md overflow-hidden">
+          <button
+            onClick={() => setActiveTab('nextjs')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'nextjs'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileCode className="w-3.5 h-3.5" />
+            <span>app/robots.ts</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('ai')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'ai'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Bot className="w-3.5 h-3.5" />
+            <span>AI Bot Presets</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('route')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'route'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <Server className="w-3.5 h-3.5" />
+            <span>Route Handler</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('output')}
+            className={`py-1.5 px-3 text-xs font-semibold transition-colors cursor-pointer flex items-center gap-1.5 border-l border-base ${
+              activeTab === 'output'
+                ? 'bg-zinc-800 text-accent'
+                : ' hover:bg-zinc-900 text-zinc-400'
+            }`}
+            type="button"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Live robots.txt</span>
+          </button>
+        </div>
+        <span className="text-sm text-zinc-400 font-medium">
+          {activeTab === 'nextjs' && 'Zero-boilerplate export for Next.js App Router app/robots.ts.'}
+          {activeTab === 'ai' && 'Agentic AI crawler configuration for GPTBot, ClaudeBot, and PerplexityBot.'}
+          {activeTab === 'route' && 'Standard Web API Response route handler (Remix, Next.js Route Handlers, Astro).'}
+          {activeTab === 'output' && 'Live rendered RFC 9309 compliant robots.txt plain text.'}
+        </span>
+      </div>
+
+      <pre
+        tabIndex={0}
+        suppressHydrationWarning
+        className="!bg-zinc-900 !text-zinc-100 p-6 !rounded-xl text-xs font-mono overflow-x-auto border border-base shadow-inner mb-8"
+      >
+        <code
+          className="language-typescript"
+          dangerouslySetInnerHTML={{
+            __html: highlightCode(
+              activeTab === 'nextjs'
+                ? nextjsUsageCode
+                : activeTab === 'ai'
+                ? aiUsageCode
+                : activeTab === 'route'
+                ? routeHandlerCode
+                : liveRobotsTxt,
+              'typescript'
+            ),
+          }}
+        />
+      </pre>
+
+      {/* Schema / API Table */}
+      <div className="space-y-3">
+        <h3 className="text-sm font-semibold font-mono text-zinc-200 uppercase tracking-wider">
+          API Parameters &amp; Return Types
+        </h3>
+        <div className="border border-base rounded-xl overflow-hidden shadow-inner">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-base bg-zinc-900/80 text-zinc-400 font-mono text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-3.5 font-semibold">Parameter</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Type</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Requirement</th>
+                  <th className="py-2.5 px-3.5 font-semibold">Description</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800 font-mono">
+                {robotsFields.map((field) => (
+                  <tr key={field.name} className="hover:bg-zinc-900/40 transition-colors">
+                    <td className="py-2.5 px-3.5 font-semibold text-accent whitespace-nowrap text-xs">
+                      {field.name}
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      <span className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[11px] text-zinc-300">
+                        {field.type}
+                      </span>
+                    </td>
+                    <td className="py-2.5 px-3.5 whitespace-nowrap">
+                      {field.required ? (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/60 text-emerald-300 border border-emerald-800/60">
+                          Required
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800">
+                          Optional
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-2.5 px-3.5 font-sans text-zinc-300 text-xs min-w-[200px] leading-relaxed">
+                      {field.description}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ShowcaseSection({
   id,
   title,
@@ -2597,6 +3439,18 @@ function ShowcaseSection({
 
 export function DocsClient({ data }: { data: SiteData }) {
   const [activeId, setActiveId] = useState<string>('quickstart');
+
+  const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+      setActiveId(id);
+      if (typeof window !== 'undefined' && window.history?.replaceState) {
+        window.history.replaceState(null, '', `#${id}`);
+      }
+    }
+  };
 
   // Interactive Dynamic State: Navbar
   const initialNavbar = {
@@ -2708,20 +3562,11 @@ export function DocsClient({ data }: { data: SiteData }) {
 
   const helperNavItems = [
     { id: 'helpers', label: 'getMetadata()', desc: 'Next.js Metadata SSOT' },
+    { id: 'sitemap', label: 'getSitemap()', desc: 'Sitemap XML & Routes' },
+    { id: 'robots', label: 'getRobots()', desc: 'Robots.txt & AI Bots' },
   ];
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: '-120px 0px -50% 0px' }
-    );
-
     const sections = [
       'quickstart',
       'schemas',
@@ -2735,19 +3580,80 @@ export function DocsClient({ data }: { data: SiteData }) {
       'create-form',
       'connectors',
       'helpers',
+      'sitemap',
+      'robots',
     ];
-    sections.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+
+    let ticking = false;
+
+    const updateActiveSection = () => {
+      const scrollY = window.scrollY;
+      const viewportHeight = window.innerHeight;
+      const scrollHeight = document.documentElement.scrollHeight;
+
+      // 1. If reached bottom of the page, focus the last section
+      if (scrollY + viewportHeight >= scrollHeight - 80) {
+        setActiveId(sections[sections.length - 1]);
+        return;
+      }
+
+      // 2. Scan sections backwards; the first one whose top is at or above the threshold is active
+      const threshold = 150;
+      let currentId = sections[0];
+
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const id = sections[i];
+        const el = document.getElementById(id);
+        if (el) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= threshold) {
+            currentId = id;
+            break;
+          }
+        }
+      }
+
+      setActiveId(currentId);
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveSection();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    // Initial check (and handle url hash if present)
+    if (window.location.hash) {
+      const hashId = window.location.hash.replace('#', '');
+      if (sections.includes(hashId)) {
+        setActiveId(hashId);
+      } else {
+        updateActiveSection();
+      }
+    } else {
+      updateActiveSection();
+    }
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll, { passive: true });
 
     return () => {
-      sections.forEach((id) => {
-        const el = document.getElementById(id);
-        if (el) observer.unobserve(el);
-      });
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
     };
   }, []);
+
+  // Ensure active sidebar link remains visible inside the scrollable aside
+  useEffect(() => {
+    const activeLink = document.querySelector(`aside a[href="#${activeId}"]`);
+    if (activeLink) {
+      activeLink.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    }
+  }, [activeId]);
 
   // ---------------------------------------------------------------------------
   // ContextualSite Code & Schema
@@ -4061,11 +4967,7 @@ export default async function DocsPage() {
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                        setActiveId(item.id);
-                      }}
+                      onClick={(e) => handleNavClick(e, item.id)}
                       className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
                         isActive
                           ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
@@ -4092,11 +4994,7 @@ export default async function DocsPage() {
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                        setActiveId(item.id);
-                      }}
+                      onClick={(e) => handleNavClick(e, item.id)}
                       className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
                         isActive
                           ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
@@ -4123,11 +5021,7 @@ export default async function DocsPage() {
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                        setActiveId(item.id);
-                      }}
+                      onClick={(e) => handleNavClick(e, item.id)}
                       className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
                         isActive
                           ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
@@ -4154,11 +5048,7 @@ export default async function DocsPage() {
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                        setActiveId(item.id);
-                      }}
+                      onClick={(e) => handleNavClick(e, item.id)}
                       className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
                         isActive
                           ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
@@ -4185,11 +5075,7 @@ export default async function DocsPage() {
                     <a
                       key={item.id}
                       href={`#${item.id}`}
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                        setActiveId(item.id);
-                      }}
+                      onClick={(e) => handleNavClick(e, item.id)}
                       className={`flex flex-col px-3 py-2 rounded-xl text-sm transition-colors no-underline ${
                         isActive
                           ? 'text-accent border border-base shadow-sm font-medium bg-zinc-900/50'
@@ -4216,11 +5102,7 @@ export default async function DocsPage() {
                 <a
                   key={item.id}
                   href={`#${item.id}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document.getElementById(item.id)?.scrollIntoView({ behavior: 'smooth' });
-                    setActiveId(item.id);
-                  }}
+                  onClick={(e) => handleNavClick(e, item.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors no-underline ${
                     isActive
                       ? 'bg-zinc-900 text-accent border border-base'
@@ -4451,6 +5333,12 @@ export default async function DocsPage() {
 
           {/* Helpers Section */}
           <HelpersSection data={data} />
+
+          {/* Sitemap Section */}
+          <SitemapSection data={data} />
+
+          {/* Robots Section */}
+          <RobotsSection data={data} />
         </div>
       </div>
     </div>
