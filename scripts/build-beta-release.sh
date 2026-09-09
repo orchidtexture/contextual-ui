@@ -13,5 +13,5 @@ ls -la *.tgz
 echo ""
 echo "🚀 Next steps:"
 echo "1. Publish jsonld-graph-builder to npm: cd packages/jsonld-graph-builder && npm publish --access public"
-echo "2. Create a GitHub Release (e.g. v0.2.0-beta.2)"
+echo "2. Create a GitHub Release (e.g. v0.2.0-beta.3)"
 echo "3. Upload the created packages/core/contextual-ui-*.tgz tarball to the release assets."
