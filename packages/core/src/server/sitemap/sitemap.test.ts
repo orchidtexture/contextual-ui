@@ -6,6 +6,7 @@ import {
   buildSitemapItems,
   generateSitemapXml,
 } from './sitemap.utils';
+import { createSitemapRouteHandler } from './createSitemapRouteHandler';
 
 describe('sitemap.utils', () => {
   describe('normalizePath', () => {
@@ -150,6 +151,31 @@ describe('sitemap.utils', () => {
 
       expect(xml).toContain('xmlns:xhtml="http://www.w3.org/1999/xhtml"');
       expect(xml).toContain('<xhtml:link rel="alternate" hreflang="en" href="https://example.com/en" />');
+    });
+  });
+
+  describe('createSitemapRouteHandler', () => {
+    it('returns XML response from array of items', async () => {
+      const handler = createSitemapRouteHandler([
+        { url: 'https://example.com', priority: 1.0 },
+      ]);
+      const res = await handler.GET(new Request('http://localhost/sitemap.xml'));
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get('content-type')).toBe('application/xml; charset=utf-8');
+      const text = await res.text();
+      expect(text).toContain('<loc>https://example.com</loc>');
+    });
+
+    it('returns XML response from async function resolver', async () => {
+      const handler = createSitemapRouteHandler(async () => [
+        { url: 'https://example.com/async', priority: 0.8 },
+      ]);
+      const res = await handler.GET(new Request('http://localhost/sitemap.xml'));
+
+      expect(res.status).toBe(200);
+      const text = await res.text();
+      expect(text).toContain('<loc>https://example.com/async</loc>');
     });
   });
 });

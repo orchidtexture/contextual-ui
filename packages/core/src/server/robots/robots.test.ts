@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { buildRobotsData, generateRobotsTxt } from './robots.utils';
+import { createRobotsRouteHandler } from './createRobotsRouteHandler';
 
 describe('robots.utils', () => {
   describe('buildRobotsData', () => {
@@ -88,6 +89,34 @@ describe('robots.utils', () => {
 
       expect(txt).toContain('Sitemap: https://example.com/sitemap-1.xml');
       expect(txt).toContain('Sitemap: https://example.com/sitemap-2.xml');
+    });
+  });
+
+  describe('createRobotsRouteHandler', () => {
+    it('returns plain text response from static data', async () => {
+      const handler = createRobotsRouteHandler({
+        rules: [{ userAgent: '*', allow: '/' }],
+        sitemap: 'https://example.com/sitemap.xml',
+      });
+      const res = await handler.GET(new Request('http://localhost/robots.txt'));
+
+      expect(res.status).toBe(200);
+      expect(res.headers.get('content-type')).toBe('text/plain; charset=utf-8');
+      const text = await res.text();
+      expect(text).toContain('User-agent: *');
+      expect(text).toContain('Sitemap: https://example.com/sitemap.xml');
+    });
+
+    it('returns plain text response from async resolver', async () => {
+      const handler = createRobotsRouteHandler(async () => ({
+        rules: [{ userAgent: 'ClaudeBot', disallow: '/' }],
+      }));
+      const res = await handler.GET(new Request('http://localhost/robots.txt'));
+
+      expect(res.status).toBe(200);
+      const text = await res.text();
+      expect(text).toContain('User-agent: ClaudeBot');
+      expect(text).toContain('Disallow: /');
     });
   });
 });

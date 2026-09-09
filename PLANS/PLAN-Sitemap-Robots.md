@@ -173,9 +173,9 @@ export interface ContextualAppInstance<TSchema, TConnector> {
 - [x] Create `packages/core/src/server/robots/index.ts`
 
 ### Phase 2: Server Route Handlers
-- [ ] Create `packages/core/src/server/sitemap/createSitemapRouteHandler.ts`
+- [x] Create `packages/core/src/server/sitemap/createSitemapRouteHandler.ts`
   - Returns `{ GET: (req: Request) => Response }` with `Content-Type: application/xml`.
-- [ ] Create `packages/core/src/server/robots/createRobotsRouteHandler.ts`
+- [x] Create `packages/core/src/server/robots/createRobotsRouteHandler.ts`
   - Returns `{ GET: (req: Request) => Response }` with `Content-Type: text/plain`.
 
 ### Phase 3: Wire into `createContextualApp`
