@@ -131,6 +131,17 @@ export const CalloutBlockSchema = z.object({
 export type CalloutBlock = z.infer<typeof CalloutBlockSchema>;
 
 /**
+ * Code snippet content block for documentation and setup instructions.
+ */
+export const CodeBlockSchema = z.object({
+  type: z.literal('code'),
+  code: cx(z.string(), { label: 'Code', widget: 'textarea' }),
+  language: z.string().optional(),
+  filename: z.string().optional(),
+});
+export type CodeBlock = z.infer<typeof CodeBlockSchema>;
+
+/**
  * Discriminated union of all supported serializable content block types.
  */
 export const ContentBlockSchema = z.discriminatedUnion('type', [
@@ -139,6 +150,7 @@ export const ContentBlockSchema = z.discriminatedUnion('type', [
   ListBlockSchema,
   LinkBlockSchema,
   CalloutBlockSchema,
+  CodeBlockSchema,
 ]);
 export type ContentBlock = z.infer<typeof ContentBlockSchema>;
 
@@ -179,3 +191,43 @@ export const SectionDataSchema = z.union([
   z.array(SectionRecordSchema),
 ]);
 export type SectionData = z.infer<typeof SectionDataSchema>;
+
+/**
+ * Schema for an individual item inside a collection.
+ */
+export const CollectionItemSchema = z.object({
+  id: cx(z.string(), { label: 'Item ID', widget: 'text' }),
+  title: cx(z.string().optional(), { label: 'Item Title', widget: 'text' }),
+  name: cx(z.string().optional(), { label: 'Item Name', widget: 'text' }),
+  description: cx(z.string().optional(), { label: 'Description', widget: 'textarea' }),
+  content: ContentInputSchema.optional(),
+  url: z.string().optional(),
+  order: z.number().optional(),
+  item: z.union([z.string(), z.record(z.string(), z.any())]).optional(),
+  type: z.string().optional().default('ListItem'),
+});
+export type CollectionItem = z.infer<typeof CollectionItemSchema>;
+
+/**
+ * Schema for a structured collection of items (features, steps, catalog items).
+ */
+export const CollectionRecordSchema = z.object({
+  id: cx(z.string(), { label: 'Collection ID', widget: 'text' }),
+  pageId: cx(z.string().optional(), { label: 'Page ID', widget: 'text' }),
+  title: cx(z.string().optional(), { label: 'Collection Title', widget: 'text' }),
+  name: cx(z.string().optional(), { label: 'Collection Name', widget: 'text' }),
+  description: cx(z.string().optional(), { label: 'Description', widget: 'textarea' }),
+  ordered: z.boolean().optional().default(false),
+  items: z.array(CollectionItemSchema).default([]),
+  type: z.string().optional().default('ItemList'),
+});
+export type CollectionRecord = z.infer<typeof CollectionRecordSchema>;
+
+/**
+ * Collection registry schema: single collection or an array of collections.
+ */
+export const CollectionDataSchema = z.union([
+  CollectionRecordSchema,
+  z.array(CollectionRecordSchema),
+]);
+export type CollectionData = z.infer<typeof CollectionDataSchema>;

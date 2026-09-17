@@ -66,6 +66,25 @@ export {
   formRegistry,
   formsRegistry,
 } from '../components/form/form.utils';
+export type { ContentProps, ContentComponentOverrides } from '../components/content';
+export type {
+  SectionRootProps,
+  SectionTitleProps,
+  SectionSubtitleProps,
+  SectionDescriptionProps,
+  SectionContentProps,
+  SectionContextValue,
+} from '../components/section';
+export type {
+  CollectionRootProps,
+  CollectionItemProps,
+  CollectionTitleProps,
+  CollectionDescriptionProps,
+  CollectionContentProps,
+  CollectionContextValue,
+  CollectionItemContextValue,
+} from '../components/collection';
+
 export {
   ContentBlockRoleSchema,
   ParagraphBlockSchema,
@@ -74,10 +93,14 @@ export {
   ListBlockSchema,
   LinkBlockSchema,
   CalloutBlockSchema,
+  CodeBlockSchema,
   ContentBlockSchema,
   ContentInputSchema,
   SectionRecordSchema,
   SectionDataSchema,
+  CollectionItemSchema,
+  CollectionRecordSchema,
+  CollectionDataSchema,
 } from '../content/content.schema';
 export type {
   ContentBlockRole,
@@ -87,11 +110,17 @@ export type {
   ListBlock,
   LinkBlock,
   CalloutBlock,
+  CodeBlock,
   ContentBlock,
   ContentInput,
   SectionRecord,
   SectionData,
   NormalizedSection,
+  CollectionItem,
+  CollectionRecord,
+  CollectionData,
+  NormalizedCollection,
+  NormalizedCollectionItem,
 } from '../content';
 export {
   normalizeContentBlocks,
@@ -100,6 +129,13 @@ export {
   normalizeSection,
   generateSectionJsonLd,
   exportAgentData as exportSectionAgentData,
+  normalizeCollectionItem,
+  normalizeCollections,
+  normalizeCollection,
+  generateCollectionJsonLd,
+  exportCollectionAgentData,
+  collectionRegistry,
+  collectionsRegistry,
   serializeJsonLd,
   sectionRegistry,
   sectionsRegistry,

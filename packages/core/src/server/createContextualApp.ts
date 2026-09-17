@@ -178,6 +178,16 @@ export function createContextualApp<
           merged[faqKey] = [];
         }
       }
+
+      // 4. Filter collections
+      const colKey = ('collections' in merged) ? 'collections' : (('collection' in merged) ? 'collection' : undefined);
+      if (colKey && Array.isArray(merged[colKey])) {
+        merged[colKey] = (merged[colKey] as any[]).filter((c: any) => {
+          if (declaredParts && declaredParts.length > 0) return matchesPart(c.id, c.pageId);
+          if (c.pageId) return c.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
+      }
     }
 
     return options.schema.hydrate(merged);
@@ -197,6 +207,7 @@ export function createContextualApp<
       const webpageKey = ('webpage' in rawData) ? 'webpage' : (('webpages' in rawData) ? 'webpages' : undefined);
       const isSinglePage = !webpageKey || !rawData[webpageKey] || (Array.isArray(rawData[webpageKey]) && rawData[webpageKey].length <= 1);
       const sectionKey = ('sections' in rawData) ? 'sections' : (('section' in rawData) ? 'section' : undefined);
+      const colKey = ('collections' in rawData) ? 'collections' : (('collection' in rawData) ? 'collection' : undefined);
       const formKey = ('forms' in rawData) ? 'forms' : (('form' in rawData) ? 'form' : undefined);
       const faqKey = ('faq' in rawData) ? 'faq' : undefined;
 
@@ -219,6 +230,19 @@ export function createContextualApp<
                 ? s.id
                 : (s.pageId ? `section:${s.pageId}:${s.id}` : `section:${s.id}`);
               parts.push(sId);
+            }
+          }
+
+          if (colKey && Array.isArray(rawData[colKey])) {
+            const matchedCols = rawData[colKey].filter((c: any) => {
+              if (c.pageId) return c.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const c of matchedCols) {
+              const cId = c.id?.startsWith('#') || c.id?.startsWith('http')
+                ? c.id
+                : (c.pageId ? `itemlist:${c.pageId}:${c.id}` : `itemlist:${c.id}`);
+              parts.push(cId);
             }
           }
 
@@ -278,7 +302,15 @@ export function createContextualApp<
 
         // When a specific page is targeted, include page-scoped non-global entities that were hydrated for this page
         if (targetPageId) {
-          if (key === 'sections' || key === 'section' || key === 'forms' || key === 'form' || key === 'faq') {
+          if (
+            key === 'sections' ||
+            key === 'section' ||
+            key === 'collections' ||
+            key === 'collection' ||
+            key === 'forms' ||
+            key === 'form' ||
+            key === 'faq'
+          ) {
             filteredGenerated[key] = val;
             continue;
           }

@@ -172,6 +172,91 @@ const connector = staticConnector({
       text: 'Maintained by Tasuku Studio. Open-source under MIT license.',
     },
   },
+  sections: [
+    {
+      id: 'headless-radix',
+      pageId: 'home',
+      title: 'Headless & Radix Powered',
+      description: 'Unstyled, accessible UI primitives built with Radix UI and the asChild pattern. Full styling freedom with Tailwind CSS or any design system, with automated Schema.org markup.',
+      anchor: 'headless-radix',
+      mainEntity: '#itemlist:home:headless-features',
+      content: [
+        {
+          type: 'paragraph',
+          role: 'qualifier',
+          text: 'Why it matters: You get top-tier SEO and agentic structured data without compromising your team\'s UI design system, component libraries, or frontend styling architecture.',
+        },
+      ],
+    },
+  ],
+  collections: [
+    {
+      id: 'headless-features',
+      pageId: 'home',
+      title: 'Headless Primitives',
+      ordered: false,
+      items: [
+        {
+          id: 'radix-aschild',
+          title: 'Radix asChild Pattern',
+          description: 'Slot into your custom button, link, Next.js <Link>, or motion component without extra wrapper divs.',
+        },
+        {
+          id: 'design-system-agnostic',
+          title: 'Design System Agnostic',
+          description: '100% compatible with Tailwind CSS, Tailwind v4, CSS Modules, Shadcn UI, or custom enterprise design tokens.',
+        },
+        {
+          id: 'wai-aria-accessibility',
+          title: 'WAI-ARIA Accessibility',
+          description: 'Full keyboard navigation (Tab, Enter, Space, Arrows), screen reader announcements, and robust ARIA states out of the box.',
+        },
+        {
+          id: 'automated-microdata',
+          title: 'Automated Microdata',
+          description: 'Components quietly emit valid Schema.org microdata and JSON-LD behind the scenes without polluting your JSX styling.',
+        },
+      ],
+    },
+    {
+      id: 'quickstart-steps',
+      pageId: 'docs',
+      title: 'Quickstart Steps',
+      ordered: true,
+      items: [
+        {
+          id: 'step-1',
+          title: 'Create Next.js App & Install Dependencies',
+          description: 'Initialize a blank Next.js App Router project (or use an existing project) and install contextual-ui, the static connector, and zod.',
+          order: 1,
+        },
+        {
+          id: 'step-2',
+          title: 'Define Site Schema & Type Contracts',
+          description: 'Declare your data architecture in site.schema.ts using defineSchema and modular schema registries.',
+          order: 2,
+        },
+        {
+          id: 'step-3',
+          title: 'Instantiate Contextual App & Static Connector',
+          description: 'Bind your schema to a data source using createContextualApp in site.server.ts to produce type-safe data hydration.',
+          order: 3,
+        },
+        {
+          id: 'step-4',
+          title: 'Configure SEO Routes (Sitemap & Robots)',
+          description: 'Export automated sitemap.xml and robots.txt handlers derived directly from your connector webpage list.',
+          order: 4,
+        },
+        {
+          id: 'step-5',
+          title: 'Mount ContextualSite in Root Layout',
+          description: 'Wrap your app in <ContextualSite> to provide client context, headless layout components, and global JSON-LD knowledge graph injection.',
+          order: 5,
+        },
+      ],
+    },
+  ],
   announcement: {
     enabled: true,
     message: '🚀 Welcome to the Contextual UI implementation reference website!',

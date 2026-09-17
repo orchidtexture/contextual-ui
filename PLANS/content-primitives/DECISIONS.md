@@ -41,12 +41,12 @@ These are recommendations from the exploration, subject to validation.
 
 ### Phase 2 — Public primitive surface
 
-- [ ] **Names and count:** does Content need a standalone public family or only a model/renderer used by Section?
-- [ ] **Data access:** explicit props, render callbacks, context-based compound components, or a combination that preserves a server-only path.
-- [ ] **Body format:** smallest block/inline model that covers the pilot without becoming a full rich-text platform.
-- [ ] **Collections:** inline descriptive items versus entity references, including deterministic registry ownership.
-- [ ] **Presentation overrides:** how to allow layout customization without encouraging competing text sources.
-- [ ] **Standalone behavior:** whether standalone primitives emit JSON-LD, and how that is explicitly controlled.
+- [x] **Names and count:** Three core capabilities provided without catalog bloat: `Section` (`Section.Root`, `.Title`, `.Subtitle`, `.Description`, `.Content`), `Content` (standalone functional renderer and `Section.Content`), and `Collection` (`Collection.Root`, `.Item`, `.Title`, `.Description`, `.Content`).
+- [x] **Data access:** Supported via dual patterns: context-based compound components for declarative composition without prop drilling, explicit prop passing for server components and granular overrides, and render callbacks (`children={(items) => ...}`) on `Collection.Root` and `Collection.Item`.
+- [x] **Body format:** Discriminated serializable union: `paragraph` (with roles: `normal`, `lead`, `note`, `qualifier`, `disclaimer`), `heading` (`level: 2-6`), `list` (`ordered` / `unordered`), `link` (validated against safe protocols), `callout` (`info`, `warning`, `note`, `caveat`), and `code` (`code`, `language`, `filename`).
+- [x] **Collections:** Structured `CollectionRecord` and `CollectionItem` schema. Maps to Schema.org `ItemList` with `ListItem` entries. Preserves explicit item positions and `itemListOrder` for ordered collections (such as docs steps). Supports domain entity references via `item`.
+- [x] **Presentation overrides:** Polymorphic `asChild` support with Radix Slot across all subcomponents, custom component overrides via `components?: ContentComponentOverrides` prop on `Content`, and standard CSS / Tailwind styling.
+- [x] **Standalone behavior:** Script ownership rule enforced: primitives inside `ContextualSite` / `WebPage` do not emit duplicate JSON-LD scripts (`injectJsonLd ?? !isInsideSite`), while standalone usage outside site context automatically emits valid Schema.org script tags.
 
 ### Phase 3 — Entity semantics
 
@@ -73,6 +73,15 @@ These are recommendations from the exploration, subject to validation.
 - Do not copy external company/legal content into the official site to exercise a domain adapter.
 
 ## Decision log
+
+```text
+Decision: Composable Primitives (Section, Content, Collection)
+Status: accepted and implemented
+Phase: Phase 2
+Reason: Provide small, headless primitives that cover page regions, serializable body models, and ordered/unordered item collections without creating specialized catalog components.
+Capabilities shipped: Section, Content, Collection with Radix Slot asChild polymorphism, accessible aria-labelledby heading association, and Schema.org WebPageElement + ItemList/ListItem generation.
+Validation evidence: 134 passing unit tests in packages/core (including Content, Section, and Collection test suites) and Next.js 16 static prerendering across all 14 routes in apps/starter-kit.
+```
 
 ```text
 Decision: Generic Page-Scoped Knowledge Graph & Starter-Kit Scoping Hardening

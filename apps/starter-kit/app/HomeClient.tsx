@@ -14,7 +14,7 @@ import {
   Bot,
   ArrowRight,
 } from 'lucide-react';
-import { Faq, useContextualSiteContext } from 'contextual-ui';
+import { Faq, Section, Collection, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 import { HeroFlowDiagram } from '@/components/hero-flow';
 
@@ -27,6 +27,11 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   const pageContext = useContextualSiteContext<SiteData>();
   const data = explicitData ?? pageContext?.data;
   const faqItems = data?.faq ?? [];
+
+  const sectionList = (data as any)?.sections ?? [];
+  const headlessSection = sectionList.find((s: any) => s.id === 'headless-radix');
+  const collectionList = (data as any)?.collections ?? [];
+  const headlessFeatures = collectionList.find((c: any) => c.id === 'headless-features');
 
   return (
     <div className="pt-16 pb-32">
@@ -385,15 +390,15 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
             </div>
 
             {/* Subsection 4: Headless & Radix Powered */}
-            <div id="headless-radix" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
+            <Section.Root
+              data={headlessSection}
+              id="headless-radix"
+              className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80"
+            >
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                    Headless & Radix Powered
-                  </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">
-                    Unstyled, accessible UI primitives built with Radix UI and the <code className="code-short">asChild</code> pattern. Full styling freedom with Tailwind CSS or any design system, with automated Schema.org markup.
-                  </p>
+                  <Section.Title as="h3" className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100" />
+                  <Section.Description className="text-sm text-zinc-400 leading-relaxed" />
                 </div>
 
                 <a
@@ -405,52 +410,30 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                 </a>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Code2 className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Radix asChild Pattern</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Slot into your custom button, link, Next.js <code className="text-accent font-mono text-[11px]">&lt;Link&gt;</code>, or motion component without extra wrapper divs.
-                  </p>
-                </div>
+              <Collection.Root data={headlessFeatures} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {(items) => {
+                  const icons = [Code2, Sparkles, ShieldCheck, FileCode];
+                  return items.map((item, idx) => {
+                    const Icon = icons[idx] || Code2;
+                    return (
+                      <Collection.Item
+                        key={item.id}
+                        item={item}
+                        className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <Collection.Title as="h4" className="text-sm font-semibold text-zinc-100" />
+                        <Collection.Description className="text-xs text-zinc-400 leading-relaxed" />
+                      </Collection.Item>
+                    );
+                  });
+                }}
+              </Collection.Root>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Design System Agnostic</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    100% compatible with Tailwind CSS, Tailwind v4, CSS Modules, Shadcn UI, or custom enterprise design tokens.
-                  </p>
-                </div>
-
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">WAI-ARIA Accessibility</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Full keyboard navigation (Tab, Enter, Space, Arrows), screen reader announcements, and robust ARIA states out of the box.
-                  </p>
-                </div>
-
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <FileCode className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Automated Microdata</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Components quietly emit valid Schema.org microdata and JSON-LD behind the scenes without polluting your JSX styling.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-                <strong className="text-zinc-200 font-medium">Why it matters:</strong> You get top-tier SEO and agentic structured data without compromising your team&apos;s UI design system, component libraries, or frontend styling architecture.
-              </p>
-            </div>
+              <Section.Content className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1" />
+            </Section.Root>
 
           </div>
         </section>

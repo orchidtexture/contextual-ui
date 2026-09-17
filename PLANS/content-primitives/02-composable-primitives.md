@@ -1,6 +1,6 @@
 # Phase 2 — Composable Primitives
 
-**Status:** Proposed · **Dependency:** [Phase 1](01-data-and-graph-foundations.md) · **Next:** [Phase 3](03-semantic-entity-adapters.md)
+**Status:** Complete · **Dependency:** [Phase 1](01-data-and-graph-foundations.md) · **Next:** [Phase 3](03-semantic-entity-adapters.md)
 
 ## Goal
 
@@ -96,21 +96,21 @@ The graph is generated from these registered records independently of this JSX. 
 
 ## Implementation tasks
 
-- [ ] Prototype Section and Content with the `#headless-radix` introduction and conclusion in [`HomeClient.tsx`](../../apps/starter-kit/app/HomeClient.tsx).
-- [ ] Add Collection for its four feature cards using shared site records and existing styling.
-- [ ] Reuse Collection for ordered steps in the `#quickstart` section of [`DocsClient.tsx`](../../apps/starter-kit/app/docs/DocsClient.tsx).
-- [ ] Keep documentation examples, generated snippets, and mutable playground data distinct from the site's canonical graph.
-- [ ] Use public workspace exports and inspect registered content through the existing `/schema` and `/api/graph.json` surfaces.
-- [ ] Keep the ordinary server-rendered path usable without a client context provider.
-- [ ] Decide whether compound components use explicit data, context, or a server-compatible alternative before stabilizing the API.
-- [ ] Preserve headless styling; support polymorphism/`asChild` only with tested valid DOM behavior.
-- [ ] Define how optional presentation overrides interact with canonical text and drift diagnostics.
-- [ ] Keep graph generation utilities usable without React.
+- [x] Prototype Section and Content with the `#headless-radix` introduction and conclusion in [`HomeClient.tsx`](../../apps/starter-kit/app/HomeClient.tsx).
+- [x] Add Collection for its four feature cards using shared site records and existing styling.
+- [x] Reuse Collection for ordered steps in the `#quickstart` section of [`DocsClient.tsx`](../../apps/starter-kit/app/docs/DocsClient.tsx).
+- [x] Keep documentation examples, generated snippets, and mutable playground data distinct from the site's canonical graph.
+- [x] Use public workspace exports and inspect registered content through the existing `/schema` and `/api/graph.json` surfaces.
+- [x] Keep the ordinary server-rendered path usable without a client context provider.
+- [x] Decide whether compound components use explicit data, context, or a server-compatible alternative before stabilizing the API.
+- [x] Preserve headless styling; support polymorphism/`asChild` only with tested valid DOM behavior.
+- [x] Define how optional presentation overrides interact with canonical text and drift diagnostics.
+- [x] Keep graph generation utilities usable without React.
 
 ## Exit criteria
 
-- [ ] The same primitives produce a homepage feature grid, docs setup steps, and a plain text section in the starter kit.
-- [ ] Tests cover text completeness, item order, missing/duplicate IDs, safe links, and script serialization.
-- [ ] Render tests cover heading association, valid list markup, and custom layouts.
-- [ ] Content is available in global and correct page graphs without browser execution.
-- [ ] No specialized `Hero`, `Feature`, or `Process` primitive is required to achieve this coverage.
+- [x] The same primitives produce a homepage feature grid, docs setup steps, and a plain text section in the starter kit.
+- [x] Tests cover text completeness, item order, missing/duplicate IDs, safe links, and script serialization.
+- [x] Render tests cover heading association, valid list markup, and custom layouts.
+- [x] Content is available in global and correct page graphs without browser execution.
+- [x] No specialized `Hero`, `Feature`, or `Process` primitive is required to achieve this coverage.

@@ -38,6 +38,7 @@ import {
   Navbar,
   Faq,
   Footer,
+  Collection,
   createForm,
   AutoForm,
   buildSitemapItems,
@@ -348,7 +349,9 @@ function InstallCommandBox() {
   );
 }
 
-function QuickstartSection() {
+function QuickstartSection({ collectionsData }: { collectionsData?: any }) {
+  const collectionList = collectionsData ?? [];
+  const quickstartSteps = collectionList.find((c: any) => c.id === 'quickstart-steps');
   const schemaCode = `import {
   defineSchema,
   organizationRegistry,
@@ -590,7 +593,7 @@ export const { GET } = siteApp.createGraphHandler({
       </div>
 
       {/* Steps List */}
-      <div className="space-y-10">
+      <Collection.Root data={quickstartSteps} ordered className="space-y-10">
         {/* Step 1 */}
         <div className="docs-step">
           <div className="flex items-start gap-3">
@@ -762,7 +765,7 @@ export const { GET } = siteApp.createGraphHandler({
             <CodeSnippet filename="app/api/graph.json/route.ts" code={routeCode} lang="typescript" />
           </div>
         </div>
-      </div>
+      </Collection.Root>
     </section>
   );
 }
@@ -5116,7 +5119,7 @@ export default async function DocsPage() {
           </div>
 
           {/* Quickstart Guide */}
-          <QuickstartSection />
+          <QuickstartSection collectionsData={(data as any)?.collections} />
 
           {/* Schema Registries & defineSchema */}
           <SchemaRegistriesSection />

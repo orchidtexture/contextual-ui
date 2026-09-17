@@ -7,8 +7,16 @@ import {
   ContentBlock,
   SectionDataSchema,
   isSafeHref,
+  CollectionItem,
+  CollectionRecord,
+  CollectionData,
+  CollectionDataSchema,
 } from './content.schema';
-import type { NormalizedSection } from './content.types';
+import type {
+  NormalizedSection,
+  NormalizedCollection,
+  NormalizedCollectionItem,
+} from './content.types';
 
 function isProd() {
   try {
@@ -77,6 +85,9 @@ export function extractPlainText(blocks: ContentBlock[]): string {
         break;
       case 'link':
         if (block.label) chunks.push(block.label);
+        break;
+      case 'code':
+        if (block.code) chunks.push(block.code);
         break;
       case 'list':
         if (block.items && block.items.length > 0) {
@@ -229,3 +240,158 @@ export function sectionRegistry() {
 }
 
 export const sectionsRegistry = sectionRegistry;
+
+/**
+ * Normalizes a collection item with its content blocks and extracted plain text.
+ */
+export function normalizeCollectionItem(item: CollectionItem): NormalizedCollectionItem {
+  const blocks = normalizeContentBlocks(item.content);
+  const plainText = extractPlainText(blocks);
+  return {
+    id: item.id,
+    title: item.title,
+    name: item.name || item.title,
+    description: item.description,
+    blocks,
+    plainText,
+    url: item.url,
+    order: item.order,
+    item: item.item,
+    type: item.type || 'ListItem',
+  };
+}
+
+/**
+ * Normalizes single or array collection data into CollectionRecord[].
+ */
+export function normalizeCollections(data: CollectionData): CollectionRecord[] {
+  if (!data) return [];
+  return Array.isArray(data) ? data : [data];
+}
+
+/**
+ * Normalizes a collection record with its items.
+ */
+export function normalizeCollection(col: CollectionRecord): NormalizedCollection {
+  const items = (col.items || []).map((it) => normalizeCollectionItem(it));
+  return {
+    id: col.id,
+    pageId: col.pageId,
+    title: col.title,
+    name: col.name || col.title,
+    description: col.description,
+    ordered: Boolean(col.ordered),
+    items,
+    type: col.type || 'ItemList',
+  };
+}
+
+/**
+ * Generates Schema.org ItemList JSON-LD objects for registered collections.
+ */
+export function generateCollectionJsonLd(data: CollectionData, ctx?: Partial<JsonLdContext>) {
+  const create = ctx?.createId ?? createId;
+  const refer = ctx?.refersTo ?? refersTo;
+  const collections = normalizeCollections(data);
+
+  return collections.map((col) => {
+    const norm = normalizeCollection(col);
+    const colId = create('itemlist', norm.pageId ? `${norm.pageId}:${norm.id}` : norm.id);
+
+    const listItems = norm.items.map((it, idx) => {
+      const position = it.order !== undefined ? it.order : idx + 1;
+      const itemId = create('listitem', `${norm.id}:${it.id || position}`);
+
+      const listItemNode: Record<string, any> = {
+        '@type': 'ListItem',
+        '@id': itemId,
+        position,
+      };
+
+      if (it.name || it.title) listItemNode.name = it.name || it.title;
+      if (it.description) listItemNode.description = it.description;
+      if (it.plainText && !listItemNode.description) listItemNode.description = it.plainText;
+      if (it.url) listItemNode.url = it.url;
+
+      if (it.item) {
+        if (typeof it.item === 'string') {
+          listItemNode.item = it.item.startsWith('#') || it.item.startsWith('http')
+            ? { '@id': it.item }
+            : refer(it.item);
+        } else if (typeof it.item === 'object' && it.item['@id']) {
+          listItemNode.item = { '@id': it.item['@id'] };
+        }
+      }
+
+      return listItemNode;
+    });
+
+    const jsonLd: Record<string, any> = {
+      '@context': 'https://schema.org',
+      '@type': norm.type,
+      '@id': colId,
+      numberOfItems: norm.items.length,
+      itemListElement: listItems,
+    };
+
+    if (norm.name || norm.title) jsonLd.name = norm.name || norm.title;
+    if (norm.description) jsonLd.description = norm.description;
+    if (norm.ordered) {
+      jsonLd.itemListOrder = 'https://schema.org/ItemListOrderAscending';
+    }
+
+    if (norm.pageId) {
+      jsonLd.isPartOf = (norm.pageId === 'home' && ctx?.isSinglePage)
+        ? refer('webpage')
+        : refer('webpage', norm.pageId);
+    }
+
+    return jsonLd;
+  });
+}
+
+/**
+ * Serializes collections for AI agents and LLM ingestion.
+ */
+export function exportCollectionAgentData(data: CollectionData) {
+  const collections = normalizeCollections(data);
+  return collections.map((col) => {
+    const norm = normalizeCollection(col);
+    return {
+      id: norm.id,
+      pageId: norm.pageId,
+      title: norm.title,
+      name: norm.name,
+      description: norm.description,
+      ordered: norm.ordered,
+      items: norm.items.map((it) => ({
+        id: it.id,
+        title: it.title,
+        name: it.name,
+        description: it.description,
+        blocks: it.blocks,
+        plainText: it.plainText,
+        url: it.url,
+        order: it.order,
+        item: it.item,
+        type: it.type,
+      })),
+      type: norm.type,
+    };
+  });
+}
+
+/**
+ * Registry factory for collections in defineSchema.
+ */
+export function collectionRegistry() {
+  return {
+    type: 'collections' as const,
+    schema: CollectionDataSchema,
+    exportAgentData: exportCollectionAgentData,
+    generateJsonLd: generateCollectionJsonLd,
+    isGlobal: true,
+  };
+}
+
+export const collectionsRegistry = collectionRegistry;
