@@ -50,10 +50,11 @@ These are recommendations from the exploration, subject to validation.
 
 ### Phase 3 — Entity semantics
 
-- [ ] **Service fields:** initial optional field set and exact reference contract.
-- [ ] **Representative:** supported truthful relationship, or retained prose until a Person/Role model is justified.
-- [ ] **Document identity:** whether privacy needs a separate CreativeWork or page sections alone are sufficient.
-- [ ] **Agent output:** serializer-only in the pilot or a separately specified public endpoint.
+- [x] **Service fields:** Typed `ServiceItem` and `ServiceData` schemas with `id`, `name`, `description`, `serviceType`, `areaServed`, `audience`, `url`, `image`, `provider` (linking to canonical Organization), and `pageId`. Commercial terms, pricing, and offers remain absent unless supplied by source content.
+- [x] **Representative:** Person/founder roles explicitly deferred. Representative information is preserved in section body copy rather than asserting an unvetted founder relationship.
+- [x] **Organization enrichment:** Structured `PostalAddress` (`streetAddress`, `addressLocality`, `addressRegion`, `postalCode`, `addressCountry`) and `foundingDate` added to `OrganizationDataSchema` and exported accurately in JSON-LD and agent data.
+- [x] **Document identity:** Page sections with `WebPageElement` provide clean, accurate coverage for policy documents without inventing non-standard Schema.org types. Full CreativeWork adapter remains deferred.
+- [x] **Agent output:** Serializer-only implemented in core (`exportServiceAgentData`, `exportOrgAgentData`). A separate public `/api/agent-data` endpoint is deferred to avoid unvetted surface expansion.
 
 ### Phases 4–5 — Pilot and promotion
 
@@ -73,6 +74,15 @@ These are recommendations from the exploration, subject to validation.
 - Do not copy external company/legal content into the official site to exercise a domain adapter.
 
 ## Decision log
+
+```text
+Decision: Semantic Entity Adapters (Service & Organization Enrichment)
+Status: accepted and implemented
+Phase: Phase 3
+Reason: Add domain meaning for Service and enriched Organization facts without catalog bloat or inferring unsupported business claims.
+Capabilities shipped: Service entity adapter (Schema.org Service, provider reference to Organization, ItemList item pointer support) and Organization enrichment (structured PostalAddress, foundingDate).
+Validation evidence: 142 passing unit tests in packages/core (including service and organization enrichment test suite), clean workspace builds, and 0 missing local IDs in reference validation.
+```
 
 ```text
 Decision: Composable Primitives (Section, Content, Collection)

@@ -73,9 +73,13 @@ export type { WebpageData, WebpageItem } from './components/webpage/webpage.sche
 export { WebpageDataSchema, WebpageItemSchema } from './components/webpage/webpage.schema';
 export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry, webpagesRegistry } from './components/webpage/webpage.utils';
 
-export type { OrganizationData } from './components/organization/organization.schema';
-export { OrganizationDataSchema } from './components/organization/organization.schema';
+export type { OrganizationData, PostalAddress } from './components/organization/organization.schema';
+export { OrganizationDataSchema, PostalAddressSchema } from './components/organization/organization.schema';
 export { generateOrganizationJsonLd, exportAgentData as exportOrganizationAgentData, organizationRegistry } from './components/organization/organization.utils';
+
+export type { ServiceData, ServiceItem } from './components/service';
+export { ServiceDataSchema, ServiceItemSchema } from './components/service';
+export { generateServiceJsonLd, exportAgentData as exportServiceAgentData, serviceRegistry, servicesRegistry } from './components/service';
 
 export { defineSchema, cx, getFieldMetadata } from './registry';
 export type { SchemaSection, SchemaConfig, HydratedContext, UIMetadata, JsonLdContext } from './registry';

@@ -1,6 +1,6 @@
 # Content Primitives: From Page Content to Composable Catalog Components
 
-**Status:** Phase 1 and Phase 2 are complete and verified against the official starter kit. Ready for Phase 3 / Phase 4. Later phases remain proposed.
+**Status:** Phases 1, 2, and 3 are complete and verified. Ready for Phase 4 (Starter-kit website pilot migration). Later phases remain proposed.
 
 ## Direction
 
@@ -37,7 +37,7 @@ Rendering a wrapper alone does not register its children with the graph. The dat
 | --- | --- | --- |
 | 1 | [Data and graph foundations](01-data-and-graph-foundations.md) | Shared contracts, identity, generic page membership, safe links, and graph export rules (Complete) |
 | 2 | [Composable primitives](02-composable-primitives.md) | Minimal Section, Content, and Collection capabilities (Complete) |
-| 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Demand-driven domain adapters; optional for the initial website migration |
+| 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Service adapter and Organization enrichment (Complete) |
 | 4 | [Official website / starter-kit pilot](04-starter-kit-pilot.md) | Real homepage, docs, and policy content migrated without a visual redesign |
 | 5 | [Catalog composition and release](05-catalog-composition-and-release.md) | Proven compositions, regression coverage, documentation, and release gate |
 

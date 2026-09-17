@@ -39,13 +39,25 @@ export type { WebpageData, WebpageItem } from '../components/webpage/webpage.sch
 export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry, webpagesRegistry } from '../components/webpage/webpage.utils';
 export {
   OrganizationDataSchema,
+  PostalAddressSchema,
 } from '../components/organization/organization.schema';
-export type { OrganizationData } from '../components/organization/organization.schema';
+export type { OrganizationData, PostalAddress } from '../components/organization/organization.schema';
 export {
   generateOrganizationJsonLd,
   exportAgentData as exportOrganizationAgentData,
   organizationRegistry,
 } from '../components/organization/organization.utils';
+export {
+  ServiceDataSchema,
+  ServiceItemSchema,
+} from '../components/service';
+export type { ServiceData, ServiceItem } from '../components/service';
+export {
+  generateServiceJsonLd,
+  exportAgentData as exportServiceAgentData,
+  serviceRegistry,
+  servicesRegistry,
+} from '../components/service';
 export {
   FormDataSchema,
   FormEntitySchema,

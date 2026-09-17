@@ -188,6 +188,16 @@ export function createContextualApp<
           return resolvedTargetId === 'home' || isSinglePage;
         });
       }
+
+      // 5. Filter services
+      const serviceKey = ('services' in merged) ? 'services' : (('service' in merged) ? 'service' : undefined);
+      if (serviceKey && Array.isArray(merged[serviceKey])) {
+        merged[serviceKey] = (merged[serviceKey] as any[]).filter((s: any) => {
+          if (declaredParts && declaredParts.length > 0) return matchesPart(s.id, s.pageId);
+          if (s.pageId) return s.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
+      }
     }
 
     return options.schema.hydrate(merged);
@@ -208,6 +218,7 @@ export function createContextualApp<
       const isSinglePage = !webpageKey || !rawData[webpageKey] || (Array.isArray(rawData[webpageKey]) && rawData[webpageKey].length <= 1);
       const sectionKey = ('sections' in rawData) ? 'sections' : (('section' in rawData) ? 'section' : undefined);
       const colKey = ('collections' in rawData) ? 'collections' : (('collection' in rawData) ? 'collection' : undefined);
+      const serviceKey = ('services' in rawData) ? 'services' : (('service' in rawData) ? 'service' : undefined);
       const formKey = ('forms' in rawData) ? 'forms' : (('form' in rawData) ? 'form' : undefined);
       const faqKey = ('faq' in rawData) ? 'faq' : undefined;
 
@@ -243,6 +254,19 @@ export function createContextualApp<
                 ? c.id
                 : (c.pageId ? `itemlist:${c.pageId}:${c.id}` : `itemlist:${c.id}`);
               parts.push(cId);
+            }
+          }
+
+          if (serviceKey && Array.isArray(rawData[serviceKey])) {
+            const matchedServices = rawData[serviceKey].filter((s: any) => {
+              if (s.pageId) return s.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const s of matchedServices) {
+              const sId = s.id?.startsWith('#') || s.id?.startsWith('http')
+                ? s.id
+                : (s.pageId ? `service:${s.pageId}:${s.id}` : `service:${s.id}`);
+              parts.push(sId);
             }
           }
 
@@ -307,6 +331,8 @@ export function createContextualApp<
             key === 'section' ||
             key === 'collections' ||
             key === 'collection' ||
+            key === 'services' ||
+            key === 'service' ||
             key === 'forms' ||
             key === 'form' ||
             key === 'faq'

@@ -1,6 +1,6 @@
 # Phase 3 — Semantic Entity Adapters
 
-**Status:** Proposed, demand-driven · **Dependency:** [Phase 1](01-data-and-graph-foundations.md), coordinated with [Phase 2](02-composable-primitives.md) · **Integration:** [Phase 4](04-starter-kit-pilot.md)
+**Status:** Complete · **Dependency:** [Phase 1](01-data-and-graph-foundations.md), coordinated with [Phase 2](02-composable-primitives.md) · **Integration:** [Phase 4](04-starter-kit-pilot.md)
 
 ## Goal and scope
 
@@ -22,11 +22,11 @@ The original research identified business-process review, AI-tool/system develop
 
 ### Tasks, when justified
 
-- [ ] Add a typed Service schema, registry adapter, JSON-LD generator, and agent-data serializer.
-- [ ] Test an ItemList referencing Service nodes that share one provider.
-- [ ] Keep offers, pricing, availability, and commercial terms absent unless supplied by actual content.
-- [ ] Validate Schema.org property domains/ranges and URL handling in fixtures.
-- [ ] If demonstrated in docs, label sample services as examples and keep their entity graph isolated from the official site's global graph.
+- [x] Add a typed Service schema, registry adapter, JSON-LD generator, and agent-data serializer.
+- [x] Test an ItemList referencing Service nodes that share one provider.
+- [x] Keep offers, pricing, availability, and commercial terms absent unless supplied by actual content.
+- [x] Validate Schema.org property domains/ranges and URL handling in fixtures.
+- [x] If demonstrated in docs, label sample services as examples and keep their entity graph isolated from the official site's global graph.
 
 A future `ServiceList` or `ServiceCard` is a composition, not a prerequisite for the first-party content pilot. Do not relabel library features as services or products for richer markup.
 
@@ -36,11 +36,11 @@ The official site already registers Tasuku Studio as creator and maintainer in [
 
 ### Tasks, when justified
 
-- [ ] Evaluate PostalAddress and founding-date support against a real use or isolated fixture.
-- [ ] Reuse the existing organization record across official-site pages without duplicating it per section.
-- [ ] Preserve names faithfully; a displayed English name is not automatically a separate legal entity or legal name.
-- [ ] Validate person roles explicitly; “representative” does not automatically imply `founder`.
-- [ ] Do not copy external company/contact facts into the official website without a separately approved content change.
+- [x] Evaluate PostalAddress and founding-date support against a real use or isolated fixture.
+- [x] Reuse the existing organization record across official-site pages without duplicating it per section.
+- [x] Preserve names faithfully; a displayed English name is not automatically a separate legal entity or legal name.
+- [x] Validate person roles explicitly; “representative” does not automatically imply `founder`.
+- [x] Do not copy external company/contact facts into the official website without a separately approved content change.
 
 A future organization-profile composition may render a definition list from selected fields. It should not create another Organization node or a new “Fact” entity for every row. A general Person registry can remain deferred.
 
@@ -66,13 +66,13 @@ The same records may support two serializers:
 
 These example keys are application data, not proposed Schema.org properties. Qualifications must survive in supported graph text even if no separate agent-data endpoint is built.
 
-- [ ] Decide whether the official site needs an agent-data endpoint beyond its existing `/api/graph.json`; serializer tests alone may be sufficient initially.
-- [ ] If added, specify discovery, public-data boundaries, and example-state isolation separately.
+- [x] Decide whether the official site needs an agent-data endpoint beyond its existing `/api/graph.json`; serializer tests alone may be sufficient initially.
+- [x] If added, specify discovery, public-data boundaries, and example-state isolation separately.
 
 ## Exit criteria for adapters selected for implementation
 
-- [ ] Core fixtures prove stable identities, shared-provider deduplication, and accurate fields without an external checkout.
-- [ ] No unsupported commercial terms, person roles, or official-site facts are inferred.
-- [ ] Example graphs remain distinguishable from the live site graph.
-- [ ] Domain-model tests run independently of catalog rendering.
-- [ ] Deferred adapters are explicitly recorded and do not block the generic starter-kit migration.
+- [x] Core fixtures prove stable identities, shared-provider deduplication, and accurate fields without an external checkout.
+- [x] No unsupported commercial terms, person roles, or official-site facts are inferred.
+- [x] Example graphs remain distinguishable from the live site graph.
+- [x] Domain-model tests run independently of catalog rendering.
+- [x] Deferred adapters are explicitly recorded and do not block the generic starter-kit migration.
