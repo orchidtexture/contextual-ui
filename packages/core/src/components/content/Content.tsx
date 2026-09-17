@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { normalizeContentBlocks } from '../../content/content.utils';
@@ -12,7 +10,7 @@ export function Content({
   className,
   ...props
 }: ContentProps) {
-  const blocks = React.useMemo(() => normalizeContentBlocks(data), [data]);
+  const blocks = normalizeContentBlocks(data);
 
   if (blocks.length === 0) {
     return null;

@@ -112,7 +112,15 @@ export {
 export { Content } from './components/content';
 export type { ContentProps, ContentComponentOverrides } from './components/content';
 
-export { Section, useSectionContext } from './components/section';
+export {
+  Section,
+  SectionRoot,
+  SectionTitle,
+  SectionSubtitle,
+  SectionDescription,
+  SectionContent,
+  useSectionContext,
+} from './components/section';
 export type {
   SectionRootProps,
   SectionTitleProps,
@@ -122,7 +130,15 @@ export type {
   SectionContextValue,
 } from './components/section';
 
-export { Collection, useCollectionContext, useCollectionItemContext } from './components/collection';
+export {
+  Collection,
+  CollectionRoot,
+  CollectionTitle,
+  CollectionDescription,
+  CollectionContent,
+  useCollectionContext,
+  useCollectionItemContext,
+} from './components/collection';
 export type {
   CollectionRootProps,
   CollectionItemProps,

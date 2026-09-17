@@ -174,6 +174,37 @@ const connector = staticConnector({
   },
   sections: [
     {
+      id: 'ssot',
+      pageId: 'home',
+      title: 'Single Source of Truth (SSOT)',
+      description: 'Define your site schema once in Zod. Automatically generate TypeScript types, runtime validation, and Schema.org JSON-LD with zero drift.',
+      anchor: 'ssot',
+      mainEntity: '#itemlist:home:ssot-features',
+    },
+    {
+      id: 'knowledge-graph',
+      pageId: 'home',
+      title: 'Global Knowledge Graph',
+      description: 'Entities, route documents, and component metadata compile into a single referentially-linked Schema.org @graph. Exposed sitewide for AI agents, LLM pipelines, and search bots.',
+      anchor: 'knowledge-graph',
+      mainEntity: '#itemlist:home:knowledge-graph-features',
+    },
+    {
+      id: 'metadata-scoping',
+      pageId: 'home',
+      title: 'Global vs Route Metadata',
+      description: 'Distinguish between domain-level entities (WebSite, Organization), route documents (WebPage), and UI components without prop drilling.',
+      anchor: 'metadata-scoping',
+      mainEntity: '#itemlist:home:metadata-scoping-features',
+      content: [
+        {
+          type: 'paragraph',
+          role: 'qualifier',
+          text: 'Why it matters: Isolating domain, route, and component contexts prevents metadata leakage across pages while maintaining global entity links throughout the Knowledge Graph.',
+        },
+      ],
+    },
+    {
       id: 'headless-radix',
       pageId: 'home',
       title: 'Headless & Radix Powered',
@@ -188,8 +219,116 @@ const connector = staticConnector({
         },
       ],
     },
+    {
+      id: 'privacy-policy',
+      pageId: 'privacy',
+      title: 'Privacy Policy',
+      description: 'Contextual UI is an open-source framework and does not track personal browsing activity or collect unsolicited personal data. All schema graphs and user configurations remain strictly under your control.',
+      content: [
+        {
+          type: 'paragraph',
+          text: 'Contextual UI is an open-source framework and does not track personal browsing activity or collect unsolicited personal data. All schema graphs and user configurations remain strictly under your control.',
+        },
+        {
+          type: 'heading',
+          text: 'Data Storage',
+          level: 2,
+        },
+        {
+          type: 'paragraph',
+          text: 'Data processed through Contextual UI connectors is executed directly on your own infrastructure or hosting provider.',
+        },
+      ],
+    },
+    {
+      id: 'terms-of-service',
+      pageId: 'terms',
+      title: 'Terms of Service',
+      description: 'Contextual UI is open-source software distributed under the MIT license.',
+      content: [
+        {
+          type: 'paragraph',
+          text: 'Contextual UI is open-source software distributed under the MIT license.',
+        },
+      ],
+    },
   ],
   collections: [
+    {
+      id: 'ssot-features',
+      pageId: 'home',
+      title: 'SSOT Pillars',
+      ordered: true,
+      items: [
+        {
+          id: 'define-once',
+          title: '1. Define Once',
+          description: 'Compose Schema.org registries (websiteRegistry, faqRegistry) and custom Zod schemas.',
+          order: 1,
+        },
+        {
+          id: 'auto-type-inference',
+          title: '2. Auto Type Inference',
+          description: 'Derive 100% type-safe models via InferData<typeof siteSchema> with zero manual duplication.',
+          order: 2,
+        },
+        {
+          id: 'zero-drift-sync',
+          title: '3. Zero Drift Sync',
+          description: 'Connector data automatically keeps headless React UI components and SEO JSON-LD graphs in sync.',
+          order: 3,
+        },
+      ],
+    },
+    {
+      id: 'knowledge-graph-features',
+      pageId: 'home',
+      title: 'Knowledge Graph Capabilities',
+      ordered: false,
+      items: [
+        {
+          id: 'referential-linking',
+          title: 'Referential @id Linking',
+          description: 'Entities reference each other with canonical URIs (#website, #organization) forming a true Semantic Web graph.',
+        },
+        {
+          id: 'agent-ready-endpoint',
+          title: 'Agent-Ready API Endpoint',
+          description: 'Exposes /api/graph.json so AI agents (Perplexity, ChatGPT Search, Claude) consume clean structured data without parsing messy DOM.',
+        },
+        {
+          id: 'zero-scraping-fragility',
+          title: 'Zero Scraping Fragility',
+          description: 'Eliminates scraper breaks from markup refactors, client hydration delays, and costly LLM token waste.',
+        },
+      ],
+    },
+    {
+      id: 'metadata-scoping-features',
+      pageId: 'home',
+      title: 'Metadata Scoping Levels',
+      ordered: true,
+      items: [
+        {
+          id: 'domain-scope',
+          title: 'Domain Scope',
+          description: 'Mounted at root app/layout.tsx. Injects global entities like Organization, WebSite, and sitewide navigations.',
+          order: 1,
+        },
+        {
+          id: 'route-scope',
+          title: 'Route Scope',
+          description: 'Wraps individual route pages (<WebPage id="docs">). Scopes canonical URLs, route titles, descriptions, and breadcrumb trails to the active document.',
+          order: 2,
+        },
+        {
+          id: 'component-scope',
+          title: 'Component Scope',
+          description: 'Headless primitives that consume typed data directly from context, render accessible UI, and attach microdata fragments to the parent page node.',
+          order: 3,
+        },
+      ],
+    },
     {
       id: 'headless-features',
       pageId: 'home',

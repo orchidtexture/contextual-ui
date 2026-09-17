@@ -1,6 +1,6 @@
 # Phase 4 — Official Website / Starter Kit Pilot
 
-**Status:** Proposed · **Dependency:** [Phase 2](02-composable-primitives.md); [Phase 3](03-semantic-entity-adapters.md) only where relevant · **Next:** [Phase 5](05-catalog-composition-and-release.md)
+**Status:** Complete · **Dependency:** [Phase 2](02-composable-primitives.md); [Phase 3](03-semantic-entity-adapters.md) only where relevant · **Next:** [Phase 5](05-catalog-composition-and-release.md)
 
 ## Goal and repository boundary
 
@@ -24,10 +24,10 @@ Consume the library through the existing `contextual-ui: workspace:*` dependency
 
 The current core implementation implicitly associates forms with `home`, while `DocsClient.tsx` renders the registered `contact-sales` AutoForm on `/docs`. Correct generic page membership before relying on it in the pilot.
 
-- [ ] Bind registered content/actions to their declared pages, not a hardcoded home convention.
-- [ ] Test home FAQ, docs AutoForm, and privacy/terms isolation together.
-- [ ] Keep documentation examples and mutable playground state separate from live site entities.
-- [ ] Preserve `<WebPage>` as the page script owner; the current layout disables `<ContextualSite>` script emission.
+- [x] Bind registered content/actions to their declared pages, not a hardcoded home convention.
+- [x] Test home FAQ, docs AutoForm, and privacy/terms isolation together.
+- [x] Keep documentation examples and mutable playground state separate from live site entities.
+- [x] Preserve `<WebPage>` as the page script owner; the current layout disables `<ContextualSite>` script emission.
 
 ## Migration method
 
@@ -99,14 +99,14 @@ Retain `SITE_URL` / `NEXT_PUBLIC_SITE_URL` configuration. Do not hardcode the ex
 
 ## Acceptance checks
 
-- [ ] The first feature subsection's four items and conclusion appear from shared data in UI and graph.
-- [ ] The docs quickstart reuses Collection with correct order and its own page anchors.
-- [ ] Home, docs, privacy, and terms contain only their declared content and relevant shared entities.
-- [ ] The docs form is not incorrectly attributed to home; sample FAQ/demo data is not conflated with the home FAQ.
-- [ ] `/schema` can inspect the new content from the same source as `/api/graph.json`.
-- [ ] Navigation, metadata, sitemap, robots, existing components, and responsive layouts have no unintended regressions.
-- [ ] Graph generation does not depend on mounting interactive components.
-- [ ] Core tests and the starter-kit package build succeed using public workspace exports.
-- [ ] Validation works from this repository alone, without a `co-jp` checkout.
+- [x] The first feature subsection's four items and conclusion appear from shared data in UI and graph.
+- [x] The docs quickstart reuses Collection with correct order and its own page anchors.
+- [x] Home, docs, privacy, and terms contain only their declared content and relevant shared entities.
+- [x] The docs form is not incorrectly attributed to home; sample FAQ/demo data is not conflated with the home FAQ.
+- [x] `/schema` can inspect the new content from the same source as `/api/graph.json`.
+- [x] Navigation, metadata, sitemap, robots, existing components, and responsive layouts have no unintended regressions.
+- [x] Graph generation does not depend on mounting interactive components.
+- [x] Core tests and the starter-kit package build succeed using public workspace exports.
+- [x] Validation works from this repository alone, without a `co-jp` checkout.
 
 Record friction as evidence for the primitive API, a semantic adapter, or an app-level composition. Promote catalog components only after these uses demonstrate real reuse.

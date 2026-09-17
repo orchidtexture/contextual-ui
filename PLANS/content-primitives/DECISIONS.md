@@ -76,6 +76,15 @@ These are recommendations from the exploration, subject to validation.
 ## Decision log
 
 ```text
+Decision: Official Website Content Migration Pilot
+Status: accepted and implemented
+Phase: Phase 4
+Reason: Migrate homepage feature sections, docs quickstart, and static policy pages (privacy, terms) to shared serializable records using Section, Content, and Collection primitives without altering visual presentation.
+Capabilities validated: Headless Section, Content, and Collection applied across home (#ssot, #knowledge-graph, #metadata-scoping, #headless-radix), docs (#quickstart ordered steps), and policy routes (/privacy, /terms).
+Validation evidence: Complete Schema.org JSON-LD graph generation with zero missing local IDs, static prerendering across all 14 Next.js 16 App Router routes in apps/starter-kit, and live graph inspection at /schema and /api/graph.json.
+```
+
+```text
 Decision: Semantic Entity Adapters (Service & Organization Enrichment)
 Status: accepted and implemented
 Phase: Phase 3
