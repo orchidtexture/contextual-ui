@@ -1,6 +1,9 @@
 import { siteSchema } from './site.schema';
 import { staticConnector } from 'contextual-ui-connector-static';
 import { createContextualApp, InferData } from 'contextual-ui/server';
+import { quickstartCollection } from './quickstart';
+import { heroSection, pipelineSection, foundationsSection, pipelineStagesCollection } from './home.content';
+import { docsSections } from './docs.content';
 
 const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://contextual.site';
 
@@ -173,6 +176,9 @@ const connector = staticConnector({
     },
   },
   sections: [
+    heroSection,
+    pipelineSection,
+    foundationsSection,
     {
       id: 'ssot',
       pageId: 'home',
@@ -252,8 +258,10 @@ const connector = staticConnector({
         },
       ],
     },
+    ...docsSections,
   ],
   collections: [
+    pipelineStagesCollection,
     {
       id: 'ssot-features',
       pageId: 'home',
@@ -357,44 +365,7 @@ const connector = staticConnector({
         },
       ],
     },
-    {
-      id: 'quickstart-steps',
-      pageId: 'docs',
-      title: 'Quickstart Steps',
-      ordered: true,
-      items: [
-        {
-          id: 'step-1',
-          title: 'Create Next.js App & Install Dependencies',
-          description: 'Initialize a blank Next.js App Router project (or use an existing project) and install contextual-ui, the static connector, and zod.',
-          order: 1,
-        },
-        {
-          id: 'step-2',
-          title: 'Define Site Schema & Type Contracts',
-          description: 'Declare your data architecture in site.schema.ts using defineSchema and modular schema registries.',
-          order: 2,
-        },
-        {
-          id: 'step-3',
-          title: 'Instantiate Contextual App & Static Connector',
-          description: 'Bind your schema to a data source using createContextualApp in site.server.ts to produce type-safe data hydration.',
-          order: 3,
-        },
-        {
-          id: 'step-4',
-          title: 'Configure SEO Routes (Sitemap & Robots)',
-          description: 'Export automated sitemap.xml and robots.txt handlers derived directly from your connector webpage list.',
-          order: 4,
-        },
-        {
-          id: 'step-5',
-          title: 'Mount ContextualSite in Root Layout',
-          description: 'Wrap your app in <ContextualSite> to provide client context, headless layout components, and global JSON-LD knowledge graph injection.',
-          order: 5,
-        },
-      ],
-    },
+    quickstartCollection,
   ],
   announcement: {
     enabled: true,

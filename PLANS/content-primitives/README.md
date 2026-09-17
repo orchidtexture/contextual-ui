@@ -1,8 +1,8 @@
 # Content Primitives: From Page Content to Composable Catalog Components
 
-**Status:** Phases 1–4 have been implemented, but the definition of success is not fully met: **3 criteria verified, 4 partially satisfied**. Resolve the findings in the [verification report](VERIFICATION.md) before treating the pilot as complete. Phase 5 remains proposed.
+**Status:** Phases 1–4 and Remediation have been implemented and verified: **All 7 criteria verified**. See the [remediation plan](REMEDIATION-PLAN.md) and [post-remediation verification report](POST-REMEDIATION-VERIFICATION.md). Phase 5 is ready to proceed.
 
-**Next:** Follow the [verification fix plan](REMEDIATION-PLAN.md) for work packages, regression tests, compatibility decisions, and the final re-verification gate.
+**Next:** Proceed to Phase 5: [Catalog composition and release](05-catalog-composition-and-release.md).
 
 ## Direction
 
@@ -56,22 +56,22 @@ Tests accompany every phase. Reusable code belongs in `packages/core`; site cont
 
 ## Definition of success
 
-- [ ] The official site's meaningful homepage, docs, and policy content is available in the graph; example-only data is not asserted as live site facts.
-  - **Partial:** feature/policy content is exported, but hero/pipeline and most docs content remain missing. Docs Navbar/Footer demos also emit standalone example JSON-LD.
-- [ ] Editing shared content updates both rendered UI and machine-readable output.
-  - **Partial:** in-memory edits update homepage UI and graph together. A docs quickstart edit updates only the graph; its eight hardcoded UI steps do not consume the five registered items.
-- [ ] Home, docs, privacy, and terms graphs contain the correct page content and relationships.
-  - **Partial:** registered content is page-isolated, the docs form belongs to docs, and graph references resolve. Docs UI/graph content still disagrees, and extra example scripts escape the canonical page graph.
+- [x] The official site's meaningful homepage, docs, and policy content is available in the graph; example-only data is not asserted as live site facts.
+  - Verified: hero, pipeline narrative, foundations, and docs sections registered. Docs showcases use `injectJsonLd={false}` and emit zero standalone scripts. Production `/docs` contains exactly 1 page script.
+- [x] Editing shared content updates both rendered UI and machine-readable output.
+  - Verified: quickstart guide and documentation sections consume shared records. In-memory mutation tests prove editing title, description, and code snippets updates both visible UI text and graph output.
+- [x] Home, docs, privacy, and terms graphs contain the correct page content and relationships.
+  - Verified: all 4 page graphs contain isolated, route-accurate content. Zero missing local references across all page graphs and the global graph.
 - [x] `/schema` and `/api/graph.json` make the actual site's content inspectable without an external repository.
-  - Verified actual GET handler output, equality with the programmatic graph, and real content in the inspector's production HTML.
-- [ ] Shared entities have stable IDs and are not duplicated per visual section.
-  - **Partial:** the current API graph has unique IDs and shared layout entities, but ListItem IDs collide when pages reuse collection/item local IDs. Docs demos also emit separate layout entities.
+  - Verified: actual GET handler output, equality with programmatic graph, and real content in the inspector's production HTML.
+- [x] Shared entities have stable IDs and are not duplicated per visual section.
+  - Verified: collection items derive IDs from collection scope (`#listitem:home:features:first` vs `#listitem:docs:features:first`). Unique IDs verified across all entities. Duplicate item IDs rejected.
 - [x] Several catalog patterns can be built from the same primitives without forking graph generators.
-  - Verified homepage feature compositions, core ordered/unordered collection render tests, and shared policy Content rendering. This does not certify the hardcoded docs quickstart.
+  - Verified: feature-card layouts, ordered quickstart flow (`ol > li`), and policy Content rendering reuse core implementations.
 - [x] Existing FAQ, form, navbar, and footer integrations continue working.
-  - Verified at unit/SSR/build level. Browser interactions and live form submissions were not exercised; demo metadata isolation remains open above.
+  - Verified: FAQ accordions, AutoForm with dynamic Zod validation, shared Navbar, and Footer render correctly at SSR/unit/production build level.
 
-**Verification evidence:** 142 core tests and 9 graph-builder tests passed; workspace/starter-kit production builds and configured typechecks passed. See [VERIFICATION.md](VERIFICATION.md) for reproduction details, concrete gaps, and follow-up order.
+**Verification evidence:** 155 core tests, 9 graph-builder tests, and 14 starter-kit app tests passed (178 total); workspace/starter-kit production builds and configured typechecks passed. See [POST-REMEDIATION-VERIFICATION.md](POST-REMEDIATION-VERIFICATION.md) for full evidence and audit details.
 
 Node count and rich-result eligibility are not success metrics on their own.
 

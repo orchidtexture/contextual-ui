@@ -287,6 +287,51 @@ export function normalizeCollection(col: CollectionRecord): NormalizedCollection
 }
 
 /**
+ * Derives the unique identity scope string for a collection.
+ * Normalizes page namespaces, custom fragment IDs, and absolute URIs.
+ */
+export function deriveCollectionScope(col: { id: string; pageId?: string }): string {
+  let baseId = col.id;
+  if (!baseId) {
+    throw new Error('Collection must have a non-empty id.');
+  }
+
+  // If already a fragment ID (e.g. '#custom-list' or '#itemlist:features')
+  if (baseId.startsWith('#')) {
+    baseId = baseId.slice(1);
+    if (baseId.startsWith('itemlist:')) {
+      baseId = baseId.slice('itemlist:'.length);
+    }
+  } else if (baseId.startsWith('http://') || baseId.startsWith('https://')) {
+    try {
+      const u = new URL(baseId);
+      const pathPart = (u.pathname + (u.hash || '')).replace(/^\//, '').replace(/[^a-zA-Z0-9_-]/g, '_');
+      baseId = pathPart || u.hostname;
+    } catch {
+      baseId = baseId.replace(/[^a-zA-Z0-9_-]/g, '_');
+    }
+  }
+
+  return col.pageId ? `${col.pageId}:${baseId}` : baseId;
+}
+
+/**
+ * Derives the canonical Schema.org @id for a collection's list item.
+ * Guarantees that item identity includes the full identity scope of its owning collection.
+ */
+export function deriveCollectionListItemId(
+  col: { id: string; pageId?: string },
+  itemId: string,
+  create: (type: string, id?: string) => string = createId
+): string {
+  if (!itemId || typeof itemId !== 'string' || itemId.trim() === '') {
+    throw new Error('Collection item must have a non-empty stable string id.');
+  }
+  const scope = deriveCollectionScope(col);
+  return create('listitem', `${scope}:${itemId.trim()}`);
+}
+
+/**
  * Generates Schema.org ItemList JSON-LD objects for registered collections.
  */
 export function generateCollectionJsonLd(data: CollectionData, ctx?: Partial<JsonLdContext>) {
@@ -296,11 +341,22 @@ export function generateCollectionJsonLd(data: CollectionData, ctx?: Partial<Jso
 
   return collections.map((col) => {
     const norm = normalizeCollection(col);
-    const colId = create('itemlist', norm.pageId ? `${norm.pageId}:${norm.id}` : norm.id);
+    const colScope = deriveCollectionScope(norm);
+    const colId = create('itemlist', colScope);
 
+    const seenItemIds = new Set<string>();
     const listItems = norm.items.map((it, idx) => {
       const position = it.order !== undefined ? it.order : idx + 1;
-      const itemId = create('listitem', `${norm.id}:${it.id || position}`);
+      const rawItemId = it.id || String(position);
+
+      if (seenItemIds.has(rawItemId)) {
+        throw new Error(
+          `[Contextual UI] Duplicate collection item id "${rawItemId}" found in collection "${norm.id}". Every item in a collection must have a unique stable identifier.`
+        );
+      }
+      seenItemIds.add(rawItemId);
+
+      const itemId = deriveCollectionListItemId(norm, rawItemId, create);
 
       const listItemNode: Record<string, any> = {
         '@type': 'ListItem',
@@ -310,7 +366,13 @@ export function generateCollectionJsonLd(data: CollectionData, ctx?: Partial<Jso
 
       if (it.name || it.title) listItemNode.name = it.name || it.title;
       if (it.description) listItemNode.description = it.description;
-      if (it.plainText && !listItemNode.description) listItemNode.description = it.plainText;
+      if (it.plainText) {
+        if (!listItemNode.description) {
+          listItemNode.description = it.plainText;
+        } else if (it.plainText !== it.description) {
+          listItemNode.text = it.plainText;
+        }
+      }
       if (it.url) listItemNode.url = it.url;
 
       if (it.item) {

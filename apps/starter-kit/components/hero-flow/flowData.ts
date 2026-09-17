@@ -1,5 +1,6 @@
 import { Node, Edge } from 'reactflow';
 import { FlowNodeData, FlowEdgeData } from './types';
+import { pipelineStagesCollection } from '@/data/home.content';
 
 export const initialNodes: Node<FlowNodeData>[] = [
   {
@@ -280,6 +281,15 @@ const graph = await siteApp.generateGraph();`,
     },
   },
 ];
+
+// Synchronize semantic node copy with the canonical pipeline stages collection
+for (const node of initialNodes) {
+  const stage = pipelineStagesCollection.items.find((it) => it.id === node.id);
+  if (stage) {
+    if (stage.title) node.data.title = stage.title;
+    if (stage.description) node.data.description = stage.description;
+  }
+}
 
 export const initialEdges: Edge<FlowEdgeData>[] = [
   {

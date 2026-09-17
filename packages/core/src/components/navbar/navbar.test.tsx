@@ -175,4 +175,58 @@ describe('Navbar Components', () => {
     expect(html).toContain('Features');
     expect(html).toContain('Docs');
   });
+
+  describe('JSON-LD script emission and isolation', () => {
+    it('injects JSON-LD script by default for standalone Navbar with explicit data', () => {
+      const html = renderToString(
+        <Navbar.Root data={sampleNavData}>
+          <Navbar.Brand />
+        </Navbar.Root>
+      );
+      expect(html).toContain('type="application/ld+json"');
+      expect(html).toContain('SiteNavigationElement');
+    });
+
+    it('suppresses JSON-LD script when injectJsonLd={false} is set explicitly on standalone Navbar', () => {
+      const html = renderToString(
+        <Navbar.Root data={sampleNavData} injectJsonLd={false}>
+          <Navbar.Brand />
+        </Navbar.Root>
+      );
+      expect(html).not.toContain('type="application/ld+json"');
+      expect(html).toContain('Contextual UI');
+    });
+
+    it('suppresses JSON-LD script when injectJsonLd={false} inside ContextualSite with explicit data', () => {
+      const siteData = { navbar: sampleNavData };
+      const demoData = {
+        ...sampleNavData,
+        brand: { ...sampleNavData.brand, name: 'Demo Showcase Navbar' },
+      };
+
+      const html = renderToString(
+        <ContextualSite data={siteData} injectJsonLd={false}>
+          <Navbar.Root data={demoData} injectJsonLd={false}>
+            <Navbar.Brand />
+          </Navbar.Root>
+        </ContextualSite>
+      );
+      expect(html).not.toContain('type="application/ld+json"');
+      expect(html).toContain('Demo Showcase Navbar');
+    });
+
+    it('does not inject JSON-LD script when Navbar consumes context inside ContextualSite', () => {
+      const siteData = { navbar: sampleNavData };
+      const html = renderToString(
+        <ContextualSite data={siteData} injectJsonLd={false}>
+          <Navbar.Root>
+            <Navbar.Brand />
+          </Navbar.Root>
+        </ContextualSite>
+      );
+      expect(html).not.toContain('type="application/ld+json"');
+      expect(html).toContain('Contextual UI');
+    });
+  });
 });
+

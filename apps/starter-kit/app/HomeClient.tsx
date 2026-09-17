@@ -17,6 +17,7 @@ import {
 import { Faq, Section, Collection, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 import { HeroFlowDiagram } from '@/components/hero-flow';
+import { heroSection, pipelineSection, foundationsSection } from '@/data/home.content';
 
 const TriangleSphere = dynamic(() => import('@/components/TriangleSphere'), {
   ssr: false,
@@ -29,6 +30,9 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   const faqItems = data?.faq ?? [];
 
   const sectionList = (data as any)?.sections ?? [];
+  const heroSectionData = sectionList.find((s: any) => s.id === 'hero') ?? heroSection;
+  const pipelineSectionData = sectionList.find((s: any) => s.id === 'data-pipeline') ?? pipelineSection;
+  const foundationsSectionData = sectionList.find((s: any) => s.id === 'foundations') ?? foundationsSection;
   const ssotSection = sectionList.find((s: any) => s.id === 'ssot');
   const kgSection = sectionList.find((s: any) => s.id === 'knowledge-graph');
   const scopingSection = sectionList.find((s: any) => s.id === 'metadata-scoping');
@@ -46,14 +50,10 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
       <main className="pt-12 pb-16 px-6 max-w-6xl mx-auto space-y-20 sm:space-y-28">
 
         {/* Hero Section with Dynamic TriangleSphere */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+        <Section.Root data={heroSectionData} id="hero" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
           <div className="lg:col-span-7 space-y-6">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight">
-            Build Websites Optimized for Search & AI Agents.
-            </h1>
-            <p className="text-lg text-zinc-300 leading-relaxed max-w-2xl">
-              Stop writing boilerplate schema markup. Use our open-source headless components to build accessible UIs that automatically compile into an unified JSON-LD Knowledge Graph for Next-Gen SEO and LLM ingestion.
-            </p>
+            <Section.Title as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight" />
+            <Section.Description className="text-lg text-zinc-300 leading-relaxed max-w-2xl" />
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#data-pipeline"
@@ -81,38 +81,30 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
           <div className="lg:col-span-5 h-[360px] sm:h-[440px] lg:h-[480px] w-full flex items-center justify-center">
             <TriangleSphere className="w-full h-full" />
           </div>
-        </section>
+        </Section.Root>
 
         {/* Data Pipeline Flow Diagram Section */}
-        <section id="data-pipeline" className="space-y-6 scroll-mt-24">
+        <Section.Root data={pipelineSectionData} id="data-pipeline" className="space-y-6 scroll-mt-24">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
-              <span>●</span> Architecture Flow
+              <span>●</span> {pipelineSectionData.subtitle || 'Architecture Flow'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100">
-              Source to Graph & UI
-            </h2>
-            <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
-              Explore how Contextual UI unifies data ingestion, SSOT schema validation, and multi-channel delivery across React components, Schema.org <code className="code-short">@graph</code> JSON-LD, and structured AI agent feeds.
-            </p>
+            <Section.Title as="h2" className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100" />
+            <Section.Description className="text-sm text-zinc-400 leading-relaxed max-w-3xl" />
           </div>
 
           <HeroFlowDiagram />
-        </section>
+        </Section.Root>
 
         {/* Core Foundations Section */}
-        <section id="foundations" className="space-y-12 sm:space-y-16 scroll-mt-24">
+        <Section.Root data={foundationsSectionData} id="foundations" className="space-y-12 sm:space-y-16 scroll-mt-24">
           {/* Section Header */}
           <div className="space-y-2 max-w-3xl">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
-              <span>●</span> Core Foundations
+              <span>●</span> {foundationsSectionData.subtitle || 'Core Foundations'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
-              Architecture & Core Concepts
-            </h2>
-            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-              Explore how Contextual UI combines unified schema definitions, sitewide Knowledge Graphs, hierarchical scoping, and headless Radix primitives.
-            </p>
+            <Section.Title as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100" />
+            <Section.Description className="text-sm sm:text-base text-zinc-400 leading-relaxed" />
           </div>
 
           {/* Subsections List */}
@@ -385,7 +377,7 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
             </Section.Root>
 
           </div>
-        </section>
+        </Section.Root>
 
         {/* FAQ Section */}
         <section className="space-y-6">

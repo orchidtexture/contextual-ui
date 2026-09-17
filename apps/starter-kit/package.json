@@ -5,16 +5,17 @@
   "scripts": {
     "dev": "next dev",
     "build": "pnpm -r build && next build",
-    "start": "next start"
+    "start": "next start",
+    "test": "pnpm --filter \"starter-kit^...\" build && vitest run"
   },
   "dependencies": {
-    "contextual-ui-connector-static": "workspace:*",
-    "contextual-ui": "workspace:*",
-    "contextual-ui-dashboard": "workspace:*",
     "@react-three/fiber": "^9.7.0",
     "@types/dagre": "^0.7.54",
     "@types/prismjs": "^1.26.6",
     "autoprefixer": "^10.4.18",
+    "contextual-ui": "workspace:*",
+    "contextual-ui-connector-static": "workspace:*",
+    "contextual-ui-dashboard": "workspace:*",
     "dagre": "^0.8.5",
     "elkjs": "^0.12.0",
     "lucide-react": "^1.34.0",
@@ -33,6 +34,7 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/three": "^0.185.4",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.10"
   }
 }

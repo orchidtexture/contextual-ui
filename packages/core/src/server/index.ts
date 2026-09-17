@@ -144,6 +144,8 @@ export {
   normalizeCollectionItem,
   normalizeCollections,
   normalizeCollection,
+  deriveCollectionScope,
+  deriveCollectionListItemId,
   generateCollectionJsonLd,
   exportCollectionAgentData,
   collectionRegistry,

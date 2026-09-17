@@ -48,6 +48,8 @@ import {
 } from 'contextual-ui';
 import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
+import { quickstartCollection } from '@/data/quickstart';
+import { docsSections } from '@/data/docs.content';
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -349,422 +351,106 @@ function InstallCommandBox() {
   );
 }
 
-function QuickstartSection({ collectionsData }: { collectionsData?: any }) {
-  const collectionList = collectionsData ?? [];
-  const quickstartSteps = collectionList.find((c: any) => c.id === 'quickstart-steps');
-  const schemaCode = `import {
-  defineSchema,
-  organizationRegistry,
-  websiteRegistry,
-  webpageRegistry,
-  navbarRegistry,
-  faqRegistry,
-  footerRegistry,
-} from 'contextual-ui/server';
-import { z } from 'zod';
-
-// 1. Define the Single Source of Truth (SSOT) schema
-export const siteSchema = defineSchema({
-  organization: organizationRegistry(),
-  website: websiteRegistry(),
-  webpage: webpageRegistry(),
-  navbar: navbarRegistry(),
-  faq: faqRegistry(),
-  footer: footerRegistry(),
-  // Extend with custom typed Zod fields anytime:
-  announcement: {
-    schema: z.object({
-      enabled: z.boolean(),
-      message: z.string().describe('Announcement Banner Text'),
-    }),
+const quickstartPresentationMap: Record<string, { optional?: boolean; customBeforeCode?: React.ReactNode }> = {
+  'create-and-install': {
+    customBeforeCode: (
+      <div className="space-y-3">
+        <div className="rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 shadow-lg">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/60">
+            <div className="flex items-center gap-2">
+              <Terminal className="w-3.5 h-3.5 text-accent" />
+              <span className="text-xs font-mono text-zinc-300 font-medium">Create Next.js App (Optional)</span>
+            </div>
+          </div>
+          <div className="p-4 bg-zinc-900/90 font-mono text-xs text-zinc-200">
+            <div className="flex items-center gap-2.5">
+              <span className="text-accent select-none font-bold">$</span>
+              <span>pnpm create next-app@latest my-app --yes && cd my-app</span>
+            </div>
+          </div>
+        </div>
+        <InstallCommandBox />
+      </div>
+    ),
   },
-});`;
-
-  const serverCode = `import { siteSchema } from './site.schema';
-import { staticConnector } from 'contextual-ui-connector-static';
-import { createContextualApp, InferData } from 'contextual-ui/server';
-
-const baseUrl = process.env.SITE_URL || 'https://example.com';
-
-// 2. Configure a data connector (Static Config, Headless CMS, or Database)
-const connector = staticConnector({
-  organization: {
-    name: 'Acme Corp',
-    url: baseUrl,
-    logo: '/images/logo.svg',
-    description: 'Creator of modern web tools.',
-    sameAs: ['https://github.com/acme', 'https://twitter.com/acme'],
+  'ai-knowledge-graph': {
+    optional: true,
   },
-  website: {
-    name: 'Acme App',
-    url: baseUrl,
-    description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
-  },
-  webpage: [
-    {
-      id: 'home',
-      name: 'Acme App - Home',
-      url: '/',
-      description: 'Headless UI with automated Schema.org SEO and Agentic AI graphs.',
-    },
-    {
-      id: 'docs',
-      name: 'Acme App - Docs',
-      url: '/docs',
-      description: 'Documentation for Acme App.',
-    },
-  ],
-  navbar: {
-    brand: { name: 'Acme', href: '/', logo: '/images/logo.svg' },
-    links: [
-      { id: '1', label: 'Home', href: '/' },
-      { id: '2', label: 'Docs', href: '/docs' },
-    ],
-  },
-  faq: [
-    {
-      id: '1',
-      question: 'How does Contextual UI work?',
-      answer: 'It unifies your data layer, headless UI components, and Schema.org JSON-LD SEO graph.',
-    },
-  ],
-  footer: {
-    brand: { name: 'Acme', href: '/' },
-    copyright: { holder: 'Acme Corp', year: 2026 },
-  },
-});
-
-// 3. Initialize the compiled Contextual App instance with baseUrl
-export const siteApp = createContextualApp({
-  schema: siteSchema,
-  connector,
-  baseUrl,
-});
-
-export type SiteData = InferData<typeof siteSchema>;`;
-
-  const layoutCode = `import type { Metadata } from 'next';
-import { siteApp } from '@/data/site.server';
-import { ContextualSite } from 'contextual-ui';
-import { CustomNavbar } from '@/components/Navbar';
-import { CustomFooter } from '@/components/Footer';
-import './globals.css';
-
-export const metadata: Metadata = {
-  title: 'My Next.js Application',
-  description: 'Built with Next.js and Contextual UI',
 };
 
-export default async function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  // Fetch validated data for global layout elements (Navbar, Footer, etc.)
-  const data = await siteApp.fetchData();
-
-  return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col">
-        {/* ContextualSite distributes site data via React context to all client & server components */}
-        <ContextualSite data={data} className="min-h-full flex flex-col flex-1">
-          <CustomNavbar />
-          <div className="flex-1">{children}</div>
-          <CustomFooter />
-        </ContextualSite>
-      </body>
-    </html>
-  );
-}`;
-
-  const navbarCode = `'use client';
-
-import { Navbar } from 'contextual-ui';
-import type { NavbarData } from 'contextual-ui';
-
-interface CustomNavbarProps {
-  data?: NavbarData; // Optional! Automatically read from ContextualSite if omitted
-}
-
-export function CustomNavbar({ data }: CustomNavbarProps = {}) {
-  // Contextual UI components are headless: style with Tailwind, CSS modules, or Radix
-  return (
-    <Navbar.Root data={data} className="fixed top-0 left-0 right-0 z-50 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-zinc-200 dark:border-zinc-800">
-      <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-        <Navbar.Brand className="font-bold font-mono text-base flex items-center gap-2.5 text-zinc-900 dark:text-zinc-50" />
-
-        <Navbar.Links
-          className="hidden md:flex gap-6 items-center"
-          linkClassName="text-zinc-600 hover:text-zinc-950 dark:text-zinc-400 dark:hover:text-zinc-50 no-underline text-sm font-medium transition-colors"
-        />
-
-        <Navbar.Toggle className="md:hidden p-2 text-zinc-600 dark:text-zinc-400 focus:outline-none cursor-pointer rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors" />
-      </div>
-
-      {/* Mobile Menu Dropdown */}
-      <Navbar.Menu
-        className="md:hidden bg-white/95 dark:bg-black/95 border-b border-zinc-200 dark:border-zinc-800 px-6 py-4 flex flex-col gap-2 shadow-xl"
-        linkClassName="text-zinc-700 dark:text-zinc-300 hover:text-zinc-950 dark:hover:text-zinc-50 text-base font-medium py-2 px-3 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-800/60"
-      />
-    </Navbar.Root>
-  );
-}`;
-
-  const pageCode = `import { siteApp } from '@/data/site.server';
-import { WebPage } from 'contextual-ui/server';
-import { Faq } from 'contextual-ui';
-
-// Zero duplication! Automatically pulls title, description, and canonical URL from SSOT
-export const generateMetadata = () => siteApp.getMetadata('home');
-
-export default async function HomePage() {
-  const data = await siteApp.fetchData();
-
-  return (
-    // Scopes the Schema.org JSON-LD graph specifically to this route
-    <WebPage app={siteApp} id="home">
-      <main className="max-w-4xl mx-auto px-6 py-12 space-y-10">
-        <header className="space-y-4">
-          <h1 className="text-4xl font-extrabold tracking-tight">Acme App</h1>
-          <p className="text-lg text-zinc-400">Headless UI with automated Schema.org SEO and Agentic AI graphs.</p>
-        </header>
-
-        {/* Headless FAQ Accordion automatically bound to schema data */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold">Frequently Asked Questions</h2>
-          <Faq.Root className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 shadow-sm">
-            {data?.faq?.map((item) => (
-              <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-zinc-200 dark:border-zinc-800 last:border-b-0 pb-4 last:pb-0">
-                <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
-                  {item.question}
-                </Faq.Trigger>
-                <Faq.Content className="mt-2 text-zinc-400 text-sm leading-relaxed">
-                  {item.answer}
-                </Faq.Content>
-              </Faq.Item>
-            ))}
-          </Faq.Root>
-        </section>
-      </main>
-    </WebPage>
-  );
-}`;
-
-  const sitemapRobotsCode = `// app/sitemap.ts
-import type { MetadataRoute } from 'next';
-import { siteApp } from '@/data/site.server';
-
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  // Automatically derives canonical sitemap from connector routes
-  return siteApp.getSitemap({
-    exclude: ['/cms', '/cms/*'],
-  });
-}
-
-// app/robots.ts
-import type { MetadataRoute } from 'next';
-import { siteApp } from '@/data/site.server';
-
-export default async function robots(): Promise<MetadataRoute.Robots> {
-  // Configures search & AI crawler permissions and auto-attaches sitemap & host
-  return siteApp.getRobots({
-    disallow: ['/cms', '/cms/'],
-  });
-}`;
-
-  const routeCode = `import { siteApp } from '@/data/site.server';
-
-// Expose machine-readable Knowledge Graph for AI Agents, Perplexity & Claude
-export const { GET } = siteApp.createGraphHandler({
-  includeAll: true, // Export all schema sections (or use excludeKeys / includeKeys)
-  graphOptions: {
-    flatten: true,
-    dedupeStrategy: 'merge',
-  },
-});`;
+function QuickstartSection({ collectionsData }: { collectionsData?: any }) {
+  const collectionList = collectionsData ?? [];
+  const quickstartSteps = collectionList.find((c: any) => c.id === 'quickstart-steps') ?? quickstartCollection;
+  const items = quickstartSteps?.items ?? [];
 
   return (
     <section id="quickstart" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <div className="docs-section-header mb-6">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">Quickstart Guide</h2>
-        <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
-          Learn how to install Contextual UI, define a single-source-of-truth schema, configure a data connector, and render headless SEO-ready components in your Next.js application in under 5 minutes.
-        </p>
+        <h2 className="text-2xl font-bold tracking-tight mb-2">{quickstartSteps.title || 'Quickstart Guide'}</h2>
+        {quickstartSteps.description && (
+          <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
+            {quickstartSteps.description}
+          </p>
+        )}
       </div>
 
       {/* Steps List */}
       <Collection.Root data={quickstartSteps} ordered className="space-y-10">
-        {/* Step 1 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              1
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Create Next.js App &amp; Install Dependencies</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Initialize a blank Next.js App Router project (or use an existing project) and install <code className="code-short">contextual-ui</code>, the static connector, and <code className="code-short">zod</code>.
-              </p>
-            </div>
-          </div>
-          <div className="pl-9 space-y-3">
-            <div className="rounded-xl overflow-hidden bg-zinc-950 border border-zinc-800 shadow-lg">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-zinc-800 bg-zinc-900/60">
-                <div className="flex items-center gap-2">
-                  <Terminal className="w-3.5 h-3.5 text-accent" />
-                  <span className="text-xs font-mono text-zinc-300 font-medium">Create Next.js App (Optional)</span>
+        {items.map((step: any, index: number) => {
+          const presentation = quickstartPresentationMap[step.id];
+          const blocks = Array.isArray(step.content) ? step.content : [];
+          const codeBlock = blocks.find((b: any) => b.type === 'code');
+          const calloutBlock = blocks.find((b: any) => b.type === 'callout');
+          const isOptional = presentation?.optional || step.optional;
+
+          return (
+            <Collection.Item
+              key={step.id}
+              id={step.id}
+              index={index}
+              className="docs-step scroll-mt-28"
+            >
+              <div className="flex items-start gap-3">
+                <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
+                  {step.order ?? index + 1}
+                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Collection.Title as="h3" className="text-base font-semibold text-zinc-100" />
+                    {isOptional && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono text-accent bg-accent/10 border border-accent/20">
+                        Optional
+                      </span>
+                    )}
+                  </div>
+                  <Collection.Description className="text-xs text-zinc-400 leading-relaxed mt-1" />
                 </div>
               </div>
-              <div className="p-4 bg-zinc-900/90 font-mono text-xs text-zinc-200">
-                <div className="flex items-center gap-2.5">
-                  <span className="text-accent select-none font-bold">$</span>
-                  <span>pnpm create next-app@latest my-app --yes &amp;&amp; cd my-app</span>
-                </div>
+
+              <div className="pl-9 space-y-3 mt-3">
+                {presentation?.customBeforeCode}
+                {codeBlock && (
+                  <CodeSnippet
+                    filename={codeBlock.filename || `step-${index + 1}`}
+                    code={codeBlock.code}
+                    lang={codeBlock.language || 'typescript'}
+                  />
+                )}
+                {calloutBlock && (
+                  <div className="p-3.5 bg-zinc-900/60 rounded-xl border border-zinc-800 flex items-start gap-3">
+                    <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
+                    <div className="text-xs text-zinc-300 leading-relaxed space-y-1">
+                      {calloutBlock.title && (
+                        <strong className="text-zinc-100 font-semibold block">{calloutBlock.title}</strong>
+                      )}
+                      <span>{calloutBlock.text}</span>
+                    </div>
+                  </div>
+                )}
               </div>
-            </div>
-            <InstallCommandBox />
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              2
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Define your Site Schema (SSOT)</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Create <code className="code-short">data/site.schema.ts</code>. Using <code className="code-short">defineSchema</code>, register pre-built Schema.org registries (<code className="code-short">organization</code>, <code className="code-short">website</code>, <code className="code-short">webpage</code>, <code className="code-short">navbar</code>, <code className="code-short">footer</code>, <code className="code-short">faq</code>) or any custom Zod schemas.
-              </p>
-            </div>
-          </div>
-          <div className="pl-9">
-            <CodeSnippet filename="data/site.schema.ts" code={schemaCode} lang="typescript" />
-          </div>
-        </div>
-
-        {/* Step 3 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              3
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Configure Server Connector &amp; App Instance</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Create <code className="code-short">data/site.server.ts</code>. Bind your schema with <code className="code-short">createContextualApp</code> and a connector (static configuration, headless CMS, or database ORM).
-              </p>
-            </div>
-          </div>
-          <div className="pl-9 space-y-3">
-            <CodeSnippet filename="data/site.server.ts" code={serverCode} lang="typescript" />
-            <div className="p-3.5 bg-zinc-900/60 rounded-xl border border-zinc-800 flex items-start gap-3">
-              <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
-              <div className="text-xs text-zinc-300 leading-relaxed space-y-1">
-                <strong className="text-zinc-100 font-semibold block">Schema Accuracy Guardrails</strong>
-                <span>
-                  Centralizing site metadata prevents data drift between your visual UI, metadata tags, and search engine graphs. In step 6, <code className="code-short">&lt;WebPage app=&#123;siteApp&#125; id=&quot;home&quot;&gt;</code> scopes the Schema.org JSON-LD graph strictly to the current route—ensuring search engines only receive structured data for entities actually rendered on that page.
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Step 4 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              4
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Wrap Root Layout with ContextualSite</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                In <code className="code-short">app/layout.tsx</code> (Server Component), fetch shared data and wrap children in <code className="code-short">&lt;ContextualSite data=&#123;data&#125;&gt;</code>. This distributes validated site data (brand, links, copyright) to all layout components via React Context.
-              </p>
-            </div>
-          </div>
-          <div className="pl-9">
-            <CodeSnippet filename="app/layout.tsx" code={layoutCode} lang="tsx" />
-          </div>
-        </div>
-
-        {/* Step 5 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              5
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Implement Headless Navbar &amp; Footer Client Components</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Contextual UI components (<code className="code-short">&lt;Navbar.Root&gt;</code>, <code className="code-short">&lt;Footer.Root&gt;</code>) are headless client components. Because they sit inside <code className="code-short">&lt;ContextualSite&gt;</code>, they automatically read brand and navigation data from context without needing explicit props!
-              </p>
-            </div>
-          </div>
-          <div className="pl-9">
-            <CodeSnippet filename="components/Navbar.tsx" code={navbarCode} lang="tsx" />
-          </div>
-        </div>
-
-        {/* Step 6 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              6
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Render WebPage &amp; Route-Specific Content</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                In <code className="code-short">app/page.tsx</code>, export <code className="code-short">generateMetadata</code> using <code className="code-short">siteApp.getMetadata(&apos;home&apos;)</code> (zero duplication), and wrap your page in <code className="code-short">&lt;WebPage app=&#123;siteApp&#125; id=&quot;home&quot;&gt;</code> to inject the route-specific Schema.org JSON-LD graph.
-              </p>
-            </div>
-          </div>
-          <div className="pl-9">
-            <CodeSnippet filename="app/page.tsx" code={pageCode} lang="tsx" />
-          </div>
-        </div>
-
-        {/* Step 7 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              7
-            </span>
-            <div>
-              <h3 className="text-base font-semibold text-zinc-100">Add Automated Sitemap &amp; Robots.txt</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Generate <code className="code-short">sitemap.xml</code> and <code className="code-short">robots.txt</code> in 3 lines each. Contextual UI automatically indexes all routes defined in your connector and manages AI crawler permissions (GPTBot, ClaudeBot, PerplexityBot).
-              </p>
-            </div>
-          </div>
-          <div className="pl-9">
-            <CodeSnippet filename="app/sitemap.ts & app/robots.ts" code={sitemapRobotsCode} lang="typescript" />
-          </div>
-        </div>
-
-        {/* Step 8 */}
-        <div className="docs-step">
-          <div className="flex items-start gap-3">
-            <span className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-xs flex items-center justify-center font-bold shrink-0 mt-0.5">
-              8
-            </span>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-semibold text-zinc-100">Expose AI Knowledge Graph API</h3>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono text-accent bg-accent/10 border border-accent/20">
-                  Optional
-                </span>
-              </div>
-              <p className="text-xs text-zinc-400 leading-relaxed mt-1">
-                Expose a machine-readable JSON-LD Knowledge Graph endpoint at <code className="code-short">app/api/graph.json/route.ts</code> in 4 lines. AI Agents (Claude, ChatGPT, Perplexity) use this endpoint to understand your entire site hierarchy.
-              </p>
-            </div>
-          </div>
-          <div className="pl-9">
-            <CodeSnippet filename="app/api/graph.json/route.ts" code={routeCode} lang="typescript" />
-          </div>
-        </div>
+            </Collection.Item>
+          );
+        })}
       </Collection.Root>
     </section>
   );
@@ -1130,11 +816,13 @@ function RegistrySelector({
   );
 }
 
-function SchemaRegistriesSection() {
+function SchemaRegistriesSection({ sectionData }: { sectionData?: any } = {}) {
   const [selectedRegistryId, setSelectedRegistryId] = useState<string>('website');
   const [codeMode, setCodeMode] = useState<'schema' | 'data'>('schema');
 
   const selectedRegistry = REGISTRIES_DATA.find((r) => r.id === selectedRegistryId) || REGISTRIES_DATA[0];
+  const title = sectionData?.title || 'Schema Registries & defineSchema';
+  const description = sectionData?.description || 'defineSchema allows you to compose pre-built, type-validated Schema.org registries and custom Zod schemas into a unified contract. Each registry automatically validates runtime data, generates compile-time TypeScript types, and compiles referentially linked Schema.org @graph JSON-LD nodes.';
 
   const fullSchemaExample = `import {
   defineSchema,
@@ -1175,9 +863,9 @@ export type SiteData = InferData<typeof siteSchema>;`;
   return (
     <section id="schemas" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       <div className="docs-section-header">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">Schema Registries & defineSchema</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-2">{title}</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
-          <code className="code-short">defineSchema</code> allows you to compose pre-built, type-validated Schema.org registries and custom Zod schemas into a unified contract. Each registry automatically validates runtime data, generates compile-time TypeScript types, and compiles referentially linked Schema.org <code className="code-short">@graph</code> JSON-LD nodes.
+          {description}
         </p>
       </div>
 
@@ -1322,8 +1010,10 @@ export const siteSchema = defineSchema({
   );
 }
 
-function AutoFormSection({ formsData }: { formsData?: any }) {
+function AutoFormSection({ formsData, sectionData }: { formsData?: any; sectionData?: any } = {}) {
   const [autoFormResponse, setAutoFormResponse] = useState<Record<string, unknown> | null>(null);
+  const title = sectionData?.title || 'AutoForm & formRegistry';
+  const description = sectionData?.description || '<AutoForm> unifies Headless CMS form definitions, dynamic in-memory Zod validation, and machine-readable Schema.org PotentialAction JSON-LD graphs for AI agents. Define your form structure in your CMS or connector, and render dynamic accessible UI without writing repetitive React field boilerplate.';
 
   const fallbackForms = [
     {
@@ -1616,9 +1306,9 @@ export default async function ContactPage() {
       {/* Header */}
       <div className="docs-section-header flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">AutoForm &amp; formRegistry</h2>
+          <h2 className="text-2xl font-bold tracking-tight mb-2">{title}</h2>
           <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
-            <code className="code-short">&lt;AutoForm&gt;</code> unifies Headless CMS form definitions, dynamic in-memory Zod validation, and machine-readable Schema.org <code className="code-short">PotentialAction</code> JSON-LD graphs for AI agents. Define your form structure in your CMS or connector, and render dynamic accessible UI without writing repetitive React field boilerplate.
+            {description}
           </p>
         </div>
         <a
@@ -1807,9 +1497,11 @@ export default async function ContactPage() {
   );
 }
 
-function CreateFormSection() {
+function CreateFormSection({ sectionData }: { sectionData?: any } = {}) {
   const [submittedData, setSubmittedData] = useState<Record<string, unknown> | null>(null);
   const [isSubmittingStatic, setIsSubmittingStatic] = useState(false);
+  const title = sectionData?.title || 'createForm (Static Form Factory)';
+  const description = sectionData?.description || 'The createForm factory generates headless, strictly type-safe React form components directly from a hardcoded Zod schema. Ideal for developer-centric custom forms with fixed field requirements, providing automatic blur validation, field name autocompletion, and zero-state boilerplate.';
 
   const staticStep1Code = `import { z } from 'zod';
 
@@ -1930,9 +1622,9 @@ export function ContactFormCard() {
     <section id="create-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       {/* Header */}
       <div className="docs-section-header">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">createForm (Static Form Factory)</h2>
+        <h2 className="text-2xl font-bold tracking-tight mb-2">{title}</h2>
         <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
-          The <code className="code-short">createForm</code> factory generates headless, strictly type-safe React form components directly from a hardcoded Zod schema. Ideal for developer-centric custom forms with fixed field requirements, providing automatic blur validation, field name autocompletion, and zero-state boilerplate.
+          {description}
         </p>
       </div>
 
@@ -2133,8 +1825,10 @@ export function ContactFormCard() {
   );
 }
 
-function ConnectorsSection() {
+function ConnectorsSection({ sectionData }: { sectionData?: any } = {}) {
   const [activeTab, setActiveTab] = useState<'static' | 'cms' | 'database'>('static');
+  const title = sectionData?.title || 'Connectors & Data Layer';
+  const description = sectionData?.description || 'Connectors decouple your data sources (Static JSON, Headless CMS, Database ORMs, or REST APIs) from your React UI components and SEO knowledge graphs. Any source that fulfills the simple contract can be plugged into createContextualApp.';
 
   const staticCode = `import { staticConnector } from 'contextual-ui-connector-static';
 import { createContextualApp } from 'contextual-ui/server';
@@ -2231,10 +1925,10 @@ export const siteApp = createContextualApp({
   return (
     <section id="connectors" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
-        <span>Connectors & Data Layer</span>
+        <span>{title}</span>
       </h2>
       <p className="mb-6 text-sm leading-relaxed text-zinc-300">
-        Connectors decouple your data sources (Static JSON, Headless CMS, Database ORMs, or REST APIs) from your React UI components and SEO knowledge graphs. Any source that fulfills the simple <code className="code-short">{`{ fetchData: () => Promise<T> }`}</code> contract can be plugged into <code className="code-short">createContextualApp</code>.
+        {description}
       </p>
 
       <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
@@ -2302,9 +1996,11 @@ export const siteApp = createContextualApp({
   );
 }
 
-function HelpersSection({ data }: { data: SiteData }) {
+function HelpersSection({ data, sectionData }: { data: SiteData; sectionData?: any }) {
   const [activeTab, setActiveTab] = useState<'page' | 'output' | 'overrides'>('page');
   const [selectedPageId, setSelectedPageId] = useState('privacy');
+  const title = sectionData?.title || 'Helpers: siteApp.getMetadata()';
+  const description = sectionData?.description || 'Next.js Metadata helper that eliminates duplication between your data connector, Schema.org JSON-LD graphs, and HTML <head> meta tags. Since siteApp already knows each page\'s title, description, canonical URL, and base URL from your Single Source of Truth (SSOT), siteApp.getMetadata(pageId) generates fully typed, route-accurate Next.js Metadata in a single line.';
 
   const pages = (data.webpage && Array.isArray(data.webpage)) ? data.webpage : [];
   const selectedPage = pages.find((p) => p.id === selectedPageId) || pages[0] || {
@@ -2413,13 +2109,13 @@ export const generateMetadata = () =>
   return (
     <section id="helpers" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-xl font-bold">Helpers: siteApp.getMetadata()</h2>
+        <h2 className="text-xl font-bold">{title}</h2>
         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
           Next.js App Router
         </span>
       </div>
       <p className="mb-6 text-sm leading-relaxed text-zinc-300">
-        Next.js Metadata helper that eliminates duplication between your data connector, Schema.org JSON-LD graphs, and HTML <code className="code-short">&lt;head&gt;</code> meta tags. Since <code className="code-short">siteApp</code> already knows each page&apos;s title, description, canonical URL, and base URL from your Single Source of Truth (SSOT), <code className="code-short">siteApp.getMetadata(pageId)</code> generates fully typed, route-accurate Next.js <code className="code-short">Metadata</code> in a single line.
+        {description}
       </p>
 
       {/* Highlights Grid */}
@@ -3442,6 +3138,13 @@ function ShowcaseSection({
 
 export function DocsClient({ data }: { data: SiteData }) {
   const [activeId, setActiveId] = useState<string>('quickstart');
+
+  const sectionList = (data as any)?.sections ?? docsSections;
+  const schemaRegSection = sectionList.find((s: any) => s.id === 'schema-registries');
+  const autoFormSection = sectionList.find((s: any) => s.id === 'auto-form');
+  const createFormSection = sectionList.find((s: any) => s.id === 'create-form');
+  const connectorsSection = sectionList.find((s: any) => s.id === 'connectors');
+  const helpersSection = sectionList.find((s: any) => s.id === 'helpers');
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -5122,7 +4825,7 @@ export default async function DocsPage() {
           <QuickstartSection collectionsData={(data as any)?.collections} />
 
           {/* Schema Registries & defineSchema */}
-          <SchemaRegistriesSection />
+          <SchemaRegistriesSection sectionData={schemaRegSection} />
 
           {/* ContextualSite Showcase */}
           <ShowcaseSection
@@ -5160,7 +4863,7 @@ export default async function DocsPage() {
             exampleDescription="React component implementation using Navbar subcomponents."
             schemaDescription="Schema.org SiteNavigationElement automatically injected in the DOM."
           >
-            <Navbar.Root data={navbarData} className="w-full relative">
+            <Navbar.Root data={navbarData} injectJsonLd={false} className="w-full relative">
               <div className="flex justify-between items-center w-full">
                 <Navbar.Brand className="font-bold text-lg no-underline flex items-center gap-2.5">
                   <img
@@ -5195,7 +4898,7 @@ export default async function DocsPage() {
             exampleDescription="Accessible, schema-driven multi-column footer layout."
             schemaDescription="Schema.org WPFooter automatically injected in the DOM."
           >
-            <Footer.Root data={footerData} className="w-full space-y-8">
+            <Footer.Root data={footerData} injectJsonLd={false} className="w-full space-y-8">
               {/* Top Section: Brand & Multi-Column Navigation */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div className="md:col-span-2 space-y-3">
@@ -5272,7 +4975,7 @@ export default async function DocsPage() {
             exampleDescription="Accessible breadcrumb trail implementation with list items and separators."
             schemaDescription="Schema.org BreadcrumbList automatically injected in the DOM."
           >
-            <Breadcrumb.Root data={breadcrumbList} baseUrl={baseUrl}>
+            <Breadcrumb.Root data={breadcrumbList} baseUrl={baseUrl} injectJsonLd={false}>
               <Breadcrumb.List className="flex list-none p-0 m-0 gap-2 items-center text-sm">
                 {breadcrumbList.map((item, index) => {
                   const isLast = index === breadcrumbList.length - 1;
@@ -5311,7 +5014,7 @@ export default async function DocsPage() {
             exampleDescription="Collapsible FAQ layout with trigger buttons and content sections."
             schemaDescription="Schema.org FAQPage automatically injected in the DOM."
           >
-            <Faq.Root data={faqList}>
+            <Faq.Root data={faqList} injectJsonLd={false}>
               {faqList.map((item, index) => (
                 <Faq.Item key={item.id} id={item.id} className="mb-4 last:mb-0 border-b border-base last:border-b-0 pb-4 last:pb-0">
                   <Faq.Trigger className="bg-transparent border-none font-semibold text-base cursor-pointer text-left w-full hover:text-accent transition-colors py-1">
@@ -5326,16 +5029,16 @@ export default async function DocsPage() {
           </ShowcaseSection>
 
           {/* Forms: AutoForm Section */}
-          <AutoFormSection formsData={data.forms} />
+          <AutoFormSection formsData={data.forms} sectionData={autoFormSection} />
 
           {/* Forms: createForm Section */}
-          <CreateFormSection />
+          <CreateFormSection sectionData={createFormSection} />
 
           {/* Connectors Section */}
-          <ConnectorsSection />
+          <ConnectorsSection sectionData={connectorsSection} />
 
           {/* Helpers Section */}
-          <HelpersSection data={data} />
+          <HelpersSection data={data} sectionData={helpersSection} />
 
           {/* Sitemap Section */}
           <SitemapSection data={data} />
