@@ -65,14 +65,15 @@ const connector = staticConnector({
     },
   ],
   faq: [
-    { id: '1', question: 'What is Contextual UI?', answer: 'An open-source library that provides the building blocks for next-gen AI-ready websites.' },
-    { id: '2', question: 'How does semantic SEO work with Contextual UI?', answer: 'Contextual UI automatically injects structured JSON-LD graphs for search engines and AI agents.' },
-    { id: '3', question: 'Can I use custom Zod schemas for CMS validation?', answer: 'Yes, any Zod schema can be plugged into the CMS dashboard and form generator.' },
-    { id: '4', question: 'Why use Contextual UI for building websites when AI is getting better and better?', answer: 'Well, libraries like Contextual UI are the kind of thing that make AI better, so lets use it!' },
+    { id: '1', pageId: 'home', question: 'What is Contextual UI?', answer: 'An open-source library that provides the building blocks for next-gen AI-ready websites.' },
+    { id: '2', pageId: 'home', question: 'How does semantic SEO work with Contextual UI?', answer: 'Contextual UI automatically injects structured JSON-LD graphs for search engines and AI agents.' },
+    { id: '3', pageId: 'home', question: 'Can I use custom Zod schemas for CMS validation?', answer: 'Yes, any Zod schema can be plugged into the CMS dashboard and form generator.' },
+    { id: '4', pageId: 'home', question: 'Why use Contextual UI for building websites when AI is getting better and better?', answer: 'Well, libraries like Contextual UI are the kind of thing that make AI better, so lets use it!' },
   ],
   forms: [
     {
       id: 'contact-sales',
+      pageId: 'docs',
       name: 'Contact Sales & Support',
       title: 'Get in Touch',
       description: 'Send our team a direct message. Submissions are dynamically validated and Agentic AI ready.',

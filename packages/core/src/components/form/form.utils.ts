@@ -22,13 +22,18 @@ export function generateFormJsonLd(data: FormData, ctx?: Partial<JsonLdContext>)
   const refer = ctx?.refersTo ?? refersTo;
   const forms = normalizeForms(data);
 
-  return forms.map((form) =>
-    createPotentialAction({
+  return forms.map((form) => {
+    const pageId = form.pageId || ctx?.targetPageId;
+    const isPartOf = pageId && (pageId !== 'home' || !ctx?.isSinglePage)
+      ? refer('webpage', pageId)
+      : refer('webpage');
+
+    return createPotentialAction({
       id: `form-${form.id}`,
       actionType: form.actionType || 'ContactAction',
       name: form.name || form.title || form.id,
       description: form.description,
-      isPartOf: refer('webpage'),
+      isPartOf,
       target: {
         urlTemplate: form.endpoint,
         httpMethod: form.method || 'POST',
@@ -65,8 +70,8 @@ export function generateFormJsonLd(data: FormData, ctx?: Partial<JsonLdContext>)
           ...(options && options.length > 0 ? { valueOption: options } : {}),
         };
       }),
-    })
-  );
+    });
+  });
 }
 
 /**
@@ -76,6 +81,7 @@ export function exportAgentData(data: FormData) {
   const forms = normalizeForms(data);
   return forms.map((form) => ({
     id: form.id,
+    pageId: form.pageId,
     name: form.name || form.title || form.id,
     description: form.description,
     actionType: form.actionType,

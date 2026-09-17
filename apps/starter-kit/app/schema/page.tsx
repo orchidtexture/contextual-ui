@@ -24,6 +24,7 @@ export default async function SchemaPage() {
   navbarRegistry,
   faqRegistry,
   footerRegistry,
+  formRegistry,
 } from 'contextual-ui/server';
 import { z } from 'zod';
 
@@ -32,8 +33,9 @@ export const siteSchema = defineSchema({
   website: websiteRegistry(),
   webpage: webpageRegistry(),
   navbar: navbarRegistry(),
-  faq: faqRegistry(),
   footer: footerRegistry(),
+  faq: faqRegistry(),
+  forms: formRegistry(),
   announcement: {
     schema: z.object({
       enabled: z.boolean(),

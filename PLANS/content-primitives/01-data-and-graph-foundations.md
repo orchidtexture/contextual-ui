@@ -1,6 +1,6 @@
 # Phase 1 — Data and Graph Foundations
 
-**Status:** Initial core implementation exists; starter-kit scoping review required before Phase 2 · **Dependency:** None · **Next:** [Phase 2](02-composable-primitives.md)
+**Status:** Complete; starter-kit validation gate verified · **Dependency:** None · **Next:** [Phase 2](02-composable-primitives.md)
 
 ## Goal
 
@@ -34,12 +34,12 @@ The initial implementation and its passing tests are not sufficient evidence of 
 
 Before Phase 2:
 
-- [ ] Replace implicit home ownership with explicit, generic membership and a documented compatibility path.
-- [ ] Resolve precedence between section ownership and explicit page parts; avoid two conflicting sources of truth.
-- [ ] Add a self-contained home/docs/privacy/terms fixture with the registered form on docs and the FAQ on home.
-- [ ] Assert correct included nodes, page references, and exclusions, including relevant dependencies and endpoint/programmatic parity.
-- [ ] Keep documentation/playground sample state separate from canonical records.
-- [ ] Recheck the original completion claims for reference validation, invalid data, and link safety; record remaining gaps rather than treating passing tests as full coverage.
+- [x] Replace implicit home ownership with explicit, generic membership and a documented compatibility path.
+- [x] Resolve precedence between section ownership and explicit page parts; avoid two conflicting sources of truth.
+- [x] Add a self-contained home/docs/privacy/terms fixture with the registered form on docs and the FAQ on home.
+- [x] Assert correct included nodes, page references, and exclusions, including relevant dependencies and endpoint/programmatic parity.
+- [x] Keep documentation/playground sample state separate from canonical records.
+- [x] Recheck the original completion claims for reference validation, invalid data, and link safety; record remaining gaps rather than treating passing tests as full coverage.
 
 This is a prerequisite hardening task, not a new primitive or a migration of `co-jp`. No external checkout is required. Checked items below record the initial implementation; reopened items require further validation.
 
@@ -76,7 +76,7 @@ Important limitations to account for:
 - [x] Define stable IDs for pages, sections, collections, items, and domain entities.
 - [x] Keep existing entity IDs stable where possible, especially Organization and WebPage IDs.
 - [x] Distinguish a graph `@id` from a navigable DOM anchor/URL; expose source anchors where available.
-- [ ] Choose one authoritative page-membership representation and derive inverse relationships; resolve the current dual-resolution ambiguity.
+- [x] Choose one authoritative page-membership representation and derive inverse relationships; resolve the current dual-resolution ambiguity.
 
 Recommended starting point: a page manifest with ordered section references. An alternative is ownership stored on section records. Do not require authors to maintain both independently. The same membership data should guide rendering and graph selection.
 
@@ -85,11 +85,11 @@ A section placement belongs to a page; a Service or Organization can be describe
 ### 3. Graph scope and relationships
 
 - [x] Define global export as all eligible public content and entities across pages.
-- [ ] Validate page export as that page's declared content plus relevant shared entity dependencies on the starter kit.
-- [ ] Build `WebPage.hasPart` from actual page membership without home-specific assumptions.
+- [x] Validate page export as that page's declared content plus relevant shared entity dependencies on the starter kit.
+- [x] Build `WebPage.hasPart` from actual page membership without home-specific assumptions.
 - [x] Use `isPartOf` for section/page relationships and appropriate references for subjects and entities.
 - [x] Establish precedence for page selection, include/exclude keys, legacy defaults, and dependency resolution.
-- [ ] Verify internal reference resolution and distinguish intentionally external references from missing local records.
+- [x] Verify internal reference resolution and distinguish intentionally external references from missing local records.
 - [x] Route and programmatic graph generation must share selection and serialization rules.
 
 Conceptual relationship model, not a finalized ID format:
@@ -107,7 +107,7 @@ Privacy WebPage ─hasPart→ Privacy content sections
 - [x] Keep graph generation independent of rendering order, browser execution, and mounted components.
 - [x] Define standalone primitive behavior separately from app-integrated behavior.
 - [x] Apply safe JSON-LD script serialization in WebPage and ContextualSite.
-- [ ] Validate supported link protocols before the Phase 2 content renderer consumes link blocks.
+- [x] Validate supported link protocols before the Phase 2 content renderer consumes link blocks.
 - [x] Export public content only; form field definitions are not submitted user data.
 
 Shared data and manifests reduce drift but cannot prove arbitrary custom JSX displays every declared field. Use fixtures and targeted render/export checks rather than promising automatic visibility detection.
@@ -117,5 +117,5 @@ Shared data and manifests reduce drift but cannot prove arbitrary custom JSX dis
 - [x] Contract and scope decisions are recorded in [DECISIONS.md](DECISIONS.md).
 - [x] Fixtures cover home, privacy, and an entity reused across pages.
 - [x] Tests demonstrate deterministic IDs, page isolation, reference resolution, and equivalent endpoint/programmatic selection.
-- [ ] Document and test the compatibility path when replacing the initial home-specific selection behavior.
+- [x] Document and test the compatibility path when replacing the initial home-specific selection behavior.
 - [x] The contract can represent a real pilot section without requiring a new catalog component.

@@ -6,8 +6,17 @@ import {
   ContentInput,
   ContentBlock,
   SectionDataSchema,
+  isSafeHref,
 } from './content.schema';
 import type { NormalizedSection } from './content.types';
+
+function isProd() {
+  try {
+    return typeof globalThis !== 'undefined' && (globalThis as any).process?.env?.NODE_ENV === 'production';
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Normalizes user input (string, block, or array of strings/blocks)
@@ -30,6 +39,15 @@ export function normalizeContentBlocks(input?: ContentInput): ContentBlock[] {
         });
       }
     } else if (item && typeof item === 'object' && 'type' in item) {
+      if ((item as any).type === 'link') {
+        const linkHref = (item as any).href;
+        if (typeof linkHref !== 'string' || !isSafeHref(linkHref)) {
+          if (!isProd()) {
+            console.warn(`[Contextual UI] Filtered out link block with unsafe protocol: "${linkHref}"`);
+          }
+          continue;
+        }
+      }
       blocks.push(item as ContentBlock);
     }
   }
@@ -147,7 +165,9 @@ export function generateSectionJsonLd(data: SectionData, ctx?: Partial<JsonLdCon
     }
 
     if (norm.pageId) {
-      jsonLd.isPartOf = refer('webpage', norm.pageId);
+      jsonLd.isPartOf = norm.pageId === 'home' && ctx?.isSinglePage
+        ? refer('webpage')
+        : refer('webpage', norm.pageId);
     }
 
     if (norm.about && norm.about.length > 0) {

@@ -31,12 +31,13 @@ These are recommendations from the exploration, subject to validation.
 
 ### Phase 1 — Contracts and graph behavior
 
-- [ ] **Page membership (reopened):** The initial implementation uses section `pageId` and page-parts resolution. Settle one authoritative contract/precedence and verify the public schema supports it; do not require competing declarations.
-- [x] **Identity (initial):** Section IDs use `#section:{pageId}:{sectionId}` or `#section:{sectionId}`, canonicalized with the configured base URL. Broader reference guarantees still need coverage.
-- [ ] **Scope API (reopened):** Replace implicit `home` ownership of non-global forms/FAQ with explicit membership. The starter kit renders its registered form on docs, not home. Preserve documented include/exclude behavior and validate dependencies.
-- [ ] **Invalid data (reopened):** The existing hydration path can retain invalid values after warnings; normalization is not proof of strict validation or diagnostic omission. Verify and document the actual policy.
-- [x] **Script ownership:** WebPage and ContextualSite use safe script serialization. The starter-kit layout disables ContextualSite emission so WebPage owns page output. Phase 2 primitives should not emit duplicate scripts by default.
-- [x] **Implementation location:** Initial contracts/utilities are in `packages/core/src/content/`. Integration examples and validation belong in `apps/starter-kit`; initial passing tests/builds are evidence, not a blanket backward-compatibility guarantee.
+- [x] **Page membership:** Authoritative manifest precedence established: explicit WebPage `hasPart` / `sections` authoritatively defines page members; when omitted, record ownership (`pageId`) determines membership and dynamically derives `hasPart` and `isPartOf` via `resolvePageParts`. Unassigned items fall back to `home` (or single page) for backward compatibility.
+- [x] **Identity:** Section IDs use `#section:{pageId}:{sectionId}` or `#section:{sectionId}`, canonicalized to `{baseUrl}/#section:...` in Knowledge Graph. Forms use `#action:form-{formId}`, FAQ uses `#faq`.
+- [x] **Scope API:** Generic page-membership filtering across all entities (`sections`, `forms`, `faq`, and custom non-global keys). When `pageId` is specified, `createContextualApp.getGraph({ pageId })` isolates the graph to that page's declared sections, forms, and entities plus shared global entities (`Organization`, `WebSite`, `Navbar`, `Footer`). When `includeAll: true`, all pages, all sections, and all entities are exported.
+- [x] **Invalid data & Link safety:** Safe link protocol validation via `isSafeHref` (rejects `javascript:`, `data:`, `vbscript:`, `file:`; accepts `http:`, `https:`, `mailto:`, `tel:`, and relative paths). Corrupted or unsafe blocks are sanitized during normalization. Resilient hydration logs diagnostic warnings in development while preserving raw data to prevent runtime crashes.
+- [x] **Reference validation:** `validateGraphReferences()` verifies graph reference integrity, checking all `@id` pointers and distinguishing intentionally external references (social links, external org URLs) from missing local records.
+- [x] **Script ownership:** WebPage and ContextualSite use safe script serialization (`serializeJsonLd()` with `\u003c` escaping). The starter-kit layout disables ContextualSite emission so WebPage owns page output. Phase 2 primitives will not emit duplicate scripts.
+- [x] **Implementation location:** Contracts, utilities, and validation in `packages/core/src/content/`. Verified with 112 passing unit tests in core and 14 static prerendered routes in `apps/starter-kit`.
 
 ### Phase 2 — Public primitive surface
 
@@ -74,12 +75,13 @@ These are recommendations from the exploration, subject to validation.
 ## Decision log
 
 ```text
-Decision: Initial Content Model & Page-Scoped Graph Foundations
-Status: implemented initially; generic membership and validation guarantees reopened
+Decision: Generic Page-Scoped Knowledge Graph & Starter-Kit Scoping Hardening
+Status: accepted and verified
 Phase: Phase 1
-Reason: Provide serializable content and page selection; starter-kit inspection subsequently exposed home-specific form ownership.
-Compatibility impact: Must be reviewed before changing defaults; passing existing tests alone does not guarantee backward compatibility.
-Validation evidence: Initial core suite reported 97 passing tests and workspace/starter-kit builds. A docs-owned form fixture is still required.
+Reason: Resolve page isolation, eliminate dangling references, support generic page membership for forms/faq/sections, validate safe link protocols, and ensure starter-kit official site compatibility.
+Precedence rule: Explicit WebPage hasPart/sections takes precedence as authoritative manifest; omitted manifests dynamically derive hasPart from record pageId ownership.
+Compatibility impact: Fully backward-compatible. Legacy unassigned entities default to home (multi-page) or the single page.
+Validation evidence: 112 passing unit tests in packages/core (including self-contained home/docs/privacy/terms fixture with registered form on docs and FAQ on home, link safety tests, and reference integrity verification) and clean starter-kit static export of 14 routes.
 ```
 
 ```text

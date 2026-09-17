@@ -104,6 +104,9 @@ export {
   sectionRegistry,
   sectionsRegistry,
 } from '../content/content.utils';
+export { isSafeHref } from '../content/content.schema';
+export { validateGraphReferences } from '../content/content.validator';
+export type { GraphReferenceValidationResult } from '../content/content.validator';
 
 
 

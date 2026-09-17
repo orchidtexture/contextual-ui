@@ -43,11 +43,16 @@ export function generateFooterJsonLd(data: FooterData, ctx?: Partial<JsonLdConte
   const allLinks = Array.from(linksMap.values());
   const copyrightHolderName = data.copyright?.holder || data.brand?.name;
 
+  const pageId = ctx?.targetPageId;
+  const isPartOf = pageId
+    ? (pageId !== 'home' || !ctx?.isSinglePage ? refer('webpage', pageId) : refer('webpage'))
+    : (ctx?.isSinglePage ? refer('webpage') : refer('website'));
+
   return {
     '@context': 'https://schema.org',
     '@type': 'WPFooter',
     '@id': create('footer'),
-    isPartOf: refer('webpage'),
+    isPartOf,
     ...(data.brand?.name ? { name: data.brand.name } : {}),
     ...(data.brand?.description ? { description: data.brand.description } : {}),
     url: data.brand?.href || '/',

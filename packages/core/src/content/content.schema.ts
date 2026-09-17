@@ -64,13 +64,56 @@ export const ListBlockSchema = z.object({
 });
 export type ListBlock = z.infer<typeof ListBlockSchema>;
 
+const SAFE_PROTOCOLS = new Set(['http:', 'https:', 'mailto:', 'tel:']);
+
+/**
+ * Validates whether a URL/URI href string uses a safe protocol for web links.
+ * Rejects dangerous schemes like javascript:, data:, vbscript:, and file:.
+ */
+export function isSafeHref(href: string): boolean {
+  if (typeof href !== 'string') return false;
+  const trimmed = href.trim();
+  if (trimmed.length === 0) return false;
+
+  // Relative paths and anchor fragments are safe
+  if (
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('#') ||
+    trimmed.startsWith('./') ||
+    trimmed.startsWith('../')
+  ) {
+    return true;
+  }
+
+  // Protocol-relative URLs
+  if (trimmed.startsWith('//')) {
+    return true;
+  }
+
+  const colonIndex = trimmed.indexOf(':');
+  if (colonIndex > 0) {
+    const scheme = trimmed.slice(0, colonIndex + 1).toLowerCase();
+    if (scheme === 'javascript:' || scheme === 'data:' || scheme === 'vbscript:' || scheme === 'file:') {
+      return false;
+    }
+    return SAFE_PROTOCOLS.has(scheme);
+  }
+
+  return false;
+}
+
 /**
  * Link content block.
  */
 export const LinkBlockSchema = z.object({
   type: z.literal('link'),
   label: cx(z.string(), { label: 'Label', widget: 'text' }),
-  href: cx(z.string(), { label: 'URL', widget: 'text' }),
+  href: cx(
+    z.string().refine((val) => isSafeHref(val), {
+      message: 'Unsafe or unsupported link protocol. Allowed: http, https, mailto, tel, or relative path.',
+    }),
+    { label: 'URL', widget: 'text' }
+  ),
   external: z.boolean().optional(),
   relationship: z.string().optional(),
 });

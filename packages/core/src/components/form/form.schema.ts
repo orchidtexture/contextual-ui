@@ -43,6 +43,7 @@ export const FormFieldSchema = z.object({
 
 export const FormEntitySchema = z.object({
   id: z.string().min(1, 'Form ID is required'),
+  pageId: z.string().optional(),
   name: z.string().optional(),
   title: z.string().optional(),
   description: z.string().optional(),

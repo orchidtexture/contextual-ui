@@ -22,11 +22,16 @@ export function generateNavbarJsonLd(data: NavbarData, ctx?: Partial<JsonLdConte
   const create = ctx?.createId ?? createId;
   const refer = ctx?.refersTo ?? refersTo;
 
+  const pageId = ctx?.targetPageId;
+  const isPartOf = pageId
+    ? (pageId !== 'home' || !ctx?.isSinglePage ? refer('webpage', pageId) : refer('webpage'))
+    : (ctx?.isSinglePage ? refer('webpage') : refer('website'));
+
   return {
     '@context': 'https://schema.org',
     '@type': 'SiteNavigationElement',
     '@id': create('navbar'),
-    isPartOf: refer('webpage'),
+    isPartOf,
     name: data.brand?.name || 'Navigation',
     url: data.brand?.href || '/',
     hasPart: data.links.map((link) => mapNavLink(link)),

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const FaqItemSchema = z.object({
   id: z.string(),
+  pageId: z.string().optional(),
   question: z.string().min(1, "Question cannot be empty"),
   answer: z.string().min(1, "Answer cannot be empty"),
 });

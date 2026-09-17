@@ -64,6 +64,8 @@ export function createContextualApp<
     // Support single page resolution when an array of webpages is configured
     const webpageKey = ('webpage' in merged) ? 'webpage' : (('webpages' in merged) ? 'webpages' : undefined);
     let targetPage: any = undefined;
+    const isSinglePage = !webpageKey || !raw[webpageKey] || (Array.isArray(raw[webpageKey]) && raw[webpageKey].length <= 1);
+
     if (webpageKey && Array.isArray(raw[webpageKey])) {
       const pageList: any[] = raw[webpageKey];
       if (pageId || pageUrl) {
@@ -108,21 +110,73 @@ export function createContextualApp<
       targetPage = merged[webpageKey];
     }
 
-    // Support page-scoped section filtering when pageId or pageUrl is specified
-    const sectionKey = ('sections' in merged) ? 'sections' : (('section' in merged) ? 'section' : undefined);
-    if (sectionKey && Array.isArray(raw[sectionKey]) && (pageId || pageUrl)) {
-      const resolvedTargetId = targetPage?.id || pageId || (pageUrl === '/' ? 'home' : (pageUrl ? pageUrl.replace(/^\//, '') : undefined));
-      if (resolvedTargetId) {
-        const declaredSections = Array.isArray(targetPage?.sections)
-          ? targetPage.sections
-          : (Array.isArray(targetPage?.hasPart) ? targetPage.hasPart : undefined);
+    // Support page-scoped filtering when pageId or pageUrl is specified
+    const resolvedTargetId = targetPage?.id || pageId || (pageUrl === '/' ? 'home' : (pageUrl ? pageUrl.replace(/^\//, '') : undefined));
 
-        merged[sectionKey] = (raw[sectionKey] as any[]).filter((s: any) => {
-          if (declaredSections && declaredSections.includes(s.id)) return true;
-          if (s.pageId && s.pageId === resolvedTargetId) return true;
-          if (!s.pageId && !declaredSections && resolvedTargetId === 'home') return true;
-          return false;
+    if (resolvedTargetId && (pageId || pageUrl)) {
+      const declaredParts: string[] | undefined = Array.isArray(targetPage?.hasPart)
+        ? targetPage.hasPart
+        : (Array.isArray(targetPage?.sections) ? targetPage.sections : undefined);
+
+      const matchesPart = (id: string, itemPageId?: string) => {
+        if (!id) return false;
+        return Boolean(
+          declaredParts?.includes(id) ||
+          declaredParts?.includes(`#${id}`) ||
+          declaredParts?.includes(`section:${id}`) ||
+          (itemPageId ? declaredParts?.includes(`section:${itemPageId}:${id}`) : false) ||
+          (itemPageId ? declaredParts?.includes(`#section:${itemPageId}:${id}`) : false) ||
+          declaredParts?.includes(`action:${id}`) ||
+          declaredParts?.includes(`#action:${id}`)
+        );
+      };
+
+      // 1. Filter sections
+      const sectionKey = ('sections' in merged) ? 'sections' : (('section' in merged) ? 'section' : undefined);
+      if (sectionKey && Array.isArray(merged[sectionKey])) {
+        merged[sectionKey] = (merged[sectionKey] as any[]).filter((s: any) => {
+          if (declaredParts && declaredParts.length > 0) return matchesPart(s.id, s.pageId);
+          if (s.pageId) return s.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
         });
+      }
+
+      // 2. Filter forms
+      const formKey = ('forms' in merged) ? 'forms' : (('form' in merged) ? 'form' : undefined);
+      if (formKey && merged[formKey]) {
+        const formList: any[] = Array.isArray(merged[formKey]) ? merged[formKey] : [merged[formKey]];
+        const filteredForms = formList.filter((f: any) => {
+          if (declaredParts && declaredParts.length > 0) {
+            return matchesPart(f.id) || matchesPart(`form-${f.id}`) || declaredParts.includes('forms') || declaredParts.includes('#forms');
+          }
+          if (f.pageId) return f.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
+        if (Array.isArray(merged[formKey])) {
+          merged[formKey] = filteredForms;
+        } else {
+          merged[formKey] = filteredForms.length > 0 ? filteredForms[0] : undefined;
+        }
+      }
+
+      // 3. Filter faq
+      const faqKey = ('faq' in merged) ? 'faq' : undefined;
+      if (faqKey && merged[faqKey]) {
+        let faqBelongs = false;
+        if (declaredParts && declaredParts.length > 0) {
+          faqBelongs = declaredParts.includes('faq') || declaredParts.includes('#faq');
+        } else {
+          const faqData = merged[faqKey];
+          const faqPageId = faqData?.pageId || (Array.isArray(faqData) ? faqData[0]?.pageId : undefined);
+          if (faqPageId) {
+            faqBelongs = faqPageId === resolvedTargetId;
+          } else {
+            faqBelongs = resolvedTargetId === 'home' || isSinglePage;
+          }
+        }
+        if (!faqBelongs) {
+          merged[faqKey] = [];
+        }
       }
     }
 
@@ -140,12 +194,17 @@ export function createContextualApp<
       const rawData = await options.connector.fetchData();
       const targetPageId = handlerOptions?.pageId || (handlerOptions?.pageUrl === '/' ? 'home' : (handlerOptions?.pageUrl ? handlerOptions.pageUrl.replace(/^\//, '') : undefined));
 
+      const webpageKey = ('webpage' in rawData) ? 'webpage' : (('webpages' in rawData) ? 'webpages' : undefined);
+      const isSinglePage = !webpageKey || !rawData[webpageKey] || (Array.isArray(rawData[webpageKey]) && rawData[webpageKey].length <= 1);
       const sectionKey = ('sections' in rawData) ? 'sections' : (('section' in rawData) ? 'section' : undefined);
-      const isSinglePage = !rawData.webpage || (Array.isArray(rawData.webpage) && rawData.webpage.length <= 1);
+      const formKey = ('forms' in rawData) ? 'forms' : (('form' in rawData) ? 'form' : undefined);
+      const faqKey = ('faq' in rawData) ? 'faq' : undefined;
 
       const extendedJsonLdContext = {
         ...(handlerOptions?.jsonLdContext || {}),
         hasFaq: Boolean(rawData.faq),
+        targetPageId,
+        isSinglePage,
         resolvePageParts: (pId: string) => {
           const parts: Array<string | { '@id': string }> = [];
           if (rawData.navbar) parts.push('navbar');
@@ -153,7 +212,7 @@ export function createContextualApp<
           if (sectionKey && Array.isArray(rawData[sectionKey])) {
             const matched = rawData[sectionKey].filter((s: any) => {
               if (s.pageId) return s.pageId === pId;
-              return pId === 'home';
+              return pId === 'home' || isSinglePage;
             });
             for (const s of matched) {
               const sId = s.id?.startsWith('#') || s.id?.startsWith('http')
@@ -163,8 +222,24 @@ export function createContextualApp<
             }
           }
 
-          if (rawData.faq && (pId === 'home' || isSinglePage)) {
-            parts.push('faq');
+          if (formKey && rawData[formKey]) {
+            const formList: any[] = Array.isArray(rawData[formKey]) ? rawData[formKey] : [rawData[formKey]];
+            const matched = formList.filter((f: any) => {
+              if (f.pageId) return f.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const f of matched) {
+              parts.push(`action:form-${f.id}`);
+            }
+          }
+
+          if (faqKey && rawData[faqKey]) {
+            const faqData = rawData[faqKey];
+            const faqPageId = faqData?.pageId || (Array.isArray(faqData) ? faqData[0]?.pageId : undefined);
+            const matchesFaq = faqPageId ? faqPageId === pId : (pId === 'home' || isSinglePage);
+            if (matchesFaq) {
+              parts.push('faq');
+            }
           }
 
           if (rawData.footer) parts.push('footer');
@@ -186,6 +261,9 @@ export function createContextualApp<
       const includeAll = handlerOptions?.includeAll;
 
       for (const [key, val] of Object.entries(generated)) {
+        if (!val) continue;
+        if (Array.isArray(val) && val.length === 0) continue;
+
         if (excludeKeys?.includes(key)) continue;
         
         if (includeKeys?.includes(key)) {
@@ -198,13 +276,9 @@ export function createContextualApp<
           continue;
         }
 
-        // When a specific page is targeted, include non-global parts relevant to that page
+        // When a specific page is targeted, include page-scoped non-global entities that were hydrated for this page
         if (targetPageId) {
-          if (key === 'faq' && (targetPageId === 'home' || isSinglePage)) {
-            filteredGenerated[key] = val;
-            continue;
-          }
-          if (key === 'forms' && (targetPageId === 'home' || isSinglePage)) {
+          if (key === 'sections' || key === 'section' || key === 'forms' || key === 'form' || key === 'faq') {
             filteredGenerated[key] = val;
             continue;
           }
