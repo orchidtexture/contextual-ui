@@ -1,8 +1,9 @@
 # Content Primitives — Verification Fix Plan
 
-**Status:** Complete; all work packages implemented and verified.
-**Evidence:** [POST-REMEDIATION-VERIFICATION.md](POST-REMEDIATION-VERIFICATION.md), historical baseline [VERIFICATION.md](VERIFICATION.md).
+**Status:** Reopened after independent verification: R1 verified; R2–R5 partial. Three definition-of-success criteria pass; four remain partial. The Phase 5 gate remains closed.
+**Latest evidence:** [REVERIFICATION.md](REVERIFICATION.md). Earlier [POST-REMEDIATION-VERIFICATION.md](POST-REMEDIATION-VERIFICATION.md) and baseline [VERIFICATION.md](VERIFICATION.md) remain historical evidence. Unchecked tasks below include requirements disproved or not durably verified by the new audit.
 **Goal:** Close the four partially satisfied [Definition of success](README.md#definition-of-success) criteria before treating the pilot as complete and proceeding to Phase 5.
+**Follow-up execution plan:** [REMEDIATION-PLAN-V2.md](REMEDIATION-PLAN-V2.md) maps the remaining findings to concrete fixes, durable tests and closure gates. Use V2 for the next implementation pass; the acceptance requirements below remain in force.
 
 ## Scope and constraints
 
@@ -114,13 +115,14 @@ Use `Collection.Item` or equivalent supported composition to produce `ol > li`, 
 
 - [x] Replace the five-record collection with the complete reviewed guide and stable step IDs.
 - [x] Render all steps from those records; do not patch the UI and graph as two independent lists.
-- [x] Give ordering one source of truth. Derive display numbering and exported positions from the same ordered sequence; avoid maintaining contradictory array/order values.
-- [x] Keep code strings shared with their renderers and clearly educational. Sample JSON inside a code string must never become live graph entities.
+- [ ] Give ordering one source of truth. Derive display numbering and exported positions from the same ordered sequence; avoid maintaining contradictory array/order values.
+- [ ] Keep code strings shared with their renderers and clearly educational. Sample JSON inside a code string must never become live graph entities.
 - [x] Retain install commands, copy controls, annotations, and the optional step badge.
-- [x] Preserve explanatory body/qualifier content in exports even when an item also has a short description; verify no serializer silently drops the body.
-- [x] Mutation tests change a title, description/body, and code string: both visible content and the intended machine-readable fields update.
-- [x] Add/remove/reorder tests show the same item count and sequence in the UI and graph, with IDs stable across reorder.
-- [x] Production quickstart renders eight steps with valid list structure and matching exported meaning/order.
+- [ ] Preserve explanatory body/qualifier content in exports even when an item also has a short description; verify no serializer silently drops the body.
+- [ ] Mutation tests change a title, description/body, and code string: both visible content and the intended machine-readable fields update.
+- [ ] Add/remove/reorder tests show the same item count and sequence in the UI and graph, with IDs stable across reorder.
+- [ ] Production quickstart renders eight steps with valid list structure and matching exported meaning/order.
+  - Reverification: eight-step structure and current title order pass, but optional status/commands are missing from exports; general body rendering and single-source ordering fail.
 
 ## R3 — Complete meaningful content coverage
 
@@ -130,10 +132,10 @@ The homepage's migrated feature grids and policy pages are covered, but its hero
 
 ### Start with a coverage inventory
 
-- [x] Inventory meaningful authored content in HomeClient, hero-flow data, and DocsClient.
-- [x] For each content group, record its shared source, rendering location, graph representation, and verification assertion.
-- [x] Distinguish official narrative, educational examples, and presentation-only decoration.
-- [x] Do not leave exclusions implicit. Decorative visuals and transient user input are excluded; meaningful prose cannot be excluded merely because it is inconvenient to model.
+- [ ] Inventory meaningful authored content in HomeClient, hero-flow data, and DocsClient.
+- [ ] For each content group, record its shared source, rendering location, graph representation, and verification assertion.
+- [ ] Distinguish official narrative, educational examples, and presentation-only decoration.
+- [ ] Do not leave exclusions implicit. Decorative visuals and transient user input are excluded; meaningful prose cannot be excluded merely because it is inconvenient to model.
 
 | Batch | Content | Initial approach |
 | --- | --- | --- |
@@ -164,10 +166,11 @@ Relevant sources:
 ### Acceptance
 
 - [x] The previously missing hero/pipeline/foundations content is present with its meaningful body text, not merely its headings.
-- [x] All inventoried meaningful docs content has a shared source and tested export; remaining exclusions have a justified non-content reason.
-- [x] Representative edits from each migrated content category change UI and export together.
+- [ ] All inventoried meaningful docs content has a shared source and tested export; remaining exclusions have a justified non-content reason.
+- [ ] Representative edits from each migrated content category change UI and export together.
 - [x] Home/docs/privacy/terms remain isolated and their local references resolve.
-- [x] Static examples are available as educational content but do not emit sample Service/Organization/Action entities or mutable demo state as live facts.
+- [ ] Static examples are available as educational content but do not emit sample Service/Organization/Action entities or mutable demo state as live facts.
+  - Reverification: live-entity isolation passes, but many authored static examples remain outside canonical content.
 - [x] Browser/layout checks preserve existing navigation, code panels, diagram interactions, and responsive presentation.
 
 ## R4 — Correct cross-page collection item identity
@@ -204,13 +207,14 @@ Page-scoped ListItem IDs will change. Treat this as an observable graph contract
 ### Tasks and acceptance
 
 - [x] Add a failing cross-page collision regression before changing the generator.
-- [x] Derive child IDs from the owning collection's scope, covering local and supported custom IDs.
-- [x] Require/validate stable item identifiers and define duplicate-item handling; never silently merge different items within a collection.
+- [ ] Derive child IDs from the owning collection's scope, covering local and supported custom IDs.
+- [ ] Require/validate stable item identifiers and define duplicate-item handling; never silently merge different items within a collection.
 - [x] Two same-local-ID collections on different pages yield two ListItems with scalar, distinct names—not a merged name array.
 - [x] Reordering or editing copy leaves IDs unchanged; moving to a different owner changes placement identity predictably.
-- [x] Two list entries referring to the same Service keep distinct list-entry IDs and one shared Service/provider identity.
-- [x] Flattened and nested outputs preserve resolvable references, and canonicalization with a configured base URL stays deterministic.
-- [x] Update fixtures and identity documentation only after the corrected behavior is tested.
+- [ ] Two list entries referring to the same Service keep distinct list-entry IDs and one shared Service/provider identity.
+  - Reverification: the new test verifies two references but supplies no Service/provider definitions for a complete graph audit.
+- [ ] Flattened and nested outputs preserve resolvable references, and canonicalization with a configured base URL stays deterministic.
+- [ ] Update fixtures and identity documentation only after the corrected behavior is tested.
 
 ## R5 — Reverify and close the checklist
 
@@ -226,11 +230,11 @@ The test command must actually include starter-kit tests after the regression ha
 
 ### Final acceptance matrix
 
-- [x] **Criterion 1:** coverage inventory is complete; all emitted structured-data scripts exclude example-only entities and submitted data.
-- [x] **Criterion 2:** real app mutation tests demonstrate UI/export parity for homepage, quickstart, representative docs categories, and policy content.
-- [x] **Criterion 3:** all four page graphs match their displayed content, memberships, and declared actions; inspect every JSON-LD script, not just the main `@graph`.
+- [ ] **Criterion 1:** coverage inventory is complete; all emitted structured-data scripts exclude example-only entities and submitted data.
+- [ ] **Criterion 2:** real app mutation tests demonstrate UI/export parity for homepage, quickstart, representative docs categories, and policy content.
+- [ ] **Criterion 3:** all four page graphs match their displayed content, memberships, and declared actions; inspect every JSON-LD script, not just the main `@graph`.
 - [x] **Criterion 4:** actual API handler, programmatic graph, and `/schema` still expose the same registered site data without another repository.
-- [x] **Criterion 5:** shared identities remain canonical and unique; cross-page collision probes pass; demo entities are absent from page scripts.
+- [ ] **Criterion 5:** shared identities remain canonical and unique; cross-page collision probes pass; demo entities are absent from page scripts.
 - [x] **Criterion 6:** fixes continue using existing primitives/generators rather than app-specific forks.
 - [x] **Criterion 7:** existing tests pass and local/preview browser smoke checks cover navigation, FAQ interaction, docs controls, and form validation.
 
@@ -241,8 +245,8 @@ For form browser tests, use intercepted/mocked network responses or an explicitl
 - [x] Inspect freshly built home/docs/privacy/terms HTML and record script ownership, visible/graph content parity, and reference results.
 - [x] Record the verified commit, commands, new regression coverage, and any remaining limitations in a follow-up verification report.
 - [x] Update README checkboxes only when the corresponding criterion passes.
-- [x] Reconcile earlier phase/decision completion claims with the new evidence.
-- [x] Proceed to Phase 5 only after the required remediation gates pass; optional improvements remain clearly separate.
+- [ ] Reconcile earlier phase/decision completion claims with the new evidence.
+- [ ] Proceed to Phase 5 only after the required remediation gates pass; optional improvements remain clearly separate.
 
 ## Optional follow-up — Inspector collection edges
 

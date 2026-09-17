@@ -1,8 +1,8 @@
 # Content Primitives: From Page Content to Composable Catalog Components
 
-**Status:** Phases 1–4 and Remediation have been implemented and verified: **All 7 criteria verified**. See the [remediation plan](REMEDIATION-PLAN.md) and [post-remediation verification report](POST-REMEDIATION-VERIFICATION.md). Phase 5 is ready to proceed.
+**Status:** Remediation is partially complete: **3 criteria verified; 4 partially satisfied** in the [independent reverification](REVERIFICATION.md). The earlier [post-remediation report](POST-REMEDIATION-VERIFICATION.md) is retained as historical evidence; its all-seven completion verdict is superseded.
 
-**Next:** Proceed to Phase 5: [Catalog composition and release](05-catalog-composition-and-release.md).
+**Next:** Execute the proposed [remaining-issues remediation plan (V2)](REMEDIATION-PLAN-V2.md), which maps every reverification finding to fixes, durable regressions and final evidence. The [original remediation plan](REMEDIATION-PLAN.md) remains the acceptance baseline. Do not proceed through the [Phase 5](05-catalog-composition-and-release.md) gate until the remaining criteria pass.
 
 ## Direction
 
@@ -37,13 +37,13 @@ Rendering a wrapper alone does not register its children with the graph. The dat
 
 | Phase | Document | Outcome |
 | --- | --- | --- |
-| 1 | [Data and graph foundations](01-data-and-graph-foundations.md) | Implemented; cross-page collection-item identity needs follow-up |
+| 1 | [Data and graph foundations](01-data-and-graph-foundations.md) | Ordinary cross-page item identity fixed; custom IDs, delimiters and item validation still need follow-up |
 | 2 | [Composable primitives](02-composable-primitives.md) | Section, Content, and Collection implemented; core render tests pass |
 | 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Service adapter and Organization enrichment implemented and unit-tested |
-| 4 | [Official website / starter-kit pilot](04-starter-kit-pilot.md) | Partial content migration; docs edit parity and example isolation need follow-up |
+| 4 | [Official website / starter-kit pilot](04-starter-kit-pilot.md) | Example scripts isolated; content coverage, CTA/diagram parity and quickstart qualifications/body/order remain partial |
 | 5 | [Catalog composition and release](05-catalog-composition-and-release.md) | Proven compositions, regression coverage, documentation, and release gate |
 
-Read [Decisions and open questions](DECISIONS.md) alongside the phases. The [verification report](VERIFICATION.md) records observed behavior and supersedes earlier blanket completion claims; passing tests/builds does not establish every planned guarantee.
+Read [Decisions and open questions](DECISIONS.md) alongside the phases. The latest [reverification report](REVERIFICATION.md) supersedes blanket completion claims in the phase/decision documents and earlier reports; passing tests/builds does not establish every planned guarantee.
 
 ### Execution order
 
@@ -56,22 +56,22 @@ Tests accompany every phase. Reusable code belongs in `packages/core`; site cont
 
 ## Definition of success
 
-- [x] The official site's meaningful homepage, docs, and policy content is available in the graph; example-only data is not asserted as live site facts.
-  - Verified: hero, pipeline narrative, foundations, and docs sections registered. Docs showcases use `injectJsonLd={false}` and emit zero standalone scripts. Production `/docs` contains exactly 1 page script.
-- [x] Editing shared content updates both rendered UI and machine-readable output.
-  - Verified: quickstart guide and documentation sections consume shared records. In-memory mutation tests prove editing title, description, and code snippets updates both visible UI text and graph output.
-- [x] Home, docs, privacy, and terms graphs contain the correct page content and relationships.
-  - Verified: all 4 page graphs contain isolated, route-accurate content. Zero missing local references across all page graphs and the global graph.
+- [ ] The official site's meaningful homepage, docs, and policy content is available in the graph; example-only data is not asserted as live site facts.
+  - Partial: example-only scripts are isolated, but substantial docs bodies/API references and quickstart qualifications/commands remain unexported.
+- [ ] Editing shared content updates both rendered UI and machine-readable output.
+  - Partial: main quickstart titles/descriptions/code and section summaries work; CTA, supplied diagram-stage and quickstart paragraph mutations change the graph without changing the UI.
+- [ ] Home, docs, privacy, and terms graphs contain the correct page content and relationships.
+  - Partial: current registered memberships and all four page reference audits pass; complete content/qualification parity does not.
 - [x] `/schema` and `/api/graph.json` make the actual site's content inspectable without an external repository.
   - Verified: actual GET handler output, equality with programmatic graph, and real content in the inspector's production HTML.
-- [x] Shared entities have stable IDs and are not duplicated per visual section.
-  - Verified: collection items derive IDs from collection scope (`#listitem:home:features:first` vs `#listitem:docs:features:first`). Unique IDs verified across all entities. Duplicate item IDs rejected.
+- [ ] Shared entities have stable IDs and are not duplicated per visual section.
+  - Partial: ordinary home/docs placements are distinct, but custom/absolute IDs and delimiters still collide or break references. Whitespace-equivalent item IDs can merge; empty IDs fall back to position.
 - [x] Several catalog patterns can be built from the same primitives without forking graph generators.
   - Verified: feature-card layouts, ordered quickstart flow (`ol > li`), and policy Content rendering reuse core implementations.
 - [x] Existing FAQ, form, navbar, and footer integrations continue working.
-  - Verified: FAQ accordions, AutoForm with dynamic Zod validation, shared Navbar, and Footer render correctly at SSR/unit/production build level.
+  - Verified within unit/SSR/build and selected browser smoke scope: FAQ, shared/mobile navigation, docs controls, and intercepted AutoForm validation/submission work. No production form submission was made.
 
-**Verification evidence:** 155 core tests, 9 graph-builder tests, and 14 starter-kit app tests passed (178 total); workspace/starter-kit production builds and configured typechecks passed. See [POST-REMEDIATION-VERIFICATION.md](POST-REMEDIATION-VERIFICATION.md) for full evidence and audit details.
+**Latest verification evidence:** 178 existing tests and builds passed; all four configured lint/typecheck scripts and a separate starter-kit `tsc --noEmit` passed. Additional acceptance probes found 5 failures and 2 passes. Local production/browser verification passed 21 smoke checks. See [REVERIFICATION.md](REVERIFICATION.md) for the reviewed uncommitted tree, reproduced failures, evidence and limitations.
 
 Node count and rich-result eligibility are not success metrics on their own.
 
@@ -86,6 +86,7 @@ Node count and rich-result eligibility are not success metrics on their own.
 
 ## Related material
 
+- [Remaining-issues remediation plan (V2)](REMEDIATION-PLAN-V2.md)
 - [Schema-aware components backlog](../schema-components-backlog.md)
 - [Global graph export guide](../../docs/guides/global-graph-export.md)
 - [WebSite / WebPage plan](../PLAN-WebSite-WebPage-Fix.md)
