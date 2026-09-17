@@ -1,12 +1,14 @@
 # Content Primitives: From Page Content to Composable Catalog Components
 
-**Status:** Proposed plan; no implementation started.
+**Status:** Phase 1 has an initial core implementation; starter-kit scoping validation is required before Phase 2. Later phases remain proposed.
 
 ## Direction
 
 Build a small set of headless, data-driven primitives that can be composed into existing or new catalog components. Do not create a new core component for every visual section found in a website.
 
-`co-jp` is the first pilot. Its services, use cases, process, company facts, and explanatory text are largely outside the registered data that generates `graph.json`.
+[`apps/starter-kit`](../../apps/starter-kit/README.md) is the first-party implementation and validation target, and is deployed as the Contextual UI official website. Its homepage, docs, policy content, and graph inspector will demonstrate the primitives using the actual workspace packages.
+
+`co-jp` is a separate repository that inspired the requirements. It remains an external use case and a possible future adoption test, not a required checkout, implementation target, or release gate for this plan.
 
 The intended flow is:
 
@@ -35,26 +37,27 @@ Rendering a wrapper alone does not register its children with the graph. The dat
 | --- | --- | --- |
 | 1 | [Data and graph foundations](01-data-and-graph-foundations.md) | Shared contracts, identity, page membership, and export rules |
 | 2 | [Composable primitives](02-composable-primitives.md) | Minimal section, content, and collection capabilities |
-| 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Services and richer organization facts without catalog-specific coupling |
-| 4 | [co-jp pilot](04-co-jp-pilot.md) | Real sections migrated without a visual redesign |
+| 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Demand-driven domain adapters; optional for the initial website migration |
+| 4 | [Official website / starter-kit pilot](04-starter-kit-pilot.md) | Real homepage, docs, and policy content migrated without a visual redesign |
 | 5 | [Catalog composition and release](05-catalog-composition-and-release.md) | Proven compositions, regression coverage, documentation, and release gate |
 
-Read [Decisions and open questions](DECISIONS.md) alongside the phases. Names and API sketches in these documents are proposals, not existing APIs.
+Read [Decisions and open questions](DECISIONS.md) alongside the phases. Phase 2 component names and API sketches remain proposals; verify the current Phase 1 implementation rather than treating every planned behavior as complete.
 
 ### Execution order
 
-1. Agree on Phase 1 contracts before stabilizing public APIs.
-2. Build a small Phase 2 vertical slice using `UseCases.tsx`; do not wait for a complete component catalog.
-3. Add Phase 3 entity adapters and complete the Phase 4 migration.
-4. Promote only the patterns proven by the pilot in Phase 5.
+1. Validate Phase 1 against starter-kit page ownership, especially the registered form rendered on `/docs` rather than home.
+2. Build a small Phase 2 slice using the homepage's `#headless-radix` feature cards, then the docs quickstart steps.
+3. Complete the Phase 4 website migration; add Phase 3 adapters only where real content or an isolated example needs them.
+4. Promote patterns proven by the website and docs in Phase 5.
 
-Tests accompany every phase; Phase 5 consolidates them rather than introducing testing at the end. Temporary custom registries can be tried in `co-jp` through the existing `defineSchema` extension point before their interfaces are promoted to the library.
+Tests accompany every phase. Reusable code belongs in `packages/core`; site content and compositions belong in `apps/starter-kit`, consuming `contextual-ui` through `workspace:*`. Verify package exports/builds, not direct imports from core source. External repository adoption is a later, separately scoped activity.
 
 ## Definition of success
 
-- [ ] The pilot's meaningful content is available in the graph, including human-review requirements and illustrative-example disclaimers.
+- [ ] The official site's meaningful homepage, docs, and policy content is available in the graph; example-only data is not asserted as live site facts.
 - [ ] Editing shared content updates both rendered UI and machine-readable output.
-- [ ] Home and privacy graphs contain the correct page content and relationships.
+- [ ] Home, docs, privacy, and terms graphs contain the correct page content and relationships.
+- [ ] `/schema` and `/api/graph.json` make the actual site's content inspectable without an external repository.
 - [ ] Shared entities have stable IDs and are not duplicated per visual section.
 - [ ] Several catalog patterns can be built from the same primitives without forking graph generators.
 - [ ] Existing FAQ, form, navbar, and footer integrations continue working.
@@ -76,6 +79,8 @@ Node count and rich-result eligibility are not success metrics on their own.
 - [Global graph export guide](../../docs/guides/global-graph-export.md)
 - [WebSite / WebPage plan](../PLAN-WebSite-WebPage-Fix.md)
 - [ContextualSite plan](../PLAN-ContextualSite.md)
-- [co-jp integration notes](../../../co-jp/contextual-ui-steps.md)
+- [Official website / starter-kit README](../../apps/starter-kit/README.md)
+- [Website schema](../../apps/starter-kit/data/site.schema.ts)
+- [Website connector](../../apps/starter-kit/data/site.server.ts)
 
-Sibling-project links assume `contextual-ui` and `co-jp` share a parent directory. The integration notes include historical examples; the pilot source is authoritative. This plan supplements the existing backlog rather than changing it.
+All required sources and examples live in this repository. Historical `co-jp` observations are retained as research context only. This plan supplements the existing backlog rather than changing it.

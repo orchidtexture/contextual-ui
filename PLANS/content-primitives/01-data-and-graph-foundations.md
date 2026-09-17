@@ -1,12 +1,14 @@
 # Phase 1 — Data and Graph Foundations
 
-**Status:** Implemented · **Dependency:** None · **Next:** [Phase 2](02-composable-primitives.md)
+**Status:** Initial core implementation exists; starter-kit scoping review required before Phase 2 · **Dependency:** None · **Next:** [Phase 2](02-composable-primitives.md)
 
 ## Goal
 
 Define how shared content becomes UI, page-scoped JSON-LD, and a global graph before deciding the final component APIs.
 
-## Observed baseline
+## Historical research baseline (external repository)
+
+This baseline describes `co-jp`, not the official website. It remains research context; implementation and integration validation take place in `packages/core` and `apps/starter-kit` within this repository.
 
 The exploration used `co-jp`'s installed `contextual-ui@0.2.0-beta.3` and generated its graph in memory with the options from `app/graph.json/route.ts`: `includeAll: true`, flattening, and merge deduplication.
 
@@ -19,7 +21,27 @@ There were **8 top-level nodes**:
 
 The service descriptions, use-case entries, process steps, moving-company scenario, company address and representative, and privacy-policy body were not represented by their own registered content. Some related themes appear in the FAQ and page descriptions; that is not complete content coverage.
 
-The privacy WebPage also references the FAQ through the current default `hasPart`, although the privacy UI does not render it.
+At the time of that exploration, the privacy WebPage also referenced the FAQ through the default `hasPart`, although its UI did not render it.
+
+## Starter-kit validation gate before Phase 2
+
+The initial implementation and its passing tests are not sufficient evidence of generic page ownership. Inspection of the official website exposes a concrete mismatch:
+
+- [`HomeClient.tsx`](../../apps/starter-kit/app/HomeClient.tsx) renders the registered home FAQ, but no registered AutoForm.
+- [`DocsClient.tsx`](../../apps/starter-kit/app/docs/DocsClient.tsx) renders `AutoForm` with `formId="contact-sales"` from `data.forms` on `/docs`.
+- The current `createContextualApp.getGraph` defaults non-global `forms` to home/single-page targets, rather than their declared placement. The normal `/docs` graph does not include them through that default.
+- The site also has privacy and terms pages, plus mutable documentation examples that must not become live site entities.
+
+Before Phase 2:
+
+- [ ] Replace implicit home ownership with explicit, generic membership and a documented compatibility path.
+- [ ] Resolve precedence between section ownership and explicit page parts; avoid two conflicting sources of truth.
+- [ ] Add a self-contained home/docs/privacy/terms fixture with the registered form on docs and the FAQ on home.
+- [ ] Assert correct included nodes, page references, and exclusions, including relevant dependencies and endpoint/programmatic parity.
+- [ ] Keep documentation/playground sample state separate from canonical records.
+- [ ] Recheck the original completion claims for reference validation, invalid data, and link safety; record remaining gaps rather than treating passing tests as full coverage.
+
+This is a prerequisite hardening task, not a new primitive or a migration of `co-jp`. No external checkout is required. Checked items below record the initial implementation; reopened items require further validation.
 
 ## Existing extension points and constraints
 
@@ -54,7 +76,7 @@ Important limitations to account for:
 - [x] Define stable IDs for pages, sections, collections, items, and domain entities.
 - [x] Keep existing entity IDs stable where possible, especially Organization and WebPage IDs.
 - [x] Distinguish a graph `@id` from a navigable DOM anchor/URL; expose source anchors where available.
-- [x] Choose one authoritative page-membership representation and derive inverse relationships.
+- [ ] Choose one authoritative page-membership representation and derive inverse relationships; resolve the current dual-resolution ambiguity.
 
 Recommended starting point: a page manifest with ordered section references. An alternative is ownership stored on section records. Do not require authors to maintain both independently. The same membership data should guide rendering and graph selection.
 
@@ -63,11 +85,11 @@ A section placement belongs to a page; a Service or Organization can be describe
 ### 3. Graph scope and relationships
 
 - [x] Define global export as all eligible public content and entities across pages.
-- [x] Define page export as that page's declared content plus relevant shared entity dependencies.
-- [x] Build `WebPage.hasPart` from actual page membership rather than unconditional defaults.
+- [ ] Validate page export as that page's declared content plus relevant shared entity dependencies on the starter kit.
+- [ ] Build `WebPage.hasPart` from actual page membership without home-specific assumptions.
 - [x] Use `isPartOf` for section/page relationships and appropriate references for subjects and entities.
 - [x] Establish precedence for page selection, include/exclude keys, legacy defaults, and dependency resolution.
-- [x] Avoid dangling internal references; distinguish intentionally external references from missing local records.
+- [ ] Verify internal reference resolution and distinguish intentionally external references from missing local records.
 - [x] Route and programmatic graph generation must share selection and serialization rules.
 
 Conceptual relationship model, not a finalized ID format:
@@ -84,7 +106,8 @@ Privacy WebPage ─hasPart→ Privacy content sections
 - [x] Choose one owner for page-level JSON-LD emission; composed primitives must not each inject duplicate scripts.
 - [x] Keep graph generation independent of rendering order, browser execution, and mounted components.
 - [x] Define standalone primitive behavior separately from app-integrated behavior.
-- [x] Apply safe JSON-LD script serialization and validate supported link protocols for rendered content.
+- [x] Apply safe JSON-LD script serialization in WebPage and ContextualSite.
+- [ ] Validate supported link protocols before the Phase 2 content renderer consumes link blocks.
 - [x] Export public content only; form field definitions are not submitted user data.
 
 Shared data and manifests reduce drift but cannot prove arbitrary custom JSX displays every declared field. Use fixtures and targeted render/export checks rather than promising automatic visibility detection.
@@ -94,5 +117,5 @@ Shared data and manifests reduce drift but cannot prove arbitrary custom JSX dis
 - [x] Contract and scope decisions are recorded in [DECISIONS.md](DECISIONS.md).
 - [x] Fixtures cover home, privacy, and an entity reused across pages.
 - [x] Tests demonstrate deterministic IDs, page isolation, reference resolution, and equivalent endpoint/programmatic selection.
-- [x] Legacy integrations have an explicit compatibility path.
+- [ ] Document and test the compatibility path when replacing the initial home-specific selection behavior.
 - [x] The contract can represent a real pilot section without requiring a new catalog component.

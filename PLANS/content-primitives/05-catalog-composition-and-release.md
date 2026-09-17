@@ -1,14 +1,14 @@
 # Phase 5 — Catalog Composition and Release
 
-**Status:** Proposed · **Dependency:** [Phase 4](04-co-jp-pilot.md)
+**Status:** Proposed · **Dependency:** [Phase 4](04-starter-kit-pilot.md)
 
 ## Goal
 
-Turn the pilot's proven patterns into reusable catalog components without creating parallel data models or graph generators for each layout.
+Turn patterns proven on the official website in `apps/starter-kit` into reusable catalog components without creating parallel data models or graph generators for each layout. The website and docs are the first-party adoption target; external repository migrations are separate follow-up work.
 
 ## Composition candidates
 
-These are candidates to validate, not a commitment to ship every name.
+These are candidates to validate, not a commitment to ship every name. Prioritize patterns used by the homepage and docs. Service, OrganizationProfile, ConsultationSection, and Scenario remain optional until a real use or isolated example justifies them; do not add unrelated business content to the official site.
 
 | Catalog pattern | Built from | Semantic specialization |
 | --- | --- | --- |
@@ -44,7 +44,7 @@ The [schema-aware components backlog](../schema-components-backlog.md) remains u
 - **Article / BlogPosting:** can later reuse Content with publication and authorship adapters.
 - **CallToAction / EntryPoint:** distinguish navigation from actual actions; do not duplicate existing Form actions.
 - **Product / Offer, Review, Video, Event, CodeSnippet:** remain outside this pilot and can reuse primitives where appropriate.
-- **Service:** add as a domain-model/catalog candidate when the pilot confirms its API.
+- **Service:** retain as a domain-model/catalog candidate, validated in isolated fixtures/examples or deferred; it is not required for the official homepage's feature grids.
 
 When the backlog is revised, correct its search-result assumptions: Google no longer shows HowTo rich results; review markup does not automatically qualify for stars, particularly for self-serving organization/local-business reviews. Schema correctness and knowledge coverage are separate from search-feature eligibility. Recheck current official search documentation before publishing SEO claims.
 
@@ -53,13 +53,13 @@ When the backlog is revised, correct its search-result assumptions: Google no lo
 | Layer | Required checks |
 | --- | --- |
 | Data contracts | Validation errors, stable IDs, serialization, optional fields, duplicate records |
-| Content | Full Japanese text, paragraph/list order, links, preserved qualifiers and disclaimers |
+| Content | Complete official-site text, paragraph/list order, links, code/example boundaries, and multilingual/qualification fixtures |
 | Graph | Canonical references, entity deduplication, supported property/type mappings, page isolation, no unintended dangling references |
-| Output paths | Equivalent graph selection between programmatic and route handlers; global endpoint parity |
+| Output paths | Equivalent programmatic/route output; `/api/graph.json` and `/schema` reflect the same registered site content |
 | Rendering | Headings, labelled sections, list/definition-list semantics, server rendering, valid custom composition |
 | Script/security | Safe JSON-LD script encoding, supported link protocols, no private submission data |
 | Compatibility | Existing FAQ/Form/Navbar/Footer, legacy registry behavior, explicit migration notes |
-| Pilot experience | Desktop/mobile presentation, navigation/anchors, contact behavior, authoring friction |
+| Pilot experience | Desktop/mobile presentation, docs navigation, form/diagram interactions, authoring friction, no external checkout required |
 
 Use targeted assertions and representative fixtures, not only large graph snapshots. A snapshot with more nodes is not proof of better coverage.
 
@@ -68,12 +68,14 @@ Use targeted assertions and representative fixtures, not only large graph snapsh
 - [ ] Finalize names, prop/data access patterns, and ownership of JSON-LD emission.
 - [ ] Document the difference between primitives, domain adapters, and catalog compositions.
 - [ ] Add a minimal shared-data → custom UI → graph example.
-- [ ] Add one complex example preserving an illustrative scenario and its caveats.
+- [ ] Add one clearly identified complex docs example and verify that its sample entities/caveats remain isolated from live site assertions.
 - [ ] Document page membership, shared entities, IDs versus anchors, and multi-page export behavior.
 - [ ] Explain standalone rendering and app-integrated rendering, including script ownership.
 - [ ] Document `exportAgentData` separately from JSON-LD and any optional public endpoint.
 - [ ] Verify server/client exports and React-free serializer entry points.
-- [ ] Choose a local package testing strategy, then verify the pilot against the actual release artifact rather than only monorepo source.
+- [ ] Verify starter-kit integration through its existing `workspace:*` package exports/builds, not direct core-source imports.
+- [ ] Smoke-test the packaged release artifact in a disposable consumer to catch missing exports/files; no `co-jp` checkout is required.
+- [ ] Review the official website in a local/preview build before deployment; production deployment is a separate approval.
 - [ ] Document compatibility impacts and version any intentional breaking changes.
 - [ ] Update relevant backlog/docs only after the implemented behavior is verified.
 
@@ -83,9 +85,9 @@ Use targeted assertions and representative fixtures, not only large graph snapsh
 - [ ] Multiple catalog patterns compose from the same small primitive set.
 - [ ] A custom layout can retain semantic coverage without adopting a catalog component.
 - [ ] Existing consumers have a documented migration path and no silent graph-scope changes.
-- [ ] The `co-jp` acceptance checks pass with the intended package artifact.
+- [ ] The starter-kit acceptance checks pass using the intended workspace packages, and release-artifact smoke checks pass independently.
 - [ ] Deferred work is explicitly recorded instead of silently included in this release.
 
 ## Deferred extensions
 
-Evaluate later: advanced rich-text/media blocks, full Person relationships, genuine HowTo content, typed case studies with evidence, richer agent-data discovery, CMS/editor integration, and content/render drift diagnostics across arbitrary custom UI.
+Evaluate later: advanced rich-text/media blocks, full Person relationships, genuine HowTo content, typed case studies with evidence, richer agent-data discovery, CMS/editor integration, content/render drift diagnostics across arbitrary custom UI, and separately scoped adoption in external repositories such as `co-jp`.

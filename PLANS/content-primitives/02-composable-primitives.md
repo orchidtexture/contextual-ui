@@ -4,7 +4,9 @@
 
 ## Goal
 
-Provide the smallest reusable surface that covers ordinary page content, repeated items, and ordered flows. Validate it on `co-jp` before expanding the catalog.
+Provide the smallest reusable surface that covers ordinary page content, repeated items, and ordered flows. Implement reusable APIs in `packages/core` and validate them on the official website in `apps/starter-kit` before expanding the catalog.
+
+**Prerequisite:** resolve the [Phase 1 starter-kit scoping gate](01-data-and-graph-foundations.md#starter-kit-validation-gate-before-phase-2). The current home-specific form inference does not match the docs route's actual AutoForm placement.
 
 ## Proposed capability set
 
@@ -47,7 +49,9 @@ Start with what the pilot requires:
 
 Keep this a small discriminated data model, not a full editor AST. Defer arbitrary HTML, MDX, embedded React, tables, video, and complex media until a concrete use case requires them.
 
-The renderer and text serializer must share the same input. Preserve Japanese text, meaningful order, list items, links where useful, and final qualification paragraphs. Decorative responsive line breaks may remain presentation-only.
+The renderer and text serializer must share the same input. Preserve meaningful order, list items, links, and concluding qualifications. Keep multilingual/Japanese coverage in core fixtures without requiring an external project. Decorative responsive line breaks may remain presentation-only.
+
+The official docs also contain inline code and code blocks. Preserve code as educational content, with one source for its display and any export; determine the minimal representation before claiming complete docs coverage. This does not require a full editor AST or SoftwareSourceCode entity adapter.
 
 ### Graph mapping
 
@@ -78,13 +82,13 @@ Prose lists are body formatting. A structured collection is a set of identifiabl
 This is an API sketch, not copy-paste-ready code. Data access and nesting rules must be settled during the prototype.
 
 ```tsx
-<Section.Root data={useCasesSection}>
+<Section.Root data={headlessSection}>
   <Section.Title className="existing-heading-styles" />
   <Section.Description />
-  <Collection.Root data={useCasesCollection}>
+  <Collection.Root data={headlessFeatures}>
     {/* Custom item layout reads the same registered item records. */}
   </Collection.Root>
-  <Section.Content /> {/* Includes the human-review qualification. */}
+  <Section.Content /> {/* Includes the concluding "Why it matters" text. */}
 </Section.Root>
 ```
 
@@ -92,9 +96,11 @@ The graph is generated from these registered records independently of this JSX. 
 
 ## Implementation tasks
 
-- [ ] Prototype Section and Content with the introduction and note from `UseCases.tsx`.
-- [ ] Add Collection for its six items using the same canonical records.
-- [ ] Render `Process.tsx` as an ordered collection to test a second layout.
+- [ ] Prototype Section and Content with the `#headless-radix` introduction and conclusion in [`HomeClient.tsx`](../../apps/starter-kit/app/HomeClient.tsx).
+- [ ] Add Collection for its four feature cards using shared site records and existing styling.
+- [ ] Reuse Collection for ordered steps in the `#quickstart` section of [`DocsClient.tsx`](../../apps/starter-kit/app/docs/DocsClient.tsx).
+- [ ] Keep documentation examples, generated snippets, and mutable playground data distinct from the site's canonical graph.
+- [ ] Use public workspace exports and inspect registered content through the existing `/schema` and `/api/graph.json` surfaces.
 - [ ] Keep the ordinary server-rendered path usable without a client context provider.
 - [ ] Decide whether compound components use explicit data, context, or a server-compatible alternative before stabilizing the API.
 - [ ] Preserve headless styling; support polymorphism/`asChild` only with tested valid DOM behavior.
@@ -103,7 +109,7 @@ The graph is generated from these registered records independently of this JSX. 
 
 ## Exit criteria
 
-- [ ] The same primitives produce a use-case list, a process flow, and a plain text section.
+- [ ] The same primitives produce a homepage feature grid, docs setup steps, and a plain text section in the starter kit.
 - [ ] Tests cover text completeness, item order, missing/duplicate IDs, safe links, and script serialization.
 - [ ] Render tests cover heading association, valid list markup, and custom layouts.
 - [ ] Content is available in global and correct page graphs without browser execution.

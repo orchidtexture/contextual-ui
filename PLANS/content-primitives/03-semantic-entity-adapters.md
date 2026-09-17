@@ -1,80 +1,78 @@
 # Phase 3 — Semantic Entity Adapters
 
-**Status:** Proposed · **Dependency:** [Phase 1](01-data-and-graph-foundations.md), coordinated with [Phase 2](02-composable-primitives.md) · **Next:** [Phase 4](04-co-jp-pilot.md)
+**Status:** Proposed, demand-driven · **Dependency:** [Phase 1](01-data-and-graph-foundations.md), coordinated with [Phase 2](02-composable-primitives.md) · **Integration:** [Phase 4](04-starter-kit-pilot.md)
 
-## Goal
+## Goal and scope
 
-Add domain meaning without turning every semantic type into a new layout primitive. A Service registry and an Organization model should work with the same Section, Content, and Collection capabilities.
+Add domain meaning without turning every semantic type into a layout primitive. Domain adapters belong in `packages/core`; the official website in `apps/starter-kit` consumes them only where its actual content warrants them.
 
-## 1. Service
+This phase is not a blanket prerequisite for the initial homepage/docs migration. Generic Section, Content, and Collection capabilities cover those first slices. Do not create business services, company-profile pages, or unsupported company facts on the official website merely to exercise an adapter.
 
-`co-jp/app/components/Services.tsx` describes three services:
+`co-jp`'s services and company information remain motivating research examples. If an adapter is useful but has no live official-site use, validate it with self-contained core fixtures and a clearly identified docs example, or defer it. No external repository is needed.
 
-1. Business-process review and improvement proposals.
-2. AI-tool adoption and system development.
-3. Tool integration and post-launch improvement.
+## 1. Service — candidate adapter
+
+The original research identified business-process review, AI-tool/system development, and post-launch integration support. These are services, unlike the official website's feature cards about the library.
 
 ### Proposed model
 
 - Stable ID, name, description, and optional image/source URL.
-- Optional service type, area served, and audience where supported by the source content.
-- Provider reference to the existing Organization.
+- Optional service type, area served, and audience where supported by source content.
+- Provider reference to a canonical Organization.
 
-### Tasks
+### Tasks, when justified
 
 - [ ] Add a typed Service schema, registry adapter, JSON-LD generator, and agent-data serializer.
-- [ ] Connect the services section to an ItemList whose entries reference canonical Service nodes.
-- [ ] Reuse organization identity instead of embedding a new company definition per service.
-- [ ] Keep offers, pricing, availability, and commercial terms optional and outside the initial pilot unless actual content supplies them.
+- [ ] Test an ItemList referencing Service nodes that share one provider.
+- [ ] Keep offers, pricing, availability, and commercial terms absent unless supplied by actual content.
 - [ ] Validate Schema.org property domains/ranges and URL handling in fixtures.
+- [ ] If demonstrated in docs, label sample services as examples and keep their entity graph isolated from the official site's global graph.
 
-A future `ServiceList` or `ServiceCard` catalog component is a composition of these models and primitives, not a prerequisite for exporting services.
+A future `ServiceList` or `ServiceCard` is a composition, not a prerequisite for the first-party content pilot. Do not relabel library features as services or products for richer markup.
 
-## 2. Organization enrichment
+## 2. Organization enrichment — candidate extensions
 
-The current Organization schema supports basic identity, description, social links, email, and telephone. The About section has additional facts that the schema does not yet represent.
+The official site already registers Tasuku Studio as creator and maintainer in [`data/site.server.ts`](../../apps/starter-kit/data/site.server.ts). Preserve that identity and its existing supported fields. It does not currently provide the company-profile content observed in `co-jp`.
 
-### Tasks
+### Tasks, when justified
 
-- [ ] Add structured PostalAddress support and founding date.
-- [ ] Populate existing supported fields from shared public data where appropriate, including legal name and contact email.
-- [ ] Represent public company names faithfully; do not assume a displayed English name is a separate legal entity or official legal name.
-- [ ] Reuse the same organization record in About and the privacy contact block.
-- [ ] Determine a truthful representation of the listed company representative before introducing a person relationship.
-- [ ] Keep the existing Organization ID stable and test deduplication across page graphs.
+- [ ] Evaluate PostalAddress and founding-date support against a real use or isolated fixture.
+- [ ] Reuse the existing organization record across official-site pages without duplicating it per section.
+- [ ] Preserve names faithfully; a displayed English name is not automatically a separate legal entity or legal name.
+- [ ] Validate person roles explicitly; “representative” does not automatically imply `founder`.
+- [ ] Do not copy external company/contact facts into the official website without a separately approved content change.
 
-Do not infer `founder` from the label “representative.” If no agreed structured role is available yet, preserve the visible representative information in the section body rather than emitting an incorrect relationship. A general Person registry can be deferred until needed.
+A future organization-profile composition may render a definition list from selected fields. It should not create another Organization node or a new “Fact” entity for every row. A general Person registry can remain deferred.
 
-An organization-profile catalog composition may render a definition list (`dl`, `dt`, `dd`) using selected fields. It should not create a second Organization entity or require a standalone “Fact” entity for every row.
-
-## 3. Interpret pilot content conservatively
+## 3. Interpret website and example content conservatively
 
 | Content | Initial representation | Avoid |
 | --- | --- | --- |
-| Six use cases | Section + descriptive ItemList | Claiming each is a separately sold service |
-| Engagement process | Section + ordered ItemList | Automatically treating any timeline as HowTo |
-| Moving-company example | Section/content composition; optional CreativeWork if it adds meaning | Claiming a completed client case study or measured success |
-| Privacy policy | Page sections with full readable content; optional document-level CreativeWork | Inventing a Schema.org PrivacyPolicy type |
-| Contact introduction | Section referencing the existing contact action where appropriate | Creating a second executable action for an anchor link |
+| Homepage feature cards | Section + descriptive ItemList | Product, Offer, or Service assertions inferred from card layout |
+| Docs quickstart | Section + ordered Collection | Automatic HowTo typing solely because steps are numbered |
+| Architecture diagram | Shared explanatory content with a custom visual renderer | Treating branching outputs as a linear procedure or exporting diagram geometry |
+| Privacy/terms text | Page sections with readable content | Invented specialized policy types or imported legal copy |
+| Live docs AutoForm | Existing registered action bound to its actual page | Implicit home ownership or exporting submitted values |
+| Sample code/graphs | Educational content and isolated example output | Treating sample companies, endpoints, or performance values as live facts |
 
-For the moving-company example, preserve the problem, proposed assistance, human responsibilities, intended outcome, and explicit illustrative disclaimer. Intended outcomes are not verified results.
+Retain multilingual and illustrative-scenario fixtures inspired by the original research. Preserve human-review requirements and distinguish intended outcomes from verified results, but do not publish an external client's scenario as official-site business evidence.
 
 ## 4. JSON-LD versus richer agent data
 
 The same records may support two serializers:
 
-- **JSON-LD:** standard types, supported properties, accurate relationships, and complete meaningful text.
-- **Agent data:** optional domain distinctions such as `kind: illustrative`, `humanResponsibilities`, or `limitations`.
+- **JSON-LD:** standard types, supported properties, accurate relationships, and meaningful text.
+- **Agent data:** optional application distinctions such as `kind: illustrative` or `limitations`.
 
-These example keys are application data, not proposed Schema.org properties. The graph must retain the qualifications in supported text fields even if a separate agent-data endpoint is never built.
+These example keys are application data, not proposed Schema.org properties. Qualifications must survive in supported graph text even if no separate agent-data endpoint is built.
 
-- [ ] Decide whether the pilot needs a public agent-data endpoint or only serializer tests.
-- [ ] If an endpoint is added later, document its discovery, scope, validation, and public-data boundary separately from `graph.json`.
+- [ ] Decide whether the official site needs an agent-data endpoint beyond its existing `/api/graph.json`; serializer tests alone may be sufficient initially.
+- [ ] If added, specify discovery, public-data boundaries, and example-state isolation separately.
 
-## Exit criteria
+## Exit criteria for adapters selected for implementation
 
-- [ ] Three Service entities link to one canonical Organization.
-- [ ] Company address and founding date are available from shared data and exported accurately.
-- [ ] No unsupported commercial or person relationship is inferred.
-- [ ] Scenario qualifications survive serialization without requiring a new Scenario primitive.
+- [ ] Core fixtures prove stable identities, shared-provider deduplication, and accurate fields without an external checkout.
+- [ ] No unsupported commercial terms, person roles, or official-site facts are inferred.
+- [ ] Example graphs remain distinguishable from the live site graph.
 - [ ] Domain-model tests run independently of catalog rendering.
+- [ ] Deferred adapters are explicitly recorded and do not block the generic starter-kit migration.
