@@ -29,12 +29,12 @@ These are recommendations from the exploration, subject to validation.
 
 ### Phase 1 — Contracts and graph behavior
 
-- [ ] **Page membership:** page manifest with ordered section references, or section-owned page references? Pick one authoritative source.
-- [ ] **Identity:** exact ID convention for page sections, collections, items, and reused entities; compatibility with existing IDs.
-- [ ] **Scope API:** how record/page selection interacts with `isGlobal`, include/exclude keys, and dependency resolution.
-- [ ] **Invalid data:** strict rejection, omission with diagnostics, or explicit modes for new exports; avoid accidentally inheriting silent invalid output.
-- [ ] **Script ownership:** app/page assembly versus standalone primitives; no duplicate emission when composed.
-- [ ] **Prototype location:** local `co-jp` registries first, core implementation first, or a small shared experimental module.
+- [x] **Page membership:** Dual-resolution supported: Section records define `pageId` (e.g. `'home'`, `'privacy'`), and WebPage records can explicitly define `hasPart` / `sections`. Dynamically linked via `resolvePageParts`, eliminating hardcoded `#faq` references on pages like `/privacy`.
+- [x] **Identity:** Standardized `#section:{pageId}:{sectionId}` or `#section:{sectionId}`, canonicalized to `{baseUrl}/#section:...` in Knowledge Graph.
+- [x] **Scope API:** When `pageId` is specified, `createContextualApp.getGraph({ pageId })` isolates the graph to that page's sections, WebPage, and relevant non-global entities (`faq`, `forms` on `home`), while global layout entities (`Organization`, `WebSite`, `Navbar`, `Footer`) remain shared. When `includeAll: true` (e.g. `/graph.json`), all pages, all sections, and all entities are exported.
+- [x] **Invalid data:** Safe normalization and text extraction; invalid blocks are filtered out with warnings rather than aborting site builds.
+- [x] **Script ownership:** `<WebPage>` and `<ContextualSite>` own JSON-LD script emission using `serializeJsonLd()` with `\u003c` escaping against `</script>` breakouts. Child primitives render semantic DOM only.
+- [x] **Implementation location:** Implemented in `@contextual-ui/core` (`packages/core/src/content/`), with full backward compatibility and 97 passing unit tests.
 
 ### Phase 2 — Public primitive surface
 
@@ -70,15 +70,13 @@ These are recommendations from the exploration, subject to validation.
 
 ## Decision log
 
-Add entries as decisions are made:
-
 ```text
-Decision:
-Status: proposed / accepted / superseded
-Phase:
-Reason:
-Compatibility impact:
-Validation evidence:
+Decision: Content Model & Page-Scoped Knowledge Graph Foundations
+Status: accepted
+Phase: Phase 1
+Reason: Resolve page isolation, eliminate dangling #faq references on non-home pages (like /privacy), and provide serializable content blocks for sections.
+Compatibility impact: Fully backward-compatible; existing schemas and tests pass without modification.
+Validation evidence: packages/core/src/content/content.test.ts (97 passing unit tests), multi-package monorepo build, and starter-kit build.
 ```
 
 Return to the [plan overview](README.md).

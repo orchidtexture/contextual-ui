@@ -66,5 +66,44 @@ export {
   formRegistry,
   formsRegistry,
 } from '../components/form/form.utils';
+export {
+  ContentBlockRoleSchema,
+  ParagraphBlockSchema,
+  HeadingBlockSchema,
+  ContentListItemSchema,
+  ListBlockSchema,
+  LinkBlockSchema,
+  CalloutBlockSchema,
+  ContentBlockSchema,
+  ContentInputSchema,
+  SectionRecordSchema,
+  SectionDataSchema,
+} from '../content/content.schema';
+export type {
+  ContentBlockRole,
+  ParagraphBlock,
+  HeadingBlock,
+  ContentListItem,
+  ListBlock,
+  LinkBlock,
+  CalloutBlock,
+  ContentBlock,
+  ContentInput,
+  SectionRecord,
+  SectionData,
+  NormalizedSection,
+} from '../content';
+export {
+  normalizeContentBlocks,
+  extractPlainText,
+  normalizeSections,
+  normalizeSection,
+  generateSectionJsonLd,
+  exportAgentData as exportSectionAgentData,
+  serializeJsonLd,
+  sectionRegistry,
+  sectionsRegistry,
+} from '../content/content.utils';
+
 
 

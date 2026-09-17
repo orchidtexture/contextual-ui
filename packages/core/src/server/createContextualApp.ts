@@ -1,4 +1,4 @@
-import { createGraphRouteHandler, GraphRouteHandlerOptions } from './createGraphRouteHandler';
+import { GraphRouteHandlerOptions } from './createGraphRouteHandler';
 import { InferData } from '../registry/defineSchema';
 import { buildGraph, JsonLdObject } from 'jsonld-graph-builder';
 import type {
@@ -63,6 +63,7 @@ export function createContextualApp<
 
     // Support single page resolution when an array of webpages is configured
     const webpageKey = ('webpage' in merged) ? 'webpage' : (('webpages' in merged) ? 'webpages' : undefined);
+    let targetPage: any = undefined;
     if (webpageKey && Array.isArray(raw[webpageKey])) {
       const pageList: any[] = raw[webpageKey];
       if (pageId || pageUrl) {
@@ -75,13 +76,15 @@ export function createContextualApp<
         const pageOverride = Array.isArray(overrideItem) ? overrideItem[0] : overrideItem;
 
         if (found) {
-          merged[webpageKey] = { ...found, ...(pageOverride || {}) };
+          targetPage = { ...found, ...(pageOverride || {}) };
+          merged[webpageKey] = targetPage;
         } else if (pageOverride && Object.keys(pageOverride).length > 0) {
-          merged[webpageKey] = {
+          targetPage = {
             ...(pageId ? { id: pageId } : {}),
             ...(pageUrl ? { url: pageUrl } : {}),
             ...pageOverride,
           };
+          merged[webpageKey] = targetPage;
         }
       } else if (overrides && overrides[webpageKey as keyof InferData<TSchema>]) {
         const overrideVal = overrides[webpageKey as keyof InferData<TSchema>];
@@ -93,11 +96,33 @@ export function createContextualApp<
               (overrideObj.url && p.url === overrideObj.url)
           );
           if (found) {
-            merged[webpageKey] = { ...found, ...overrideObj };
+            targetPage = { ...found, ...overrideObj };
+            merged[webpageKey] = targetPage;
           } else {
+            targetPage = overrideObj;
             merged[webpageKey] = overrideObj;
           }
         }
+      }
+    } else if (webpageKey && typeof merged[webpageKey] === 'object') {
+      targetPage = merged[webpageKey];
+    }
+
+    // Support page-scoped section filtering when pageId or pageUrl is specified
+    const sectionKey = ('sections' in merged) ? 'sections' : (('section' in merged) ? 'section' : undefined);
+    if (sectionKey && Array.isArray(raw[sectionKey]) && (pageId || pageUrl)) {
+      const resolvedTargetId = targetPage?.id || pageId || (pageUrl === '/' ? 'home' : (pageUrl ? pageUrl.replace(/^\//, '') : undefined));
+      if (resolvedTargetId) {
+        const declaredSections = Array.isArray(targetPage?.sections)
+          ? targetPage.sections
+          : (Array.isArray(targetPage?.hasPart) ? targetPage.hasPart : undefined);
+
+        merged[sectionKey] = (raw[sectionKey] as any[]).filter((s: any) => {
+          if (declaredSections && declaredSections.includes(s.id)) return true;
+          if (s.pageId && s.pageId === resolvedTargetId) return true;
+          if (!s.pageId && !declaredSections && resolvedTargetId === 'home') return true;
+          return false;
+        });
       }
     }
 
@@ -112,12 +137,47 @@ export function createContextualApp<
       return hydrated.raw as InferData<TSchema>;
     },
     async getGraph(handlerOptions?: GetGraphOptions<TSchema>) {
+      const rawData = await options.connector.fetchData();
+      const targetPageId = handlerOptions?.pageId || (handlerOptions?.pageUrl === '/' ? 'home' : (handlerOptions?.pageUrl ? handlerOptions.pageUrl.replace(/^\//, '') : undefined));
+
+      const sectionKey = ('sections' in rawData) ? 'sections' : (('section' in rawData) ? 'section' : undefined);
+      const isSinglePage = !rawData.webpage || (Array.isArray(rawData.webpage) && rawData.webpage.length <= 1);
+
+      const extendedJsonLdContext = {
+        ...(handlerOptions?.jsonLdContext || {}),
+        hasFaq: Boolean(rawData.faq),
+        resolvePageParts: (pId: string) => {
+          const parts: Array<string | { '@id': string }> = [];
+          if (rawData.navbar) parts.push('navbar');
+
+          if (sectionKey && Array.isArray(rawData[sectionKey])) {
+            const matched = rawData[sectionKey].filter((s: any) => {
+              if (s.pageId) return s.pageId === pId;
+              return pId === 'home';
+            });
+            for (const s of matched) {
+              const sId = s.id?.startsWith('#') || s.id?.startsWith('http')
+                ? s.id
+                : (s.pageId ? `section:${s.pageId}:${s.id}` : `section:${s.id}`);
+              parts.push(sId);
+            }
+          }
+
+          if (rawData.faq && (pId === 'home' || isSinglePage)) {
+            parts.push('faq');
+          }
+
+          if (rawData.footer) parts.push('footer');
+          return parts;
+        },
+      };
+
       const hydrated = await getHydrated(
         handlerOptions?.dataOverrides,
         handlerOptions?.pageId,
         handlerOptions?.pageUrl
       );
-      const generated = hydrated.generateJsonLd(handlerOptions?.jsonLdContext);
+      const generated = hydrated.generateJsonLd(extendedJsonLdContext);
       const config = hydrated.config || options.schema.config || {};
       
       const filteredGenerated: Record<string, any> = {};
@@ -138,6 +198,18 @@ export function createContextualApp<
           continue;
         }
 
+        // When a specific page is targeted, include non-global parts relevant to that page
+        if (targetPageId) {
+          if (key === 'faq' && (targetPageId === 'home' || isSinglePage)) {
+            filteredGenerated[key] = val;
+            continue;
+          }
+          if (key === 'forms' && (targetPageId === 'home' || isSinglePage)) {
+            filteredGenerated[key] = val;
+            continue;
+          }
+        }
+
         // If not strictly included/excluded, fallback to registry default behavior
         const isGlobal = config[key]?.isGlobal !== false;
         if (isGlobal) {
@@ -154,21 +226,33 @@ export function createContextualApp<
     },
     createGraphHandler(handlerOptions?: GetGraphOptions<TSchema>) {
       return {
-        GET: async (req: Request) => {
-          const hydrated = await getHydrated(
-            handlerOptions?.dataOverrides,
-            handlerOptions?.pageId,
-            handlerOptions?.pageUrl
-          );
-          const effectiveOptions: GetGraphOptions<TSchema> = {
-            ...handlerOptions,
-            graphOptions: {
-              baseUrl: options.baseUrl,
-              ...handlerOptions?.graphOptions,
-            },
-          };
-          const graphHandler = createGraphRouteHandler(hydrated, effectiveOptions);
-          return graphHandler.GET(req);
+        GET: async (_req: Request) => {
+          try {
+            const graph = await this.getGraph(handlerOptions);
+            const defaultHeaders = {
+              'Content-Type': 'application/ld+json; charset=utf-8',
+              'Access-Control-Allow-Origin': '*',
+              'Cache-Control': 'public, max-age=60, s-maxage=300',
+              ...handlerOptions?.headers,
+            };
+            return new Response(JSON.stringify(graph, null, 2), {
+              status: 200,
+              headers: defaultHeaders,
+            });
+          } catch (error) {
+            return new Response(
+              JSON.stringify({
+                error: 'Internal Server Error',
+                message: error instanceof Error ? error.message : String(error),
+              }),
+              {
+                status: 500,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+          }
         },
       };
     },
