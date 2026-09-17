@@ -1,6 +1,8 @@
 # Content Primitives: From Page Content to Composable Catalog Components
 
-**Status:** Phases 1, 2, 3, and 4 are complete and verified. Ready for Phase 5 (Catalog composition and release). Later phases remain proposed.
+**Status:** Phases 1–4 have been implemented, but the definition of success is not fully met: **3 criteria verified, 4 partially satisfied**. Resolve the findings in the [verification report](VERIFICATION.md) before treating the pilot as complete. Phase 5 remains proposed.
+
+**Next:** Follow the [verification fix plan](REMEDIATION-PLAN.md) for work packages, regression tests, compatibility decisions, and the final re-verification gate.
 
 ## Direction
 
@@ -35,13 +37,13 @@ Rendering a wrapper alone does not register its children with the graph. The dat
 
 | Phase | Document | Outcome |
 | --- | --- | --- |
-| 1 | [Data and graph foundations](01-data-and-graph-foundations.md) | Shared contracts, identity, generic page membership, safe links, and graph export rules (Complete) |
-| 2 | [Composable primitives](02-composable-primitives.md) | Minimal Section, Content, and Collection capabilities (Complete) |
-| 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Service adapter and Organization enrichment (Complete) |
-| 4 | [Official website / starter-kit pilot](04-starter-kit-pilot.md) | Real homepage, docs, and policy content migrated without a visual redesign (Complete) |
+| 1 | [Data and graph foundations](01-data-and-graph-foundations.md) | Implemented; cross-page collection-item identity needs follow-up |
+| 2 | [Composable primitives](02-composable-primitives.md) | Section, Content, and Collection implemented; core render tests pass |
+| 3 | [Semantic entity adapters](03-semantic-entity-adapters.md) | Service adapter and Organization enrichment implemented and unit-tested |
+| 4 | [Official website / starter-kit pilot](04-starter-kit-pilot.md) | Partial content migration; docs edit parity and example isolation need follow-up |
 | 5 | [Catalog composition and release](05-catalog-composition-and-release.md) | Proven compositions, regression coverage, documentation, and release gate |
 
-Read [Decisions and open questions](DECISIONS.md) alongside the phases. Phase 2 component names and API sketches remain proposals; verify the current Phase 1 implementation rather than treating every planned behavior as complete.
+Read [Decisions and open questions](DECISIONS.md) alongside the phases. The [verification report](VERIFICATION.md) records observed behavior and supersedes earlier blanket completion claims; passing tests/builds does not establish every planned guarantee.
 
 ### Execution order
 
@@ -55,12 +57,21 @@ Tests accompany every phase. Reusable code belongs in `packages/core`; site cont
 ## Definition of success
 
 - [ ] The official site's meaningful homepage, docs, and policy content is available in the graph; example-only data is not asserted as live site facts.
+  - **Partial:** feature/policy content is exported, but hero/pipeline and most docs content remain missing. Docs Navbar/Footer demos also emit standalone example JSON-LD.
 - [ ] Editing shared content updates both rendered UI and machine-readable output.
+  - **Partial:** in-memory edits update homepage UI and graph together. A docs quickstart edit updates only the graph; its eight hardcoded UI steps do not consume the five registered items.
 - [ ] Home, docs, privacy, and terms graphs contain the correct page content and relationships.
-- [ ] `/schema` and `/api/graph.json` make the actual site's content inspectable without an external repository.
+  - **Partial:** registered content is page-isolated, the docs form belongs to docs, and graph references resolve. Docs UI/graph content still disagrees, and extra example scripts escape the canonical page graph.
+- [x] `/schema` and `/api/graph.json` make the actual site's content inspectable without an external repository.
+  - Verified actual GET handler output, equality with the programmatic graph, and real content in the inspector's production HTML.
 - [ ] Shared entities have stable IDs and are not duplicated per visual section.
-- [ ] Several catalog patterns can be built from the same primitives without forking graph generators.
-- [ ] Existing FAQ, form, navbar, and footer integrations continue working.
+  - **Partial:** the current API graph has unique IDs and shared layout entities, but ListItem IDs collide when pages reuse collection/item local IDs. Docs demos also emit separate layout entities.
+- [x] Several catalog patterns can be built from the same primitives without forking graph generators.
+  - Verified homepage feature compositions, core ordered/unordered collection render tests, and shared policy Content rendering. This does not certify the hardcoded docs quickstart.
+- [x] Existing FAQ, form, navbar, and footer integrations continue working.
+  - Verified at unit/SSR/build level. Browser interactions and live form submissions were not exercised; demo metadata isolation remains open above.
+
+**Verification evidence:** 142 core tests and 9 graph-builder tests passed; workspace/starter-kit production builds and configured typechecks passed. See [VERIFICATION.md](VERIFICATION.md) for reproduction details, concrete gaps, and follow-up order.
 
 Node count and rich-result eligibility are not success metrics on their own.
 
