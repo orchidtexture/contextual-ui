@@ -39,16 +39,16 @@ Start by translating the reverification's five failing app probes and identity p
 
 ### Required changes
 
-- [ ] Add durable app tests for CTA label **and href**, supplied diagram-stage content, quickstart paragraph content, optional qualification, and reorder without repairing `order` values.
-- [ ] Add core failure fixtures for absolute/custom IDs, delimiter collisions, empty IDs and whitespace-equivalent duplicates; execute them through both the direct generator and `createContextualApp`.
-- [ ] Strengthen the existing quickstart code-mutation test to assert the exact updated graph `text`, not only UI code and graph name/description.
-- [ ] Replace UI containment assertions for reordered content with parsed item-ID sequences, counts and numbering.
-- [ ] Replace the policy graph-only “renders” check with actual policy composition rendering and in-memory paragraph/qualifier/link mutation coverage. Reuse the real page content composition; do not make a test-only reconstruction of the policy JSX.
-- [ ] Await every graph invocation before checking immutability. Compare the complete connector data before and after overrides, exports and demo interactions, not just one original title.
-- [ ] Render UI and generate its page graph from the **same effective supplied data**. A WebPage using the original app while its child gets an override is not an override-parity test.
-- [ ] Use an HTML parser with explicitly declared test dependencies for DOM structure and decoded text extraction. Exclude scripts/styles from visible-text assertions; parse **every** JSON-LD script, including standalone objects/arrays. For tabbed content, distinguish rendered DOM text from browser-visible text.
-- [ ] Add a starter-kit `lint`/typecheck script so recursive lint no longer silently skips the app. Document that this is TypeScript checking unless an actual linter is added.
-- [ ] Keep unit/SSR tests in the recursive test workflow. Add separate documented production-output and browser commands plus an aggregate verification command/CI job that requires all of them.
+- [x] Add durable app tests for CTA label **and href**, supplied diagram-stage content, quickstart paragraph content, optional qualification, and reorder without repairing `order` values.
+- [x] Add core failure fixtures for absolute/custom IDs, delimiter collisions, empty IDs and whitespace-equivalent duplicates; execute them through both the direct generator and `createContextualApp`.
+- [x] Strengthen the existing quickstart code-mutation test to assert the exact updated graph `text`, not only UI code and graph name/description.
+- [x] Replace UI containment assertions for reordered content with parsed item-ID sequences, counts and numbering.
+- [x] Replace the policy graph-only “renders” check with actual policy composition rendering and in-memory paragraph/qualifier/link mutation coverage. Reuse the real page content composition; do not make a test-only reconstruction of the policy JSX.
+- [x] Await every graph invocation before checking immutability. Compare the complete connector data before and after overrides, exports and demo interactions, not just one original title.
+- [x] Render UI and generate its page graph from the **same effective supplied data**. A WebPage using the original app while its child gets an override is not an override-parity test.
+- [x] Use an HTML parser with explicitly declared test dependencies for DOM structure and decoded text extraction. Exclude scripts/styles from visible-text assertions; parse **every** JSON-LD script, including standalone objects/arrays. For tabbed content, distinguish rendered DOM text from browser-visible text.
+- [x] Add a starter-kit `lint`/typecheck script so recursive lint no longer silently skips the app. Document that this is TypeScript checking unless an actual linter is added.
+- [x] Keep unit/SSR tests in the recursive test workflow. Add separate documented production-output and browser commands plus an aggregate verification command/CI job that requires all of them.
 
 Before introducing framework-specific harness code, read the relevant **installed** Next.js App Router testing and route documentation. Vitest rendering of resolved server components is supplemental evidence; production route behavior needs the built app. Declare Playwright and its browser setup in the app package, keep browser specs out of Vitest discovery, and document browser installation. Give production-output checks their own configuration/script too, so ordinary app unit tests do not silently depend on a pre-existing `.next` build.
 

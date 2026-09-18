@@ -140,19 +140,26 @@ describe('Graph Output & Route Handler Parity', () => {
     expect(docsValidation.missingLocalIds).toEqual([]);
   });
 
-  it('keeps connector data unchanged across graph and handler invocations', async () => {
+  it('keeps complete connector data unchanged across graph, overrides, and handler invocations', async () => {
     const dataBefore = await siteApp.fetchData();
     const serializedBefore = JSON.stringify(dataBefore);
 
     const req = new Request('https://contextual.site/api/graph.json');
     await GET(req as any);
-    siteApp.getGraph({ includeAll: true });
-    siteApp.getGraph({ pageId: 'home' });
-    siteApp.getGraph({ pageId: 'docs' });
+    await siteApp.getGraph({ includeAll: true });
+    await siteApp.getGraph({ pageId: 'home' });
+    await siteApp.getGraph({ pageId: 'docs' });
+    await siteApp.getGraph({
+      pageId: 'home',
+      dataOverrides: {
+        sections: [{ id: 'hero', pageId: 'home', title: 'Temporary Title Override', type: 'WebPageElement' }],
+      },
+    });
 
     const dataAfter = await siteApp.fetchData();
     const serializedAfter = JSON.stringify(dataAfter);
 
     expect(serializedAfter).toBe(serializedBefore);
+    expect(dataAfter).toEqual(dataBefore);
   });
 });

@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "pnpm -r build && next build",
     "start": "next start",
-    "test": "pnpm --filter \"starter-kit^...\" build && vitest run"
+    "lint": "tsc --noEmit",
+    "test": "pnpm --filter \"starter-kit^...\" build && vitest run",
+    "test:production": "vitest run --config vitest.production.config.mts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@react-three/fiber": "^9.7.0",
@@ -30,10 +33,12 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/node": "26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/three": "^0.185.4",
+    "cheerio": "^1.2.0",
     "typescript": "^7.0.2",
     "vitest": "^4.1.10"
   }

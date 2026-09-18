@@ -1,5 +1,6 @@
 import React from 'react';
 import { renderToString } from 'react-dom/server';
+import * as cheerio from 'cheerio';
 import { ContextualSite } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 
@@ -15,50 +16,67 @@ export function renderSiteComponent(
   );
 }
 
-export function extractVisibleText(html: string): string {
-  // Strip script and style blocks completely
-  const withoutScriptsAndStyles = html
-    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ')
-    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
-
-  // Strip all HTML tags
-  const withoutTags = withoutScriptsAndStyles.replace(/<[^>]+>/g, ' ');
-
-  // Decode common HTML entities
-  const decoded = withoutTags
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&#x27;/g, "'")
-    .replace(/&#x2F;/g, '/');
-
-  // Normalize whitespace
-  return decoded.replace(/\s+/g, ' ').trim();
+/**
+ * Parses raw HTML into a Cheerio root instance for structured DOM assertions.
+ */
+export function parseHtml(html: string): cheerio.CheerioAPI {
+  return cheerio.load(html);
 }
 
+/**
+ * Extracts visible/rendered text from HTML using an HTML parser.
+ * Excludes scripts, styles, and noscript elements.
+ * Decodes all HTML entities and normalizes whitespace.
+ */
+export function extractVisibleText(html: string, selector?: string): string {
+  const $ = cheerio.load(html);
+  $('script, style, noscript').remove();
+  const root = selector ? $(selector) : $('body').length ? $('body') : $.root();
+  const text = root.text();
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Extracts raw DOM text from HTML, including tabbed or inactive panels,
+ * excluding scripts and styles.
+ */
+export function extractDomText(html: string, selector?: string): string {
+  const $ = cheerio.load(html);
+  $('script, style, noscript').remove();
+  const root = selector ? $(selector) : $.root();
+  return root.text().replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Parses EVERY application/ld+json script tag in the HTML,
+ * including standalone objects and standalone arrays.
+ */
 export function extractJsonLdScripts(html: string): Array<any> {
+  const $ = cheerio.load(html);
   const scripts: any[] = [];
-  const scriptRegex = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
-  let match: RegExpExecArray | null;
-  while ((match = scriptRegex.exec(html)) !== null) {
-    const rawContent = match[1].trim();
+
+  $('script[type="application/ld+json"]').each((_, el) => {
+    const rawContent = $(el).text().trim();
     if (rawContent) {
       try {
         scripts.push(JSON.parse(rawContent));
       } catch (err) {
-        throw new Error(`Failed to parse application/ld+json script: ${rawContent}\n${err}`);
+        throw new Error(`Failed to parse application/ld+json script tag: ${rawContent}\n${err}`);
       }
     }
-  }
+  });
+
   return scripts;
 }
 
+/**
+ * Flattens all Schema.org entities across all application/ld+json scripts in the HTML,
+ * unpacking standalone objects, standalone arrays, and top-level @graph arrays.
+ */
 export function extractAllJsonLdEntities(html: string): Array<Record<string, any>> {
   const scripts = extractJsonLdScripts(html);
   const entities: Record<string, any>[] = [];
+
   for (const script of scripts) {
     if (Array.isArray(script)) {
       entities.push(...script);
@@ -70,6 +88,7 @@ export function extractAllJsonLdEntities(html: string): Array<Record<string, any
       }
     }
   }
+
   return entities;
 }
 

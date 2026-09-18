@@ -1,0 +1,48 @@
+name: Verify Content Primitives
+
+on:
+  push:
+    branches: [main, content-primitives]
+  pull_request:
+    branches: [main, content-primitives]
+
+jobs:
+  verify:
+    name: Verify Content & Remediation Gates
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 11.20.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright Chromium
+        run: pnpm --filter starter-kit exec playwright install --with-deps chromium
+
+      - name: Step 1 - Build Workspace Packages & Next.js App
+        run: pnpm build
+
+      - name: Step 2 - Recursive Unit & SSR Test Suites
+        run: pnpm -r --if-present test
+
+      - name: Step 3 - Recursive Monorepo Lint / Typecheck
+        run: pnpm -r lint
+
+      - name: Step 4 - Production Build Output Verification
+        run: pnpm --filter starter-kit run test:production
+
+      - name: Step 5 - Playwright Browser End-to-End Suite
+        run: pnpm --filter starter-kit run test:e2e

@@ -5,14 +5,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: true,
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/e2e/**',
-      '**/tests/production/**',
-      '**/*.e2e.*',
-      '**/*.spec.ts',
-    ],
+    include: ['tests/production/**/*.test.{ts,tsx}'],
   },
   resolve: {
     alias: {

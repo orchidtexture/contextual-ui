@@ -11,7 +11,12 @@ import {
   extractJsonLdScripts,
   extractAllJsonLdEntities,
   cloneSiteData,
+  parseHtml,
 } from './helpers';
+import PrivacyPage from '@/app/privacy/page';
+import TermsPage from '@/app/terms/page';
+import { createContextualApp } from 'contextual-ui/server';
+import { siteSchema } from '@/data/site.schema';
 
 describe('Content Parity & Structured Data Isolation', () => {
   it('R1: isolates example JSON-LD on docs page - only WebPage owns structured data script', async () => {
@@ -172,6 +177,8 @@ describe('Content Parity & Structured Data Isolation', () => {
       expect(step2Node).toBeDefined();
       expect(step2Node?.name).toBe('Custom Mutated Schema Step Title');
       expect(step2Node?.description).toBe('Custom mutated description text for verification');
+      expect(step2Node?.text).toContain('// MUTATED CODE STRING FOR PARITY TEST');
+      expect(step2Node?.text).toContain('export const customSchema = 42;');
 
       // Verify original connector data remained completely unchanged
       const freshData = await siteApp.fetchData();
@@ -202,8 +209,17 @@ describe('Content Parity & Structured Data Isolation', () => {
         </ContextualSite>
       );
 
-      // Verify first rendered item is now ai-knowledge-graph
-      expect(html).toContain('data-id="ai-knowledge-graph"');
+      // Verify exact parsed item-ID sequence, counts, and numbering using HTML parser
+      const $ = parseHtml(html);
+      const items = $('ol[data-contextual="collection-root"] > li[data-contextual="collection-item"]');
+      expect(items.length).toBe(8);
+
+      const parsedIds = items.map((_, el) => $(el).attr('data-id')).get();
+      expect(parsedIds).toEqual(qs.items.map((it: any) => it.id));
+      expect(parsedIds[0]).toBe('ai-knowledge-graph');
+
+      const parsedNumbers = items.map((_, el) => $(el).find('span').first().text().trim()).get();
+      expect(parsedNumbers).toEqual(['1', '2', '3', '4', '5', '6', '7', '8']);
 
       // Graph reflects the new order
       const graph = await siteApp.getGraph({
@@ -306,20 +322,116 @@ describe('Content Parity & Structured Data Isolation', () => {
       expect(connNode?.description).toBe('Custom connectors description text for verification.');
     });
 
-    it('verifies privacy and terms policy content renders matching graph text', async () => {
-      const privacyGraph = await siteApp.getGraph({ pageId: 'privacy' });
-      const termsGraph = await siteApp.getGraph({ pageId: 'terms' });
+    it('verifies privacy and terms policy actual composition rendering and in-memory mutation parity', async () => {
+      const canonicalData = await siteApp.fetchData();
 
-      const privacyNodes = privacyGraph['@graph'] as Record<string, any>[];
-      const privacySection = privacyNodes.find((n) => n['@type'] === 'WebPageElement');
-      expect(privacySection).toBeDefined();
-      expect(privacySection?.text).toContain('Contextual UI is an open-source framework');
-      expect(privacySection?.text).toContain('Data Storage');
+      // 1. Verify canonical PrivacyPage composition renders matching UI and JSON-LD
+      const privacyJsx = await PrivacyPage();
+      const privacyHtml = renderToString(
+        <ContextualSite data={canonicalData} options={{ disableJsonLdScript: true }}>
+          {privacyJsx}
+        </ContextualSite>
+      );
+      const privacyText = extractVisibleText(privacyHtml);
+      expect(privacyText).toContain('Privacy Policy');
+      expect(privacyText).toContain('Contextual UI is an open-source framework');
+      expect(privacyText).toContain('Data Storage');
 
-      const termsNodes = termsGraph['@graph'] as Record<string, any>[];
-      const termsSection = termsNodes.find((n) => n['@type'] === 'WebPageElement');
-      expect(termsSection).toBeDefined();
-      expect(termsSection?.text).toContain('Contextual UI is open-source software distributed under the MIT license.');
+      const privacyScripts = extractJsonLdScripts(privacyHtml);
+      expect(privacyScripts.length).toBe(1);
+      const privacyEntities = privacyScripts[0]['@graph'] as Record<string, any>[];
+      const privacySectionNode = privacyEntities.find((n) => n['@type'] === 'WebPageElement');
+      expect(privacySectionNode).toBeDefined();
+      expect(privacySectionNode?.text).toContain('Contextual UI is an open-source framework');
+      expect(privacySectionNode?.text).toContain('Data Storage');
+
+      // 2. Verify canonical TermsPage composition renders matching UI and JSON-LD
+      const termsJsx = await TermsPage();
+      const termsHtml = renderToString(
+        <ContextualSite data={canonicalData} options={{ disableJsonLdScript: true }}>
+          {termsJsx}
+        </ContextualSite>
+      );
+      const termsText = extractVisibleText(termsHtml);
+      expect(termsText).toContain('Terms of Service');
+      expect(termsText).toContain('Contextual UI is open-source software distributed under the MIT license.');
+
+      const termsScripts = extractJsonLdScripts(termsHtml);
+      expect(termsScripts.length).toBe(1);
+      const termsEntities = termsScripts[0]['@graph'] as Record<string, any>[];
+      const termsSectionNode = termsEntities.find((n) => n['@type'] === 'WebPageElement');
+      expect(termsSectionNode).toBeDefined();
+      expect(termsSectionNode?.text).toContain('Contextual UI is open-source software distributed under the MIT license.');
+
+      // 3. In-memory paragraph, qualifier, and link mutation on PrivacyPage
+      const cloned = cloneSiteData(canonicalData);
+      const privacySec = (cloned as any).sections.find((s: any) => s.id === 'privacy-policy');
+      expect(privacySec).toBeDefined();
+
+      privacySec.content = [
+        {
+          type: 'paragraph',
+          role: 'normal',
+          text: 'Mutated in-memory paragraph for privacy disclosures verification.',
+        },
+        {
+          type: 'paragraph',
+          role: 'qualifier',
+          text: 'Mutated in-memory qualifier: All processing is local without tracking.',
+        },
+        {
+          type: 'link',
+          label: 'Contact Security Team',
+          href: 'mailto:security@contextual.site',
+        },
+      ];
+
+      // Mutated app supplying the same effective data to both WebPage and graph
+      const mutatedApp = createContextualApp({
+        schema: siteSchema,
+        connector: {
+          async fetchData() {
+            return cloned;
+          },
+        },
+        baseUrl: 'https://contextual.site',
+      });
+
+      const mutatedPrivacyJsx = await PrivacyPage({
+        data: cloned,
+        app: mutatedApp,
+      });
+
+      const mutatedHtml = renderToString(
+        <ContextualSite data={cloned} options={{ disableJsonLdScript: true }}>
+          {mutatedPrivacyJsx}
+        </ContextualSite>
+      );
+
+      // Verify UI text contains mutated paragraph and qualifier
+      const mutatedText = extractVisibleText(mutatedHtml);
+      expect(mutatedText).toContain('Mutated in-memory paragraph for privacy disclosures verification.');
+      expect(mutatedText).toContain('Mutated in-memory qualifier: All processing is local without tracking.');
+      expect(mutatedText).toContain('Contact Security Team');
+
+      // Verify UI contains rendered link with destination
+      const $ = parseHtml(mutatedHtml);
+      const linkEl = $('a[href="mailto:security@contextual.site"]');
+      expect(linkEl.length).toBe(1);
+      expect(linkEl.text()).toContain('Contact Security Team');
+
+      // Verify graph generated from the same effective supplied data matches
+      const mutatedScripts = extractJsonLdScripts(mutatedHtml);
+      expect(mutatedScripts.length).toBe(1);
+      const mutatedEntities = mutatedScripts[0]['@graph'] as Record<string, any>[];
+      const mutatedSectionNode = mutatedEntities.find((n) => n['@type'] === 'WebPageElement');
+      expect(mutatedSectionNode?.text).toContain('Mutated in-memory paragraph for privacy disclosures verification.');
+      expect(mutatedSectionNode?.text).toContain('Mutated in-memory qualifier: All processing is local without tracking.');
+
+      // Verify original connector data remained completely unchanged
+      const freshData = await siteApp.fetchData();
+      const freshPrivacySec = (freshData as any).sections.find((s: any) => s.id === 'privacy-policy');
+      expect(freshPrivacySec.content[0].text).toContain('Contextual UI is an open-source framework');
     });
   });
 });
