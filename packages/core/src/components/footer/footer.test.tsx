@@ -555,5 +555,56 @@ describe('Footer Components', () => {
       expect(html).toContain('Documentation');
       expect(html).toContain('Privacy Policy');
     });
+
+    it('injects JSON-LD script by default for standalone Footer with explicit data', () => {
+      const html = renderToString(
+        <Footer.Root data={sampleFooterData}>
+          <Footer.Brand />
+        </Footer.Root>
+      );
+      expect(html).toContain('type="application/ld+json"');
+      expect(html).toContain('WPFooter');
+    });
+
+    it('suppresses JSON-LD script when injectJsonLd={false} is set explicitly on standalone Footer', () => {
+      const html = renderToString(
+        <Footer.Root data={sampleFooterData} injectJsonLd={false}>
+          <Footer.Brand />
+        </Footer.Root>
+      );
+      expect(html).not.toContain('type="application/ld+json"');
+      expect(html).toContain('Contextual UI');
+    });
+
+    it('suppresses JSON-LD script when injectJsonLd={false} inside ContextualSite with explicit data', () => {
+      const siteData = { footer: sampleFooterData };
+      const demoData = {
+        ...sampleFooterData,
+        brand: { ...sampleFooterData.brand, name: 'Demo Showcase Footer' },
+      };
+
+      const html = renderToString(
+        <ContextualSite data={siteData} injectJsonLd={false}>
+          <Footer.Root data={demoData} injectJsonLd={false}>
+            <Footer.Brand />
+          </Footer.Root>
+        </ContextualSite>
+      );
+      expect(html).not.toContain('type="application/ld+json"');
+      expect(html).toContain('Demo Showcase Footer');
+    });
+
+    it('does not inject JSON-LD script when Footer consumes context inside ContextualSite', () => {
+      const siteData = { footer: sampleFooterData };
+      const html = renderToString(
+        <ContextualSite data={siteData} injectJsonLd={false}>
+          <Footer.Root>
+            <Footer.Brand />
+          </Footer.Root>
+        </ContextualSite>
+      );
+      expect(html).not.toContain('type="application/ld+json"');
+      expect(html).toContain('Contextual UI');
+    });
   });
 });

@@ -14,9 +14,10 @@ import {
   Bot,
   ArrowRight,
 } from 'lucide-react';
-import { Faq, useContextualSiteContext } from 'contextual-ui';
+import { Faq, Section, Collection, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 import { HeroFlowDiagram } from '@/components/hero-flow';
+import { heroSection, pipelineSection, foundationsSection } from '@/data/home.content';
 
 const TriangleSphere = dynamic(() => import('@/components/TriangleSphere'), {
   ssr: false,
@@ -28,20 +29,31 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   const data = explicitData ?? pageContext?.data;
   const faqItems = data?.faq ?? [];
 
+  const sectionList = (data as any)?.sections ?? [];
+  const heroSectionData = sectionList.find((s: any) => s.id === 'hero') ?? heroSection;
+  const pipelineSectionData = sectionList.find((s: any) => s.id === 'data-pipeline') ?? pipelineSection;
+  const foundationsSectionData = sectionList.find((s: any) => s.id === 'foundations') ?? foundationsSection;
+  const ssotSection = sectionList.find((s: any) => s.id === 'ssot');
+  const kgSection = sectionList.find((s: any) => s.id === 'knowledge-graph');
+  const scopingSection = sectionList.find((s: any) => s.id === 'metadata-scoping');
+  const headlessSection = sectionList.find((s: any) => s.id === 'headless-radix');
+
+  const collectionList = (data as any)?.collections ?? [];
+  const ssotFeatures = collectionList.find((c: any) => c.id === 'ssot-features');
+  const kgFeatures = collectionList.find((c: any) => c.id === 'knowledge-graph-features');
+  const scopingFeatures = collectionList.find((c: any) => c.id === 'metadata-scoping-features');
+  const headlessFeatures = collectionList.find((c: any) => c.id === 'headless-features');
+
   return (
     <div className="pt-16 pb-32">
       {/* Main Content with padding-top to account for fixed header */}
       <main className="pt-12 pb-16 px-6 max-w-6xl mx-auto space-y-20 sm:space-y-28">
 
         {/* Hero Section with Dynamic TriangleSphere */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+        <Section.Root data={heroSectionData} id="hero" className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
           <div className="lg:col-span-7 space-y-6">
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight">
-            Build Websites Optimized for Search & AI Agents.
-            </h1>
-            <p className="text-lg text-zinc-300 leading-relaxed max-w-2xl">
-              Stop writing boilerplate schema markup. Use our open-source headless components to build accessible UIs that automatically compile into an unified JSON-LD Knowledge Graph for Next-Gen SEO and LLM ingestion.
-            </p>
+            <Section.Title as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight" />
+            <Section.Description className="text-lg text-zinc-300 leading-relaxed max-w-2xl" />
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <a
                 href="#data-pipeline"
@@ -69,53 +81,41 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
           <div className="lg:col-span-5 h-[360px] sm:h-[440px] lg:h-[480px] w-full flex items-center justify-center">
             <TriangleSphere className="w-full h-full" />
           </div>
-        </section>
+        </Section.Root>
 
         {/* Data Pipeline Flow Diagram Section */}
-        <section id="data-pipeline" className="space-y-6 scroll-mt-24">
+        <Section.Root data={pipelineSectionData} id="data-pipeline" className="space-y-6 scroll-mt-24">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
-              <span>●</span> Architecture Flow
+              <span>●</span> {pipelineSectionData.subtitle || 'Architecture Flow'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100">
-              Source to Graph & UI
-            </h2>
-            <p className="text-sm text-zinc-400 leading-relaxed max-w-3xl">
-              Explore how Contextual UI unifies data ingestion, SSOT schema validation, and multi-channel delivery across React components, Schema.org <code className="code-short">@graph</code> JSON-LD, and structured AI agent feeds.
-            </p>
+            <Section.Title as="h2" className="text-2xl sm:text-3xl font-semibold tracking-tight text-zinc-100" />
+            <Section.Description className="text-sm text-zinc-400 leading-relaxed max-w-3xl" />
           </div>
 
           <HeroFlowDiagram />
-        </section>
+        </Section.Root>
 
         {/* Core Foundations Section */}
-        <section id="foundations" className="space-y-12 sm:space-y-16 scroll-mt-24">
+        <Section.Root data={foundationsSectionData} id="foundations" className="space-y-12 sm:space-y-16 scroll-mt-24">
           {/* Section Header */}
           <div className="space-y-2 max-w-3xl">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
-              <span>●</span> Core Foundations
+              <span>●</span> {foundationsSectionData.subtitle || 'Core Foundations'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
-              Architecture & Core Concepts
-            </h2>
-            <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-              Explore how Contextual UI combines unified schema definitions, sitewide Knowledge Graphs, hierarchical scoping, and headless Radix primitives.
-            </p>
+            <Section.Title as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100" />
+            <Section.Description className="text-sm sm:text-base text-zinc-400 leading-relaxed" />
           </div>
 
           {/* Subsections List */}
           <div className="space-y-16 sm:space-y-20">
 
             {/* Subsection 1: Single Source of Truth (SSOT) */}
-            <div id="ssot" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
+            <Section.Root data={ssotSection} id="ssot" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                    Single Source of Truth (SSOT)
-                  </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">
-                    Define your site schema once in Zod. Automatically generate TypeScript types, runtime validation, and Schema.org JSON-LD with zero drift.
-                  </p>
+                  <Section.Title as="h3" className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100" />
+                  <Section.Description className="text-sm text-zinc-400 leading-relaxed" />
                 </div>
 
                 <a
@@ -129,43 +129,29 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
                 {/* 3 Value Pillars */}
-                <div className="lg:col-span-6 grid grid-cols-1 gap-3">
-                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
-                      <Boxes className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-100">1. Define Once</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
-                        Compose Schema.org registries (<code className="text-accent font-mono text-[11px]">websiteRegistry</code>, <code className="text-accent font-mono text-[11px]">faqRegistry</code>) and custom Zod schemas.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-100">2. Auto Type Inference</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
-                        Derive 100% type-safe models via <code className="text-accent font-mono text-[11px]">InferData&lt;typeof siteSchema&gt;</code> with zero manual duplication.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
-                      <Workflow className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-100">3. Zero Drift Sync</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
-                        Connector data automatically keeps headless React UI components and SEO JSON-LD graphs in sync.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <Collection.Root data={ssotFeatures} ordered className="lg:col-span-6 grid grid-cols-1 gap-3">
+                  {(items) => {
+                    const icons = [Boxes, ShieldCheck, Workflow];
+                    return items.map((item, idx) => {
+                      const Icon = icons[idx] || Boxes;
+                      return (
+                        <Collection.Item
+                          key={item.id}
+                          item={item}
+                          className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <Collection.Title as="h4" className="text-sm font-semibold text-zinc-100" />
+                            <Collection.Description className="text-xs text-zinc-400 leading-relaxed mt-0.5" />
+                          </div>
+                        </Collection.Item>
+                      );
+                    });
+                  }}
+                </Collection.Root>
 
                 {/* Micro Code Preview Card */}
                 <div className="lg:col-span-6 border border-base rounded-2xl bg-zinc-950/80 p-5 font-mono text-xs shadow-inner flex flex-col justify-between">
@@ -199,18 +185,14 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                   </div>
                 </div>
               </div>
-            </div>
+            </Section.Root>
 
             {/* Subsection 2: Global Knowledge Graph */}
-            <div id="knowledge-graph" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
+            <Section.Root data={kgSection} id="knowledge-graph" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                    Global Knowledge Graph
-                  </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">
-                    Entities, route documents, and component metadata compile into a single referentially-linked Schema.org <code className="code-short">@graph</code>. Exposed sitewide for AI agents, LLM pipelines, and search bots.
-                  </p>
+                  <Section.Title as="h3" className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100" />
+                  <Section.Description className="text-sm text-zinc-400 leading-relaxed" />
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0">
@@ -235,43 +217,29 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
 
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
                 {/* 3 Value Pillars */}
-                <div className="lg:col-span-6 grid grid-cols-1 gap-3">
-                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
-                      <Network className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-100">Referential @id Linking</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
-                        Entities reference each other with canonical URIs (<code className="text-accent font-mono text-[11px]">#website</code>, <code className="text-accent font-mono text-[11px]">#organization</code>) forming a true Semantic Web graph.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
-                      <Bot className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-100">Agent-Ready API Endpoint</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
-                        Exposes <code className="text-accent font-mono text-[11px]">/api/graph.json</code> so AI agents (Perplexity, ChatGPT Search, Claude) consume clean structured data without parsing messy DOM.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm">
-                    <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
-                      <Cpu className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-zinc-100">Zero Scraping Fragility</h4>
-                      <p className="text-xs text-zinc-400 leading-relaxed mt-0.5">
-                        Eliminates scraper breaks from markup refactors, client hydration delays, and costly LLM token waste.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <Collection.Root data={kgFeatures} className="lg:col-span-6 grid grid-cols-1 gap-3">
+                  {(items) => {
+                    const icons = [Network, Bot, Cpu];
+                    return items.map((item, idx) => {
+                      const Icon = icons[idx] || Network;
+                      return (
+                        <Collection.Item
+                          key={item.id}
+                          item={item}
+                          className="border border-base rounded-2xl p-4 bg-zinc-950/60 flex items-start gap-3.5 shadow-sm"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent shrink-0 mt-0.5">
+                            <Icon className="w-4 h-4" />
+                          </div>
+                          <div>
+                            <Collection.Title as="h4" className="text-sm font-semibold text-zinc-100" />
+                            <Collection.Description className="text-xs text-zinc-400 leading-relaxed mt-0.5" />
+                          </div>
+                        </Collection.Item>
+                      );
+                    });
+                  }}
+                </Collection.Root>
 
                 {/* JSON-LD Graph Endpoint Preview */}
                 <div className="lg:col-span-6 border border-base rounded-2xl bg-zinc-950/80 p-5 font-mono text-xs shadow-inner flex flex-col justify-between">
@@ -315,18 +283,14 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                   </div>
                 </div>
               </div>
-            </div>
+            </Section.Root>
 
             {/* Subsection 3: Global vs Route Metadata */}
-            <div id="metadata-scoping" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
+            <Section.Root data={scopingSection} id="metadata-scoping" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                    Global vs Route Metadata
-                  </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">
-                    Distinguish between domain-level entities (<code className="code-short">WebSite</code>, <code className="code-short">Organization</code>), route documents (<code className="code-short">WebPage</code>), and UI components without prop drilling.
-                  </p>
+                  <Section.Title as="h3" className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100" />
+                  <Section.Description className="text-sm text-zinc-400 leading-relaxed" />
                 </div>
 
                 <a
@@ -338,62 +302,44 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                 </a>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded bg-accent/20 border border-accent/40 text-accent font-mono text-xs font-bold flex items-center justify-center">1</span>
-                      <h4 className="text-sm font-semibold text-zinc-100">Domain Scope</h4>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">&lt;ContextualSite&gt;</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Mounted at root <code className="code-short">app/layout.tsx</code>. Injects global entities like <code className="text-zinc-200 font-mono text-[11px]">Organization</code>, <code className="text-zinc-200 font-mono text-[11px]">WebSite</code>, and sitewide navigations.
-                  </p>
-                </div>
+              <Collection.Root data={scopingFeatures} ordered className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {(items) =>
+                  items.map((item, idx) => (
+                    <Collection.Item
+                      key={item.id}
+                      item={item}
+                      className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="w-6 h-6 rounded bg-accent/20 border border-accent/40 text-accent font-mono text-xs font-bold flex items-center justify-center">
+                            {idx + 1}
+                          </span>
+                          <Collection.Title as="h4" className="text-sm font-semibold text-zinc-100" />
+                        </div>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                          {idx === 0 ? '<ContextualSite>' : idx === 1 ? '<WebPage>' : '<Faq> / <Breadcrumb>'}
+                        </span>
+                      </div>
+                      <Collection.Description className="text-xs text-zinc-400 leading-relaxed" />
+                    </Collection.Item>
+                  ))
+                }
+              </Collection.Root>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded bg-accent/20 border border-accent/40 text-accent font-mono text-xs font-bold flex items-center justify-center">2</span>
-                      <h4 className="text-sm font-semibold text-zinc-100">Route Scope</h4>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">&lt;WebPage&gt;</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Wraps individual route pages (<code className="code-short">&lt;WebPage id="docs"&gt;</code>). Scopes canonical URLs, route titles, descriptions, and breadcrumb trails to the active document.
-                  </p>
-                </div>
-
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded bg-accent/20 border border-accent/40 text-accent font-mono text-xs font-bold flex items-center justify-center">3</span>
-                      <h4 className="text-sm font-semibold text-zinc-100">Component Scope</h4>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">&lt;Faq&gt; / &lt;Breadcrumb&gt;</span>
-                  </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Headless primitives that consume typed data directly from context, render accessible UI, and attach microdata fragments to the parent page node.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-                <strong className="text-zinc-200 font-medium">Why it matters:</strong> Isolating domain, route, and component contexts prevents metadata leakage across pages while maintaining global entity links throughout the Knowledge Graph.
-              </p>
-            </div>
+              <Section.Content className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1" />
+            </Section.Root>
 
             {/* Subsection 4: Headless & Radix Powered */}
-            <div id="headless-radix" className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80">
+            <Section.Root
+              data={headlessSection}
+              id="headless-radix"
+              className="scroll-mt-24 space-y-6 pt-8 border-t border-zinc-800/80"
+            >
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div className="space-y-2 max-w-2xl">
-                  <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100">
-                    Headless & Radix Powered
-                  </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">
-                    Unstyled, accessible UI primitives built with Radix UI and the <code className="code-short">asChild</code> pattern. Full styling freedom with Tailwind CSS or any design system, with automated Schema.org markup.
-                  </p>
+                  <Section.Title as="h3" className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-100" />
+                  <Section.Description className="text-sm text-zinc-400 leading-relaxed" />
                 </div>
 
                 <a
@@ -405,55 +351,33 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                 </a>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Code2 className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Radix asChild Pattern</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Slot into your custom button, link, Next.js <code className="text-accent font-mono text-[11px]">&lt;Link&gt;</code>, or motion component without extra wrapper divs.
-                  </p>
-                </div>
+              <Collection.Root data={headlessFeatures} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {(items) => {
+                  const icons = [Code2, Sparkles, ShieldCheck, FileCode];
+                  return items.map((item, idx) => {
+                    const Icon = icons[idx] || Code2;
+                    return (
+                      <Collection.Item
+                        key={item.id}
+                        item={item}
+                        className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm"
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <Collection.Title as="h4" className="text-sm font-semibold text-zinc-100" />
+                        <Collection.Description className="text-xs text-zinc-400 leading-relaxed" />
+                      </Collection.Item>
+                    );
+                  });
+                }}
+              </Collection.Root>
 
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <Sparkles className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Design System Agnostic</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    100% compatible with Tailwind CSS, Tailwind v4, CSS Modules, Shadcn UI, or custom enterprise design tokens.
-                  </p>
-                </div>
-
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <ShieldCheck className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">WAI-ARIA Accessibility</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Full keyboard navigation (Tab, Enter, Space, Arrows), screen reader announcements, and robust ARIA states out of the box.
-                  </p>
-                </div>
-
-                <div className="border border-base rounded-2xl p-5 bg-zinc-950/60 space-y-2.5 shadow-sm">
-                  <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-accent">
-                    <FileCode className="w-4 h-4" />
-                  </div>
-                  <h4 className="text-sm font-semibold text-zinc-100">Automated Microdata</h4>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Components quietly emit valid Schema.org microdata and JSON-LD behind the scenes without polluting your JSX styling.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1">
-                <strong className="text-zinc-200 font-medium">Why it matters:</strong> You get top-tier SEO and agentic structured data without compromising your team&apos;s UI design system, component libraries, or frontend styling architecture.
-              </p>
-            </div>
+              <Section.Content className="text-xs sm:text-sm text-zinc-400 leading-relaxed pt-1" />
+            </Section.Root>
 
           </div>
-        </section>
+        </Section.Root>
 
         {/* FAQ Section */}
         <section className="space-y-6">

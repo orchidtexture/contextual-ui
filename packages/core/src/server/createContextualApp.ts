@@ -1,4 +1,4 @@
-import { createGraphRouteHandler, GraphRouteHandlerOptions } from './createGraphRouteHandler';
+import { GraphRouteHandlerOptions } from './createGraphRouteHandler';
 import { InferData } from '../registry/defineSchema';
 import { buildGraph, JsonLdObject } from 'jsonld-graph-builder';
 import type {
@@ -63,6 +63,9 @@ export function createContextualApp<
 
     // Support single page resolution when an array of webpages is configured
     const webpageKey = ('webpage' in merged) ? 'webpage' : (('webpages' in merged) ? 'webpages' : undefined);
+    let targetPage: any = undefined;
+    const isSinglePage = !webpageKey || !raw[webpageKey] || (Array.isArray(raw[webpageKey]) && raw[webpageKey].length <= 1);
+
     if (webpageKey && Array.isArray(raw[webpageKey])) {
       const pageList: any[] = raw[webpageKey];
       if (pageId || pageUrl) {
@@ -75,13 +78,15 @@ export function createContextualApp<
         const pageOverride = Array.isArray(overrideItem) ? overrideItem[0] : overrideItem;
 
         if (found) {
-          merged[webpageKey] = { ...found, ...(pageOverride || {}) };
+          targetPage = { ...found, ...(pageOverride || {}) };
+          merged[webpageKey] = targetPage;
         } else if (pageOverride && Object.keys(pageOverride).length > 0) {
-          merged[webpageKey] = {
+          targetPage = {
             ...(pageId ? { id: pageId } : {}),
             ...(pageUrl ? { url: pageUrl } : {}),
             ...pageOverride,
           };
+          merged[webpageKey] = targetPage;
         }
       } else if (overrides && overrides[webpageKey as keyof InferData<TSchema>]) {
         const overrideVal = overrides[webpageKey as keyof InferData<TSchema>];
@@ -93,11 +98,105 @@ export function createContextualApp<
               (overrideObj.url && p.url === overrideObj.url)
           );
           if (found) {
-            merged[webpageKey] = { ...found, ...overrideObj };
+            targetPage = { ...found, ...overrideObj };
+            merged[webpageKey] = targetPage;
           } else {
+            targetPage = overrideObj;
             merged[webpageKey] = overrideObj;
           }
         }
+      }
+    } else if (webpageKey && typeof merged[webpageKey] === 'object') {
+      targetPage = merged[webpageKey];
+    }
+
+    // Support page-scoped filtering when pageId or pageUrl is specified
+    const resolvedTargetId = targetPage?.id || pageId || (pageUrl === '/' ? 'home' : (pageUrl ? pageUrl.replace(/^\//, '') : undefined));
+
+    if (resolvedTargetId && (pageId || pageUrl)) {
+      const declaredParts: string[] | undefined = Array.isArray(targetPage?.hasPart)
+        ? targetPage.hasPart
+        : (Array.isArray(targetPage?.sections) ? targetPage.sections : undefined);
+
+      const matchesPart = (id: string, itemPageId?: string) => {
+        if (!id) return false;
+        return Boolean(
+          declaredParts?.includes(id) ||
+          declaredParts?.includes(`#${id}`) ||
+          declaredParts?.includes(`section:${id}`) ||
+          (itemPageId ? declaredParts?.includes(`section:${itemPageId}:${id}`) : false) ||
+          (itemPageId ? declaredParts?.includes(`#section:${itemPageId}:${id}`) : false) ||
+          declaredParts?.includes(`action:${id}`) ||
+          declaredParts?.includes(`#action:${id}`)
+        );
+      };
+
+      // 1. Filter sections
+      const sectionKey = ('sections' in merged) ? 'sections' : (('section' in merged) ? 'section' : undefined);
+      if (sectionKey && Array.isArray(merged[sectionKey])) {
+        merged[sectionKey] = (merged[sectionKey] as any[]).filter((s: any) => {
+          if (declaredParts && declaredParts.length > 0) return matchesPart(s.id, s.pageId);
+          if (s.pageId) return s.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
+      }
+
+      // 2. Filter forms
+      const formKey = ('forms' in merged) ? 'forms' : (('form' in merged) ? 'form' : undefined);
+      if (formKey && merged[formKey]) {
+        const formList: any[] = Array.isArray(merged[formKey]) ? merged[formKey] : [merged[formKey]];
+        const filteredForms = formList.filter((f: any) => {
+          if (declaredParts && declaredParts.length > 0) {
+            return matchesPart(f.id) || matchesPart(`form-${f.id}`) || declaredParts.includes('forms') || declaredParts.includes('#forms');
+          }
+          if (f.pageId) return f.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
+        if (Array.isArray(merged[formKey])) {
+          merged[formKey] = filteredForms;
+        } else {
+          merged[formKey] = filteredForms.length > 0 ? filteredForms[0] : undefined;
+        }
+      }
+
+      // 3. Filter faq
+      const faqKey = ('faq' in merged) ? 'faq' : undefined;
+      if (faqKey && merged[faqKey]) {
+        let faqBelongs = false;
+        if (declaredParts && declaredParts.length > 0) {
+          faqBelongs = declaredParts.includes('faq') || declaredParts.includes('#faq');
+        } else {
+          const faqData = merged[faqKey];
+          const faqPageId = faqData?.pageId || (Array.isArray(faqData) ? faqData[0]?.pageId : undefined);
+          if (faqPageId) {
+            faqBelongs = faqPageId === resolvedTargetId;
+          } else {
+            faqBelongs = resolvedTargetId === 'home' || isSinglePage;
+          }
+        }
+        if (!faqBelongs) {
+          merged[faqKey] = [];
+        }
+      }
+
+      // 4. Filter collections
+      const colKey = ('collections' in merged) ? 'collections' : (('collection' in merged) ? 'collection' : undefined);
+      if (colKey && Array.isArray(merged[colKey])) {
+        merged[colKey] = (merged[colKey] as any[]).filter((c: any) => {
+          if (declaredParts && declaredParts.length > 0) return matchesPart(c.id, c.pageId);
+          if (c.pageId) return c.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
+      }
+
+      // 5. Filter services
+      const serviceKey = ('services' in merged) ? 'services' : (('service' in merged) ? 'service' : undefined);
+      if (serviceKey && Array.isArray(merged[serviceKey])) {
+        merged[serviceKey] = (merged[serviceKey] as any[]).filter((s: any) => {
+          if (declaredParts && declaredParts.length > 0) return matchesPart(s.id, s.pageId);
+          if (s.pageId) return s.pageId === resolvedTargetId;
+          return resolvedTargetId === 'home' || isSinglePage;
+        });
       }
     }
 
@@ -112,12 +211,96 @@ export function createContextualApp<
       return hydrated.raw as InferData<TSchema>;
     },
     async getGraph(handlerOptions?: GetGraphOptions<TSchema>) {
+      const rawData = await options.connector.fetchData();
+      const targetPageId = handlerOptions?.pageId || (handlerOptions?.pageUrl === '/' ? 'home' : (handlerOptions?.pageUrl ? handlerOptions.pageUrl.replace(/^\//, '') : undefined));
+
+      const webpageKey = ('webpage' in rawData) ? 'webpage' : (('webpages' in rawData) ? 'webpages' : undefined);
+      const isSinglePage = !webpageKey || !rawData[webpageKey] || (Array.isArray(rawData[webpageKey]) && rawData[webpageKey].length <= 1);
+      const sectionKey = ('sections' in rawData) ? 'sections' : (('section' in rawData) ? 'section' : undefined);
+      const colKey = ('collections' in rawData) ? 'collections' : (('collection' in rawData) ? 'collection' : undefined);
+      const serviceKey = ('services' in rawData) ? 'services' : (('service' in rawData) ? 'service' : undefined);
+      const formKey = ('forms' in rawData) ? 'forms' : (('form' in rawData) ? 'form' : undefined);
+      const faqKey = ('faq' in rawData) ? 'faq' : undefined;
+
+      const extendedJsonLdContext = {
+        ...(handlerOptions?.jsonLdContext || {}),
+        hasFaq: Boolean(rawData.faq),
+        targetPageId,
+        isSinglePage,
+        resolvePageParts: (pId: string) => {
+          const parts: Array<string | { '@id': string }> = [];
+          if (rawData.navbar) parts.push('navbar');
+
+          if (sectionKey && Array.isArray(rawData[sectionKey])) {
+            const matched = rawData[sectionKey].filter((s: any) => {
+              if (s.pageId) return s.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const s of matched) {
+              const sId = s.id?.startsWith('#') || s.id?.startsWith('http')
+                ? s.id
+                : (s.pageId ? `section:${s.pageId}:${s.id}` : `section:${s.id}`);
+              parts.push(sId);
+            }
+          }
+
+          if (colKey && Array.isArray(rawData[colKey])) {
+            const matchedCols = rawData[colKey].filter((c: any) => {
+              if (c.pageId) return c.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const c of matchedCols) {
+              const cId = c.id?.startsWith('#') || c.id?.startsWith('http')
+                ? c.id
+                : (c.pageId ? `itemlist:${c.pageId}:${c.id}` : `itemlist:${c.id}`);
+              parts.push(cId);
+            }
+          }
+
+          if (serviceKey && Array.isArray(rawData[serviceKey])) {
+            const matchedServices = rawData[serviceKey].filter((s: any) => {
+              if (s.pageId) return s.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const s of matchedServices) {
+              const sId = s.id?.startsWith('#') || s.id?.startsWith('http')
+                ? s.id
+                : (s.pageId ? `service:${s.pageId}:${s.id}` : `service:${s.id}`);
+              parts.push(sId);
+            }
+          }
+
+          if (formKey && rawData[formKey]) {
+            const formList: any[] = Array.isArray(rawData[formKey]) ? rawData[formKey] : [rawData[formKey]];
+            const matched = formList.filter((f: any) => {
+              if (f.pageId) return f.pageId === pId;
+              return pId === 'home' || isSinglePage;
+            });
+            for (const f of matched) {
+              parts.push(`action:form-${f.id}`);
+            }
+          }
+
+          if (faqKey && rawData[faqKey]) {
+            const faqData = rawData[faqKey];
+            const faqPageId = faqData?.pageId || (Array.isArray(faqData) ? faqData[0]?.pageId : undefined);
+            const matchesFaq = faqPageId ? faqPageId === pId : (pId === 'home' || isSinglePage);
+            if (matchesFaq) {
+              parts.push('faq');
+            }
+          }
+
+          if (rawData.footer) parts.push('footer');
+          return parts;
+        },
+      };
+
       const hydrated = await getHydrated(
         handlerOptions?.dataOverrides,
         handlerOptions?.pageId,
         handlerOptions?.pageUrl
       );
-      const generated = hydrated.generateJsonLd(handlerOptions?.jsonLdContext);
+      const generated = hydrated.generateJsonLd(extendedJsonLdContext);
       const config = hydrated.config || options.schema.config || {};
       
       const filteredGenerated: Record<string, any> = {};
@@ -126,6 +309,9 @@ export function createContextualApp<
       const includeAll = handlerOptions?.includeAll;
 
       for (const [key, val] of Object.entries(generated)) {
+        if (!val) continue;
+        if (Array.isArray(val) && val.length === 0) continue;
+
         if (excludeKeys?.includes(key)) continue;
         
         if (includeKeys?.includes(key)) {
@@ -136,6 +322,24 @@ export function createContextualApp<
         if (includeAll) {
           filteredGenerated[key] = val;
           continue;
+        }
+
+        // When a specific page is targeted, include page-scoped non-global entities that were hydrated for this page
+        if (targetPageId) {
+          if (
+            key === 'sections' ||
+            key === 'section' ||
+            key === 'collections' ||
+            key === 'collection' ||
+            key === 'services' ||
+            key === 'service' ||
+            key === 'forms' ||
+            key === 'form' ||
+            key === 'faq'
+          ) {
+            filteredGenerated[key] = val;
+            continue;
+          }
         }
 
         // If not strictly included/excluded, fallback to registry default behavior
@@ -154,21 +358,33 @@ export function createContextualApp<
     },
     createGraphHandler(handlerOptions?: GetGraphOptions<TSchema>) {
       return {
-        GET: async (req: Request) => {
-          const hydrated = await getHydrated(
-            handlerOptions?.dataOverrides,
-            handlerOptions?.pageId,
-            handlerOptions?.pageUrl
-          );
-          const effectiveOptions: GetGraphOptions<TSchema> = {
-            ...handlerOptions,
-            graphOptions: {
-              baseUrl: options.baseUrl,
-              ...handlerOptions?.graphOptions,
-            },
-          };
-          const graphHandler = createGraphRouteHandler(hydrated, effectiveOptions);
-          return graphHandler.GET(req);
+        GET: async (_req: Request) => {
+          try {
+            const graph = await this.getGraph(handlerOptions);
+            const defaultHeaders = {
+              'Content-Type': 'application/ld+json; charset=utf-8',
+              'Access-Control-Allow-Origin': '*',
+              'Cache-Control': 'public, max-age=60, s-maxage=300',
+              ...handlerOptions?.headers,
+            };
+            return new Response(JSON.stringify(graph, null, 2), {
+              status: 200,
+              headers: defaultHeaders,
+            });
+          } catch (error) {
+            return new Response(
+              JSON.stringify({
+                error: 'Internal Server Error',
+                message: error instanceof Error ? error.message : String(error),
+              }),
+              {
+                status: 500,
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+          }
         },
       };
     },

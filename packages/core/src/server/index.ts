@@ -39,13 +39,25 @@ export type { WebpageData, WebpageItem } from '../components/webpage/webpage.sch
 export { generateWebpageJsonLd, exportAgentData as exportWebpageAgentData, webpageRegistry, webpagesRegistry } from '../components/webpage/webpage.utils';
 export {
   OrganizationDataSchema,
+  PostalAddressSchema,
 } from '../components/organization/organization.schema';
-export type { OrganizationData } from '../components/organization/organization.schema';
+export type { OrganizationData, PostalAddress } from '../components/organization/organization.schema';
 export {
   generateOrganizationJsonLd,
   exportAgentData as exportOrganizationAgentData,
   organizationRegistry,
 } from '../components/organization/organization.utils';
+export {
+  ServiceDataSchema,
+  ServiceItemSchema,
+} from '../components/service';
+export type { ServiceData, ServiceItem } from '../components/service';
+export {
+  generateServiceJsonLd,
+  exportAgentData as exportServiceAgentData,
+  serviceRegistry,
+  servicesRegistry,
+} from '../components/service';
 export {
   FormDataSchema,
   FormEntitySchema,
@@ -66,5 +78,85 @@ export {
   formRegistry,
   formsRegistry,
 } from '../components/form/form.utils';
+export type { ContentProps, ContentComponentOverrides } from '../components/content';
+export type {
+  SectionRootProps,
+  SectionTitleProps,
+  SectionSubtitleProps,
+  SectionDescriptionProps,
+  SectionContentProps,
+  SectionContextValue,
+} from '../components/section';
+export type {
+  CollectionRootProps,
+  CollectionItemProps,
+  CollectionTitleProps,
+  CollectionDescriptionProps,
+  CollectionContentProps,
+  CollectionContextValue,
+  CollectionItemContextValue,
+} from '../components/collection';
+
+export {
+  ContentBlockRoleSchema,
+  ParagraphBlockSchema,
+  HeadingBlockSchema,
+  ContentListItemSchema,
+  ListBlockSchema,
+  LinkBlockSchema,
+  CalloutBlockSchema,
+  CodeBlockSchema,
+  ContentBlockSchema,
+  ContentInputSchema,
+  SectionRecordSchema,
+  SectionDataSchema,
+  CollectionItemSchema,
+  CollectionRecordSchema,
+  CollectionDataSchema,
+} from '../content/content.schema';
+export type {
+  ContentBlockRole,
+  ParagraphBlock,
+  HeadingBlock,
+  ContentListItem,
+  ListBlock,
+  LinkBlock,
+  CalloutBlock,
+  CodeBlock,
+  ContentBlock,
+  ContentInput,
+  SectionRecord,
+  SectionData,
+  NormalizedSection,
+  CollectionItem,
+  CollectionRecord,
+  CollectionData,
+  NormalizedCollection,
+  NormalizedCollectionItem,
+} from '../content';
+export {
+  normalizeContentBlocks,
+  extractPlainText,
+  normalizeSections,
+  normalizeSection,
+  generateSectionJsonLd,
+  exportAgentData as exportSectionAgentData,
+  normalizeCollectionItem,
+  normalizeCollections,
+  normalizeCollection,
+  deriveCollectionScope,
+  deriveCollectionListItemId,
+  generateCollectionJsonLd,
+  exportCollectionAgentData,
+  collectionRegistry,
+  collectionsRegistry,
+  serializeJsonLd,
+  sectionRegistry,
+  sectionsRegistry,
+} from '../content/content.utils';
+export { isSafeHref } from '../content/content.schema';
+export { validateGraphReferences } from '../content/content.validator';
+export type { GraphReferenceValidationResult } from '../content/content.validator';
+
 
 

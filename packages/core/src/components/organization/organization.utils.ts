@@ -8,10 +8,26 @@ import { OrganizationDataSchema, OrganizationData } from './organization.schema'
 export function generateOrganizationJsonLd(data: OrganizationData, ctx?: Partial<JsonLdContext>) {
   const create = ctx?.createId ?? createId;
 
+  let addressObj: any;
+  if (data.address) {
+    if (typeof data.address === 'object') {
+      addressObj = {
+        '@type': 'PostalAddress',
+        ...(data.address.streetAddress ? { streetAddress: data.address.streetAddress } : {}),
+        ...(data.address.addressLocality ? { addressLocality: data.address.addressLocality } : {}),
+        ...(data.address.addressRegion ? { addressRegion: data.address.addressRegion } : {}),
+        ...(data.address.postalCode ? { postalCode: data.address.postalCode } : {}),
+        ...(data.address.addressCountry ? { addressCountry: data.address.addressCountry } : {}),
+      };
+    } else {
+      addressObj = data.address;
+    }
+  }
+
   return {
     '@context': 'https://schema.org',
     '@type': 'Organization',
-    '@id': create('organization'),
+    '@id': data.id ? create('organization', data.id) : create('organization'),
     name: data.name,
     ...(data.legalName ? { legalName: data.legalName } : {}),
     ...(data.url ? { url: data.url } : {}),
@@ -20,6 +36,8 @@ export function generateOrganizationJsonLd(data: OrganizationData, ctx?: Partial
     ...(data.sameAs && data.sameAs.length > 0 ? { sameAs: data.sameAs } : {}),
     ...(data.email ? { email: data.email } : {}),
     ...(data.telephone ? { telephone: data.telephone } : {}),
+    ...(addressObj ? { address: addressObj } : {}),
+    ...(data.foundingDate ? { foundingDate: data.foundingDate } : {}),
   };
 }
 
@@ -28,6 +46,7 @@ export function generateOrganizationJsonLd(data: OrganizationData, ctx?: Partial
  */
 export function exportAgentData(data: OrganizationData) {
   return {
+    id: data.id,
     name: data.name,
     legalName: data.legalName,
     url: data.url,
@@ -36,6 +55,8 @@ export function exportAgentData(data: OrganizationData) {
     sameAs: data.sameAs,
     email: data.email,
     telephone: data.telephone,
+    address: data.address,
+    foundingDate: data.foundingDate,
   };
 }
 

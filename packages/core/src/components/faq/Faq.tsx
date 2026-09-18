@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { FaqDataSchema } from './faq.schema';
 import { FaqContext, FaqItemContext } from './faq.context';
-import { useContextualSiteContext } from '../site/site.context';
+import { useContextualSiteContext, useIsContextualSite } from '../site/site.context';
 import { 
   FaqRootProps, 
   FaqItemProps, 
@@ -13,6 +13,7 @@ import {
   FaqContextValue 
 } from './faq.types';
 import { generateFaqJsonLd } from './faq.utils';
+import { serializeJsonLd } from '../../content/content.utils';
 
 export function Root({ 
   data: explicitData,
@@ -23,6 +24,7 @@ export function Root({
   injectJsonLd 
 }: FaqRootProps) {
   const pageContext = useContextualSiteContext();
+  const isInsideSite = useIsContextualSite();
 
   const rawData = explicitData ?? pageContext?.data?.[sectionKey] ?? [];
 
@@ -65,7 +67,7 @@ export function Root({
     getItemData,
   }), [data, openItemIds, toggleItem, isItemOpen, getItemData]);
 
-  const shouldInject = injectJsonLd ?? true;
+  const shouldInject = injectJsonLd ?? !isInsideSite;
   const jsonLd = useMemo(() => (shouldInject ? generateFaqJsonLd(data) : null), [data, shouldInject]);
 
   return (
@@ -74,7 +76,7 @@ export function Root({
         {jsonLd && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
           />
         )}
         {children}

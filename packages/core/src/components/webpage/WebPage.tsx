@@ -1,6 +1,7 @@
 import { Slot } from '@radix-ui/react-slot';
 import type { WebPageProps } from './webpage.types';
 import type { WebpageItem } from './webpage.schema';
+import { serializeJsonLd } from '../../content/content.utils';
 
 export async function WebPage({
   app,
@@ -54,7 +55,7 @@ export async function WebPage({
       {!disableJsonLdScript && graph && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(graph) }}
         />
       )}
       {children}

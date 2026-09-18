@@ -237,6 +237,35 @@ export default async function CMSPage() {
 
 ---
 
+## 🧪 Testing & Verification
+
+The starter kit contains comprehensive unit, SSR parity, production output, and browser integration suites.
+
+### Commands
+
+```bash
+# 1. Typecheck (included in monorepo recursive lint)
+pnpm lint
+
+# 2. Unit and SSR Parity Tests (Vitest)
+pnpm test
+
+# 3. Production Build Artifact Verification (inspects .next output and graph scripts)
+pnpm build
+pnpm test:production
+
+# 4. End-to-End Browser Verification (Playwright)
+# Note: Install Playwright Chromium binary first if not already installed:
+# pnpm exec playwright install chromium
+pnpm test:e2e
+```
+
+### Browser Test Setup
+- E2E tests use Playwright with Chromium against the built production server at `http://127.0.0.1:3217`.
+- Network safety: Form submissions (`/api/contact`) are intercepted locally by Playwright before exiting the browser to prevent external traffic.
+
+---
+
 ## 📂 Project Structure
 
 ```text

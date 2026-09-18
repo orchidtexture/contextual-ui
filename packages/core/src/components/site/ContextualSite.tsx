@@ -5,6 +5,7 @@ import { Slot } from '@radix-ui/react-slot';
 import { buildGraph, JsonLdObject } from 'jsonld-graph-builder';
 import { ContextualSiteContext } from './site.context';
 import { ContextualSiteProps, ContextualSiteContextValue } from './site.types';
+import { serializeJsonLd } from '../../content/content.utils';
 
 function isHydratedContext(data: any): boolean {
   return (
@@ -103,7 +104,7 @@ export function ContextualSite<
         {!options?.disableJsonLdScript && graph && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(graph) }}
+            dangerouslySetInnerHTML={{ __html: serializeJsonLd(graph) }}
           />
         )}
         {children}

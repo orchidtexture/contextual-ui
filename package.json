@@ -12,6 +12,10 @@
     "build": "pnpm -r build",
     "dev": "pnpm -r --parallel dev",
     "lint": "pnpm -r lint",
+    "test": "pnpm -r --if-present test",
+    "test:production": "pnpm --filter starter-kit run test:production",
+    "test:e2e": "pnpm --filter starter-kit run test:e2e",
+    "verify:content": "pnpm build && pnpm -r --if-present test && pnpm -r lint && pnpm --filter starter-kit run test:production && pnpm --filter starter-kit run test:e2e",
     "release:beta": "./scripts/build-beta-release.sh"
   },
   "devDependencies": {

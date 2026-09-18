@@ -4,7 +4,7 @@ import { useMemo, useCallback } from 'react';
 import { Slot } from '@radix-ui/react-slot';
 import { BreadcrumbDataSchema } from './breadcrumb.schema';
 import { BreadcrumbContext, BreadcrumbItemContext } from './breadcrumb.context';
-import { useContextualSiteContext } from '../site/site.context';
+import { useContextualSiteContext, useIsContextualSite } from '../site/site.context';
 import {
   BreadcrumbRootProps,
   BreadcrumbListProps,
@@ -15,6 +15,7 @@ import {
   BreadcrumbContextValue,
 } from './breadcrumb.types';
 import { generateBreadcrumbJsonLd } from './breadcrumb.utils';
+import { serializeJsonLd } from '../../content/content.utils';
 
 export function Root({
   data: explicitData,
@@ -25,6 +26,7 @@ export function Root({
   injectJsonLd,
 }: BreadcrumbRootProps) {
   const siteContext = useContextualSiteContext();
+  const isInsideSite = useIsContextualSite();
 
   const rawData = explicitData ?? siteContext?.data?.[sectionKey] ?? [];
 
@@ -53,7 +55,7 @@ export function Root({
     [data, getItemData]
   );
 
-  const shouldInject = injectJsonLd ?? true;
+  const shouldInject = injectJsonLd ?? !isInsideSite;
   const jsonLd = useMemo(
     () => (shouldInject ? generateBreadcrumbJsonLd(data, baseUrl) : null),
     [data, baseUrl, shouldInject]
@@ -69,7 +71,7 @@ export function Root({
         {jsonLd && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            dangerouslySetInnerHTML={{ __html: serializeJsonLd(jsonLd) }}
           />
         )}
         {children}
