@@ -14,10 +14,23 @@ import {
   Bot,
   ArrowRight,
 } from 'lucide-react';
-import { Faq, Section, Collection, useContextualSiteContext } from 'contextual-ui';
+import { Faq, Section, Collection, Content, useContextualSiteContext } from 'contextual-ui';
 import type { SiteData } from '@/data/site.server';
 import { HeroFlowDiagram } from '@/components/hero-flow';
-import { heroSection, pipelineSection, foundationsSection } from '@/data/home.content';
+import {
+  heroSection,
+  pipelineSection,
+  foundationsSection,
+  ssotSection as defaultSsotSection,
+  kgSection as defaultKgSection,
+  scopingSection as defaultScopingSection,
+  headlessSection as defaultHeadlessSection,
+  faqSection as defaultFaqSection,
+  ssotFeatures as defaultSsotFeatures,
+  kgFeatures as defaultKgFeatures,
+  scopingFeatures as defaultScopingFeatures,
+  headlessFeatures as defaultHeadlessFeatures,
+} from '@/data/home.content';
 
 const TriangleSphere = dynamic(() => import('@/components/TriangleSphere'), {
   ssr: false,
@@ -33,16 +46,31 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
   const heroSectionData = sectionList.find((s: any) => s.id === 'hero') ?? heroSection;
   const pipelineSectionData = sectionList.find((s: any) => s.id === 'data-pipeline') ?? pipelineSection;
   const foundationsSectionData = sectionList.find((s: any) => s.id === 'foundations') ?? foundationsSection;
-  const ssotSection = sectionList.find((s: any) => s.id === 'ssot');
-  const kgSection = sectionList.find((s: any) => s.id === 'knowledge-graph');
-  const scopingSection = sectionList.find((s: any) => s.id === 'metadata-scoping');
-  const headlessSection = sectionList.find((s: any) => s.id === 'headless-radix');
+  const ssotSection = sectionList.find((s: any) => s.id === 'ssot') ?? defaultSsotSection;
+  const kgSection = sectionList.find((s: any) => s.id === 'knowledge-graph') ?? defaultKgSection;
+  const scopingSection = sectionList.find((s: any) => s.id === 'metadata-scoping') ?? defaultScopingSection;
+  const headlessSection = sectionList.find((s: any) => s.id === 'headless-radix') ?? defaultHeadlessSection;
+  const faqSectionData = sectionList.find((s: any) => s.id === 'faq-section') ?? defaultFaqSection;
 
   const collectionList = (data as any)?.collections ?? [];
-  const ssotFeatures = collectionList.find((c: any) => c.id === 'ssot-features');
-  const kgFeatures = collectionList.find((c: any) => c.id === 'knowledge-graph-features');
-  const scopingFeatures = collectionList.find((c: any) => c.id === 'metadata-scoping-features');
-  const headlessFeatures = collectionList.find((c: any) => c.id === 'headless-features');
+  const ssotFeatures = collectionList.find((c: any) => c.id === 'ssot-features') ?? defaultSsotFeatures;
+  const kgFeatures = collectionList.find((c: any) => c.id === 'knowledge-graph-features') ?? defaultKgFeatures;
+  const scopingFeatures = collectionList.find((c: any) => c.id === 'metadata-scoping-features') ?? defaultScopingFeatures;
+  const headlessFeatures = collectionList.find((c: any) => c.id === 'headless-features') ?? defaultHeadlessFeatures;
+
+  const heroLinks = heroSectionData?.content?.filter((b: any) => b.type === 'link') || [
+    { type: 'link', label: 'Explore Pipeline Diagram', href: '#data-pipeline' },
+    { type: 'link', label: 'Browse Docs', href: '/docs' },
+    { type: 'link', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
+  ];
+
+  const ssotCodeBlock = ssotSection?.content?.find((b: any) => b.type === 'code');
+  const ssotFilename = ssotCodeBlock?.filename || 'data/site.schema.ts';
+  const ssotCode = ssotCodeBlock?.code;
+
+  const kgCodeBlock = kgSection?.content?.find((b: any) => b.type === 'code');
+  const kgFilename = kgCodeBlock?.filename || 'GET /api/graph.json';
+  const kgCode = kgCodeBlock?.code;
 
   return (
     <div className="pt-16 pb-32">
@@ -55,26 +83,28 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
             <Section.Title as="h1" className="text-4xl sm:text-5xl font-bold tracking-tight text-zinc-50 leading-tight" />
             <Section.Description className="text-lg text-zinc-300 leading-relaxed max-w-2xl" />
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <a
-                href="#data-pipeline"
-                className="px-4 py-2 rounded-xl bg-accent text-zinc-950 font-semibold text-xs tracking-tight hover:bg-accent/90 transition-colors shadow-sm flex items-center gap-1.5"
-              >
-                <span>Explore Pipeline Diagram</span>
-                <span>↓</span>
-              </a>
-              <a
-                href="/docs"
-                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-base text-xs font-medium transition-colors"
-              >
-                Browse Docs
-              </a>
-              <a
-                href="/api/graph.json"
-                target="_blank"
-                className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-base text-xs font-mono transition-colors"
-              >
-                /api/graph.json ↗
-              </a>
+              {heroLinks.map((link: any, idx: number) => {
+                const isPrimary = idx === 0;
+                const isMono = link.href?.endsWith('.json');
+                const linkClass = isPrimary
+                  ? "px-4 py-2 rounded-xl bg-accent text-zinc-950 font-semibold text-xs tracking-tight hover:bg-accent/90 transition-colors shadow-sm flex items-center gap-1.5"
+                  : isMono
+                  ? "px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 border border-base text-xs font-mono transition-colors"
+                  : "px-4 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-base text-xs font-medium transition-colors";
+
+                return (
+                  <a
+                    key={link.href || idx}
+                    href={link.href}
+                    target={link.external ? '_blank' : undefined}
+                    rel={link.external ? 'noopener noreferrer' : undefined}
+                    className={linkClass}
+                  >
+                    <span>{link.label}</span>
+                    {isPrimary && <span>↓</span>}
+                  </a>
+                );
+              })}
             </div>
           </div>
 
@@ -161,20 +191,26 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                         <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                         <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                         <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
-                        <span className="ml-2 text-zinc-400 font-medium">data/site.schema.ts</span>
+                        <span className="ml-2 text-zinc-400 font-medium">{ssotFilename}</span>
                       </div>
                       <span className="text-accent font-semibold">SSOT Contract</span>
                     </div>
 
                     <pre className="text-zinc-300 overflow-x-auto leading-relaxed !bg-transparent !p-0 !m-0">
                       <code>
-                        <span className="text-purple-400">export const</span> siteSchema = <span className="text-accent">defineSchema</span>({'{'}{'\n'}
-                        {'  '}organization: <span className="text-accent">organizationRegistry</span>(),{'\n'}
-                        {'  '}website: <span className="text-accent">websiteRegistry</span>(),{'\n'}
-                        {'  '}faq: <span className="text-accent">faqRegistry</span>(),{'\n'}
-                        {'}'});{'\n\n'}
-                        <span className="text-zinc-500">// TypeScript type derived automatically</span>{'\n'}
-                        <span className="text-purple-400">export type</span> <span className="text-amber-300">SiteData</span> = <span className="text-accent">InferData</span>&lt;<span className="text-purple-400">typeof</span> siteSchema&gt;;
+                        {ssotCode && !ssotCode.includes('export const siteSchema = defineSchema({') ? (
+                          ssotCode
+                        ) : (
+                          <>
+                            <span className="text-purple-400">export const</span> siteSchema = <span className="text-accent">defineSchema</span>({'{'}{'\n'}
+                            {'  '}organization: <span className="text-accent">organizationRegistry</span>(),{'\n'}
+                            {'  '}website: <span className="text-accent">websiteRegistry</span>(),{'\n'}
+                            {'  '}faq: <span className="text-accent">faqRegistry</span>(),{'\n'}
+                            {'}'});{'\n\n'}
+                            <span className="text-zinc-500">// TypeScript type derived automatically</span>{'\n'}
+                            <span className="text-purple-400">export type</span> <span className="text-amber-300">SiteData</span> = <span className="text-accent">InferData</span>&lt;<span className="text-purple-400">typeof</span> siteSchema&gt;;
+                          </>
+                        )}
                       </code>
                     </pre>
                   </div>
@@ -204,14 +240,14 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                     <span>/api/graph.json</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
-                  <a
+                  {/* <a
                     href="/schema"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 text-xs font-mono text-accent border border-accent/30 transition-colors"
                     title="Interactive visualization demo of this site's graph"
                   >
                     <Network className="w-3.5 h-3.5" />
                     <span>Visualizer Demo</span>
-                  </a>
+                  </a> */}
                 </div>
               </div>
 
@@ -249,37 +285,35 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                         <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                         <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
                         <span className="w-2.5 h-2.5 rounded-full bg-zinc-800" />
-                        <span className="ml-2 text-zinc-400 font-medium">GET /api/graph.json</span>
+                        <span className="ml-2 text-zinc-400 font-medium">{kgFilename}</span>
                       </div>
                       <span className="text-accent font-semibold">JSON-LD @graph</span>
                     </div>
 
                     <pre className="text-zinc-300 overflow-x-auto leading-relaxed !bg-transparent !p-0 !m-0">
                       <code>
-                        {'{'}{'\n'}
-                        {'  '}<span className="text-zinc-500">"@context":</span> <span className="text-emerald-400">"https://schema.org"</span>,{'\n'}
-                        {'  '}<span className="text-zinc-500">"@graph":</span> [{'\n'}
-                        {'    '}{'{'}{'\n'}
-                        {'      '}<span className="text-zinc-500">"@type":</span> <span className="text-amber-300">"WebSite"</span>,{'\n'}
-                        {'      '}<span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#website"</span>,{'\n'}
-                        {'      '}<span className="text-zinc-500">"publisher":</span> {'{'} <span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#org"</span> {'}'}{'\n'}
-                        {'    '}{'}'},{'\n'}
-                        {'    '}{'{'}{'\n'}
-                        {'      '}<span className="text-zinc-500">"@type":</span> <span className="text-amber-300">"Organization"</span>,{'\n'}
-                        {'      '}<span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#org"</span>{'\n'}
-                        {'    '}{'}'}{'\n'}
-                        {'  '}]{'\n'}
-                        {'}'}
+                        {kgCode && !kgCode.includes('"@context": "https://schema.org"') ? (
+                          kgCode
+                        ) : (
+                          <>
+                            {'{'}{'\n'}
+                            {'  '}<span className="text-zinc-500">"@context":</span> <span className="text-emerald-400">"https://schema.org"</span>,{'\n'}
+                            {'  '}<span className="text-zinc-500">"@graph":</span> [{'\n'}
+                            {'    '}{'{'}{'\n'}
+                            {'      '}<span className="text-zinc-500">"@type":</span> <span className="text-amber-300">"WebSite"</span>,{'\n'}
+                            {'      '}<span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#website"</span>,{'\n'}
+                            {'      '}<span className="text-zinc-500">"publisher":</span> {'{'} <span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#org"</span> {'}'}{'\n'}
+                            {'    '}{'}'},{'\n'}
+                            {'    '}{'{'}{'\n'}
+                            {'      '}<span className="text-zinc-500">"@type":</span> <span className="text-amber-300">"Organization"</span>,{'\n'}
+                            {'      '}<span className="text-zinc-500">"@id":</span> <span className="text-accent">"https://contextual.site/#org"</span>{'\n'}
+                            {'    '}{'}'}{'\n'}
+                            {'  '}]{'\n'}
+                            {'}'}
+                          </>
+                        )}
                       </code>
                     </pre>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-500">
-                    <span className="text-emerald-400">● Live AI Feed</span>
-                    <a href="/schema" className="text-accent hover:underline flex items-center gap-1">
-                      <span>Explore visualizer demo</span>
-                      <span>&rarr;</span>
-                    </a>
                   </div>
                 </div>
               </div>
@@ -380,17 +414,13 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
         </Section.Root>
 
         {/* FAQ Section */}
-        <section className="space-y-6">
+        <Section.Root data={faqSectionData} id="faq" className="space-y-6 scroll-mt-24">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 text-xs font-mono text-accent uppercase tracking-wider">
-              <span>●</span> FAQ
+              <span>●</span> {faqSectionData?.subtitle || 'FAQ'}
             </div>
-            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-sm text-zinc-400">
-              Frequently asked questions powered by Contextual UI and Schema.org semantic structured data.
-            </p>
+            <Section.Title as="h2" className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-100" />
+            <Section.Description className="text-sm text-zinc-400" />
           </div>
 
           <div className="border border-zinc-800 rounded-2xl p-6 shadow-sm bg-zinc-950/40">
@@ -407,7 +437,7 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
               ))}
             </Faq.Root>
           </div>
-        </section>
+        </Section.Root>
       </main>
     </div>
   );

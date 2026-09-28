@@ -15,6 +15,7 @@ import {
 } from './helpers';
 import PrivacyPage from '@/app/privacy/page';
 import TermsPage from '@/app/terms/page';
+import DocsPage from '@/app/docs/page';
 import { createContextualApp } from 'contextual-ui/server';
 import { siteSchema } from '@/data/site.schema';
 
@@ -22,12 +23,8 @@ describe('Content Parity & Structured Data Isolation', () => {
   it('R1: isolates example JSON-LD on docs page - only WebPage owns structured data script', async () => {
     const data = await siteApp.fetchData();
 
-    // WebPage is an async Server Component; resolve it before synchronous renderToString
-    const webPageJsx = await WebPage({
-      app: siteApp,
-      id: 'docs',
-      children: <DocsClient data={data} />,
-    });
+    // DocsPage is an async Server Component wrapping WebPage
+    const webPageJsx = await DocsPage({ data, app: siteApp });
 
     const html = renderToString(
       <ContextualSite data={data} options={{ disableJsonLdScript: true }}>
