@@ -579,6 +579,190 @@ export default async function DocsPage() {
       ]
     }, null, 2),
   },
+  {
+    id: 'section',
+    anchor: 'section',
+    title: '<Section /> Primitive',
+    description: 'Semantic container component for structured content regions. Coordinates automated headings, accessible aria-labelledby attributes, Radix Slot (asChild) support, and embedded <Content /> rendering.',
+    exampleDescription: 'Accessible, schema-bound section layout using Section compound components.',
+    schemaDescription: 'Schema.org WebPageElement automatically linked to the owning WebPage.',
+    fields: [
+      {
+        name: 'data',
+        type: 'SectionRecord',
+        required: false,
+        schemaOrgMapping: '@graph (WebPageElement)',
+        description: 'Single Source of Truth section data (title, subtitle, description, anchor, content blocks).',
+      },
+      {
+        name: 'id',
+        type: 'string',
+        required: false,
+        schemaOrgMapping: '@id',
+        description: 'Unique section identifier. Used for aria-labelledby and DOM id fallback.',
+      },
+      {
+        name: 'title',
+        type: 'string',
+        required: false,
+        schemaOrgMapping: 'name',
+        description: 'Explicit section title override (bypasses data.title lookup).',
+      },
+      {
+        name: 'subtitle',
+        type: 'string',
+        required: false,
+        schemaOrgMapping: '—',
+        description: 'Explicit section subtitle or eyebrow text override.',
+      },
+      {
+        name: 'description',
+        type: 'string',
+        required: false,
+        schemaOrgMapping: 'description',
+        description: 'Explicit section description override.',
+      },
+      {
+        name: 'anchor',
+        type: 'string',
+        required: false,
+        schemaOrgMapping: 'url',
+        description: 'DOM element anchor id used for fragment URL navigation.',
+      },
+      {
+        name: 'asChild',
+        type: 'boolean',
+        required: false,
+        schemaOrgMapping: '—',
+        description: 'Merges section behaviors and data attributes onto its immediate child element (Radix Slot).',
+      },
+    ],
+    codeString: `<Section.Root data={sectionData} id="features" className="space-y-4">
+  <Section.Title as="h2" className="text-xl font-bold" />
+  <Section.Subtitle className="text-xs text-accent font-mono" />
+  <Section.Description className="text-sm text-zinc-400" />
+  <Section.Content className="space-y-3" />
+</Section.Root>`,
+    schemaString: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPageElement",
+      "@id": "https://contextual.site/#section:docs:features",
+      "name": "Core Features",
+      "description": "Structured content with built-in Agentic AI and Schema.org SEO.",
+      "url": "#features",
+      "isPartOf": { "@id": "https://contextual.site/#webpage" }
+    }, null, 2),
+  },
+  {
+    id: 'collection',
+    anchor: 'collection',
+    title: '<Collection /> Primitive',
+    description: 'Headless list container component that renders ordered (<ol>) or unordered (<ul>) semantic collections with individual item context, stable ID tracking, and automated Schema.org ItemList markup.',
+    exampleDescription: 'Structured item collection rendered with semantic Collection compound components.',
+    schemaDescription: 'Schema.org ItemList containing individual ListItem nodes.',
+    fields: [
+      {
+        name: 'data',
+        type: 'CollectionRecord',
+        required: true,
+        schemaOrgMapping: '@graph (ItemList)',
+        description: 'Single Source of Truth collection record containing collection metadata and items array.',
+      },
+      {
+        name: 'ordered',
+        type: 'boolean',
+        required: false,
+        schemaOrgMapping: 'itemListOrder',
+        description: 'Renders semantic <ol> when true, <ul> when false. Sets data-ordered attribute.',
+      },
+      {
+        name: 'asChild',
+        type: 'boolean',
+        required: false,
+        schemaOrgMapping: '—',
+        description: 'Merges collection behaviors and data attributes onto child component.',
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        required: true,
+        schemaOrgMapping: '—',
+        description: 'Collection items rendered within collection context.',
+      },
+    ],
+    codeString: `<Collection.Root data={collectionData} ordered className="space-y-4">
+  {collectionData.items.map((item, index) => (
+    <Collection.Item key={item.id} id={item.id} index={index} className="flex gap-3">
+      <span className="font-mono text-accent">{index + 1}</span>
+      <div>
+        <Collection.Title as="h3" className="font-semibold text-white" />
+        <Collection.Description className="text-sm text-zinc-400" />
+      </div>
+    </Collection.Item>
+  ))}
+</Collection.Root>`,
+    schemaString: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "@id": "https://contextual.site/#itemlist:docs:steps",
+      "name": "Quickstart Guide",
+      "numberOfItems": 2,
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "@id": "https://contextual.site/#listitem:docs:steps:1", "name": "Install Dependencies" },
+        { "@type": "ListItem", "position": 2, "@id": "https://contextual.site/#listitem:docs:steps:2", "name": "Define Site Schema" }
+      ]
+    }, null, 2),
+  },
+  {
+    id: 'content',
+    anchor: 'content',
+    title: '<Content /> Portable Renderer',
+    description: 'Universal renderer for portable, CMS-agnostic content blocks (paragraphs, headings, lists, links, callouts, and code blocks) with custom component slot overrides and plain-text extraction for AI agents.',
+    exampleDescription: 'Renders dynamic content blocks with custom Tailwind overrides.',
+    schemaDescription: 'All plain text from content blocks is extracted into the parent node text property.',
+    fields: [
+      {
+        name: 'data',
+        type: 'ContentInput',
+        required: true,
+        schemaOrgMapping: 'text (extracted plain-text)',
+        description: 'Single or array of ContentBlocks, raw markdown string, or structured Portable Text blocks.',
+      },
+      {
+        name: 'components',
+        type: 'ContentComponentOverrides',
+        required: false,
+        schemaOrgMapping: '—',
+        description: 'Custom React component slots for paragraph, heading, list, callout, code, link.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        required: false,
+        schemaOrgMapping: '—',
+        description: 'Optional CSS class name for the wrapper container.',
+      },
+    ],
+    codeString: `<Content
+  data={section.content}
+  components={{
+    paragraph: ({ children, role }) => (
+      <p className={role === 'qualifier' ? 'text-xs text-accent italic' : 'text-sm text-zinc-300'}>
+        {children}
+      </p>
+    ),
+    code: ({ code, language }) => (
+      <pre className="p-4 bg-zinc-900 rounded-lg font-mono text-xs text-zinc-100">{code}</pre>
+    ),
+  }}
+/>`,
+    schemaString: JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "WebPageElement",
+      "name": "Documentation Article",
+      "text": "Full extracted plain-text of all headings, paragraphs, and list items for AI agents."
+    }, null, 2),
+  },
 ];
 
 export const showcaseSections: SectionRecord[] = SHOWCASE_COMPONENTS_DATA.map((showcase) => ({

@@ -39,6 +39,8 @@ import {
   Faq,
   Footer,
   Collection,
+  Section,
+  Content,
   createForm,
   AutoForm,
   buildSitemapItems,
@@ -397,13 +399,13 @@ function QuickstartSection({ collectionsData }: { collectionsData?: any }) {
   const items = quickstartSteps?.items ?? [];
 
   return (
-    <section id="quickstart" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+    <Section.Root id="quickstart" data={quickstartSteps} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <div className="docs-section-header mb-6">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">{quickstartSteps.title || 'Quickstart Guide'}</h2>
+        <Section.Title as="h2" className="text-2xl font-bold tracking-tight mb-2">
+          {quickstartSteps.title || 'Quickstart Guide'}
+        </Section.Title>
         {quickstartSteps.description && (
-          <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
-            {quickstartSteps.description}
-          </p>
+          <Section.Description className="text-zinc-400 max-w-3xl text-sm leading-relaxed" />
         )}
       </div>
 
@@ -465,7 +467,7 @@ function QuickstartSection({ collectionsData }: { collectionsData?: any }) {
           );
         })}
       </Collection.Root>
-    </section>
+    </Section.Root>
   );
 }
 
@@ -619,12 +621,14 @@ export const siteSchema = defineSchema({
 export type SiteData = InferData<typeof siteSchema>;`;
 
   return (
-    <section id="schemas" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
+    <Section.Root id="schemas" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       <div className="docs-section-header">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">{title}</h2>
-        <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
+        <Section.Title as="h2" className="text-2xl font-bold tracking-tight mb-2">
+          {title}
+        </Section.Title>
+        <Section.Description className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
           {description}
-        </p>
+        </Section.Description>
       </div>
 
       {/* Overview Code Snippet */}
@@ -764,7 +768,7 @@ export const siteSchema = defineSchema({
           lang="typescript"
         />
       </div>
-    </section>
+    </Section.Root>
   );
 }
 
@@ -999,14 +1003,16 @@ export default async function ContactPage() {
   };
 
   return (
-    <section id="auto-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
+    <Section.Root id="auto-form" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       {/* Header */}
       <div className="docs-section-header flex flex-col md:flex-row md:items-start md:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight mb-2">{title}</h2>
-          <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
+          <Section.Title as="h2" className="text-2xl font-bold tracking-tight mb-2">
+            {title}
+          </Section.Title>
+          <Section.Description className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
             {description}
-          </p>
+          </Section.Description>
         </div>
         <a
           href="/studio/forms"
@@ -1190,7 +1196,7 @@ export default async function ContactPage() {
           </table>
         </div>
       </div>
-    </section>
+    </Section.Root>
   );
 }
 
@@ -1275,13 +1281,15 @@ export function ContactFormCard() {
   const formSubcomponents = STATIC_FORM_SUBCOMPONENTS;
 
   return (
-    <section id="create-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
+    <Section.Root id="create-form" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
       {/* Header */}
       <div className="docs-section-header">
-        <h2 className="text-2xl font-bold tracking-tight mb-2">{title}</h2>
-        <p className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
+        <Section.Title as="h2" className="text-2xl font-bold tracking-tight mb-2">
+          {title}
+        </Section.Title>
+        <Section.Description className="text-zinc-400 max-w-3xl text-sm leading-relaxed">
           {description}
-        </p>
+        </Section.Description>
       </div>
 
       {/* Steps List */}
@@ -1477,7 +1485,7 @@ export function ContactFormCard() {
           </table>
         </div>
       </div>
-    </section>
+    </Section.Root>
   );
 }
 
@@ -1579,13 +1587,13 @@ export const siteApp = createContextualApp({
 });`;
 
   return (
-    <section id="connectors" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
-      <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
+    <Section.Root id="connectors" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+      <Section.Title as="h2" className="text-xl font-bold mb-3 flex items-center gap-2">
         <span>{title}</span>
-      </h2>
-      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+      </Section.Title>
+      <Section.Description className="mb-6 text-sm leading-relaxed text-zinc-300">
         {description}
-      </p>
+      </Section.Description>
 
       <div className="flex flex-col justify-start items-start pb-2 mb-2 gap-4">
         <div className="flex ml-auto border border-base rounded-md overflow-hidden">
@@ -1648,7 +1656,7 @@ export const siteApp = createContextualApp({
           }}
         />
       </pre>
-    </section>
+    </Section.Root>
   );
 }
 
@@ -1741,16 +1749,18 @@ export const generateMetadata = () =>
   const helperFields: SchemaField[] = HELPER_FIELDS;
 
   return (
-    <section id="helpers" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+    <Section.Root id="helpers" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-xl font-bold">{title}</h2>
+        <Section.Title as="h2" className="text-xl font-bold">
+          {title}
+        </Section.Title>
         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
           Next.js App Router
         </span>
       </div>
-      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
+      <Section.Description className="mb-6 text-sm leading-relaxed text-zinc-300">
         {description}
-      </p>
+      </Section.Description>
 
       {/* Highlights Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -1944,15 +1954,17 @@ export const generateMetadata = () =>
           </div>
         </div>
       </div>
-    </section>
+    </Section.Root>
   );
 }
 
-function SitemapSection({ data }: { data: SiteData }) {
+function SitemapSection({ data, sectionData }: { data: SiteData; sectionData?: any }) {
   const [activeTab, setActiveTab] = useState<'nextjs' | 'route' | 'output' | 'custom'>('nextjs');
   const [excludeCms, setExcludeCms] = useState(true);
   const [excludeStudio, setExcludeStudio] = useState(false);
   const [defaultPriority, setDefaultPriority] = useState(0.8);
+  const title = sectionData?.title || 'Helpers: siteApp.getSitemap() & XML Generation';
+  const description = sectionData?.description || 'Automated sitemap generator that derives route URLs directly from your connector schema (webpage: [...]). Eliminates maintaining hardcoded XML files or duplicate route lists. Provides typed Next.js App Router metadata, web-standard route handlers, and static XML formatting.';
 
   const rawPages = (data.webpage && Array.isArray(data.webpage)) ? data.webpage : [];
   const baseUrl = (data.website?.url || 'https://contextual.site').replace(/\/+$/, '');
@@ -2017,16 +2029,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const sitemapFields: SchemaField[] = SITEMAP_FIELDS;
 
   return (
-    <section id="sitemap" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+    <Section.Root id="sitemap" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-xl font-bold">Helpers: siteApp.getSitemap() &amp; XML Generation</h2>
+        <Section.Title as="h2" className="text-xl font-bold">
+          {title}
+        </Section.Title>
         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
           Sitemap 0.9 Protocol
         </span>
       </div>
-      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
-        Automated sitemap generator that derives route URLs directly from your connector schema (<code className="code-short">webpage: [...]</code>). Eliminates maintaining hardcoded XML files or duplicate route lists. Provides typed Next.js App Router metadata, web-standard route handlers, and static XML formatting.
-      </p>
+      <Section.Description className="mb-6 text-sm leading-relaxed text-zinc-300">
+        {description}
+      </Section.Description>
 
       {/* Highlights Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -2251,15 +2265,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           </div>
         </div>
       </div>
-    </section>
+    </Section.Root>
   );
 }
 
-function RobotsSection({ data }: { data: SiteData }) {
+function RobotsSection({ data, sectionData }: { data: SiteData; sectionData?: any }) {
   const [activeTab, setActiveTab] = useState<'nextjs' | 'ai' | 'route' | 'output'>('nextjs');
   const [defaultAiPolicy, setDefaultAiPolicy] = useState<'allow' | 'disallow'>('disallow');
   const [perplexityOverride, setPerplexityOverride] = useState<'allow' | 'disallow'>('allow');
   const [disallowCms, setDisallowCms] = useState(true);
+  const title = sectionData?.title || 'Helpers: siteApp.getRobots() & AI Agent Controls';
+  const description = sectionData?.description || 'Configures search engine indexing policies, automatically links your canonical sitemap and host, and provides first-class controls for LLM search bots (PerplexityBot) and AI training crawlers (GPTBot, ClaudeBot, Google-Extended).';
 
   const baseUrl = (data.website?.url || 'https://contextual.site').replace(/\/+$/, '');
 
@@ -2326,16 +2342,18 @@ export const { GET } = siteApp.createRobotsHandler({
   const robotsFields: SchemaField[] = ROBOTS_FIELDS;
 
   return (
-    <section id="robots" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+    <Section.Root id="robots" data={sectionData} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
       <div className="flex items-center gap-2 mb-3">
-        <h2 className="text-xl font-bold">Helpers: siteApp.getRobots() &amp; AI Agent Controls</h2>
+        <Section.Title as="h2" className="text-xl font-bold">
+          {title}
+        </Section.Title>
         <span className="px-2 py-0.5 rounded text-[10px] font-mono font-semibold bg-accent/10 border border-accent/30 text-accent">
           RFC 9309 &amp; Agentic AI
         </span>
       </div>
-      <p className="mb-6 text-sm leading-relaxed text-zinc-300">
-        Configures search engine indexing policies, automatically links your canonical sitemap and host, and provides first-class controls for LLM search bots (<code className="code-short">PerplexityBot</code>) and AI training crawlers (<code className="code-short">GPTBot</code>, <code className="code-short">ClaudeBot</code>, <code className="code-short">Google-Extended</code>).
-      </p>
+      <Section.Description className="mb-6 text-sm leading-relaxed text-zinc-300">
+        {description}
+      </Section.Description>
 
       {/* Highlights Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -2562,7 +2580,7 @@ export const { GET } = siteApp.createRobotsHandler({
           </div>
         </div>
       </div>
-    </section>
+    </Section.Root>
   );
 }
 
@@ -2594,9 +2612,13 @@ function ShowcaseSection({
   const currentLang = activeTab === 'example' ? 'jsx' : 'json';
 
   return (
-    <section id={id} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
-      <h2 className="text-xl font-bold mb-3">{title}</h2>
-      <p className="mb-6 text-sm leading-relaxed text-zinc-300">{description}</p>
+    <Section.Root id={id} className="border-b border-base shadow-sm scroll-mt-28 pb-12">
+      <Section.Title as="h2" className="text-xl font-bold mb-3">
+        {title}
+      </Section.Title>
+      <Section.Description className="mb-6 text-sm leading-relaxed text-zinc-300">
+        {description}
+      </Section.Description>
 
       {children && (
         <div className="border border-base rounded-xl p-4 shadow-inner mb-6">
@@ -2652,7 +2674,7 @@ function ShowcaseSection({
       </pre>
 
       {fields && fields.length > 0 && <SchemaFieldsTable fields={fields} />}
-    </section>
+    </Section.Root>
   );
 }
 
@@ -2665,13 +2687,22 @@ export function DocsClient({ data }: { data: SiteData }) {
   const createFormSection = sectionList.find((s: any) => s.id === 'create-form');
   const connectorsSection = sectionList.find((s: any) => s.id === 'connectors');
   const helpersSection = sectionList.find((s: any) => s.id === 'helpers');
+  const sitemapSection = sectionList.find((s: any) => s.id === 'sitemap-helper');
+  const robotsSection = sectionList.find((s: any) => s.id === 'robots-helper');
 
   const csSection = sectionList.find((s: any) => s.id === 'showcase-contextual-site');
   const webpageSection = sectionList.find((s: any) => s.id === 'showcase-webpage');
+  const sectionSection = sectionList.find((s: any) => s.id === 'showcase-section');
+  const collectionSection = sectionList.find((s: any) => s.id === 'showcase-collection');
+  const contentSection = sectionList.find((s: any) => s.id === 'showcase-content');
   const navbarSection = sectionList.find((s: any) => s.id === 'showcase-navbar');
   const footerSection = sectionList.find((s: any) => s.id === 'showcase-footer');
   const breadcrumbSection = sectionList.find((s: any) => s.id === 'showcase-breadcrumb');
   const faqSection = sectionList.find((s: any) => s.id === 'showcase-faq');
+
+  const sectionShowcase = SHOWCASE_COMPONENTS_DATA.find((s) => s.id === 'section')!;
+  const collectionShowcase = SHOWCASE_COMPONENTS_DATA.find((s) => s.id === 'collection')!;
+  const contentShowcase = SHOWCASE_COMPONENTS_DATA.find((s) => s.id === 'content')!;
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -2778,6 +2809,9 @@ export function DocsClient({ data }: { data: SiteData }) {
   const componentNavItems = [
     { id: 'contextual-site', label: 'ContextualSite', desc: 'Site Provider & SPA Graph' },
     { id: 'webpage', label: 'WebPage', desc: 'Route Metadata & JSON-LD' },
+    { id: 'section', label: 'Section', desc: 'Semantic Section Container' },
+    { id: 'collection', label: 'Collection', desc: 'Structured Item Collections' },
+    { id: 'content', label: 'Content', desc: 'Portable Content Renderer' },
     { id: 'navbar', label: 'Navbar', desc: 'Navigation Bar' },
     { id: 'footer', label: 'Footer', desc: 'Footer & Attribution' },
     { id: 'breadcrumb', label: 'Breadcrumb', desc: 'Breadcrumb Trail' },
@@ -2805,6 +2839,9 @@ export function DocsClient({ data }: { data: SiteData }) {
       'schemas',
       'contextual-site',
       'webpage',
+      'section',
+      'collection',
+      'content',
       'navbar',
       'footer',
       'breadcrumb',
@@ -4381,6 +4418,80 @@ export default async function DocsPage() {
             schemaDescription="Route-accurate Schema.org WebPage node connecting navbar, footer, and FAQ."
           />
 
+          {/* Section Showcase */}
+          <ShowcaseSection
+            id="section"
+            title={sectionSection?.title || sectionShowcase.title}
+            description={sectionSection?.description || sectionShowcase.description}
+            fields={sectionShowcase.fields}
+            codeString={sectionShowcase.codeString}
+            schemaString={sectionShowcase.schemaString}
+            exampleDescription={sectionShowcase.exampleDescription || "Accessible, schema-bound section layout using Section compound components."}
+            schemaDescription={sectionShowcase.schemaDescription || "Schema.org WebPageElement node automatically linked to the owning WebPage."}
+          >
+            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/60 space-y-3">
+              <span className="text-[10px] font-mono uppercase text-accent font-semibold tracking-wider">Live &lt;Section.Root&gt; Demo</span>
+              <h3 className="text-lg font-bold text-white">Semantic Section Container</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed">
+                Automatically attaches aria-labelledby, links to parent WebPage in Schema.org @graph, and supports Radix asChild composition.
+              </p>
+            </div>
+          </ShowcaseSection>
+
+          {/* Collection Showcase */}
+          <ShowcaseSection
+            id="collection"
+            title={collectionSection?.title || collectionShowcase.title}
+            description={collectionSection?.description || collectionShowcase.description}
+            fields={collectionShowcase.fields}
+            codeString={collectionShowcase.codeString}
+            schemaString={collectionShowcase.schemaString}
+            exampleDescription={collectionShowcase.exampleDescription || "Structured item collection rendered with semantic Collection compound components."}
+            schemaDescription={collectionShowcase.schemaDescription || "Schema.org ItemList containing individual ListItem nodes."}
+          >
+            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/60 space-y-3">
+              <span className="text-[10px] font-mono uppercase text-accent font-semibold tracking-wider">Live &lt;Collection.Root&gt; Demo</span>
+              <div className="space-y-2">
+                {[
+                  { num: '1', title: 'Single Source of Truth', desc: 'Define content models in site.schema.ts.' },
+                  { num: '2', title: 'Zero Drift Sync', desc: 'Connector data powers both UI and Schema.org graphs.' },
+                ].map((item) => (
+                  <div key={item.num} className="flex items-start gap-2.5 p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/80">
+                    <span className="w-5 h-5 rounded-full bg-accent/10 border border-accent/30 text-accent font-mono text-[11px] flex items-center justify-center font-bold shrink-0 mt-0.5">{item.num}</span>
+                    <div>
+                      <h4 className="text-xs font-semibold text-zinc-200">{item.title}</h4>
+                      <p className="text-[11px] text-zinc-400">{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </ShowcaseSection>
+
+          {/* Content Showcase */}
+          <ShowcaseSection
+            id="content"
+            title={contentSection?.title || contentShowcase.title}
+            description={contentSection?.description || contentShowcase.description}
+            fields={contentShowcase.fields}
+            codeString={contentShowcase.codeString}
+            schemaString={contentShowcase.schemaString}
+            exampleDescription={contentShowcase.exampleDescription || "Renders dynamic content blocks with custom Tailwind overrides."}
+            schemaDescription={contentShowcase.schemaDescription || "All plain text from content blocks is extracted into the parent node text property."}
+          >
+            <div className="p-4 rounded-xl border border-zinc-800 bg-zinc-950/60 space-y-3">
+              <span className="text-[10px] font-mono uppercase text-accent font-semibold tracking-wider">Live &lt;Content /&gt; Demo</span>
+              <div className="p-3 bg-zinc-900/80 rounded-lg border border-zinc-800 space-y-2">
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                  Portable content block rendered with automated styling and plain-text extraction:
+                </p>
+                <div className="p-2.5 rounded bg-zinc-950 border border-zinc-800 font-mono text-xs text-accent">
+                  export const content = [&#123; type: &apos;paragraph&apos;, text: &apos;Hello World&apos; &#125;];
+                </div>
+              </div>
+            </div>
+          </ShowcaseSection>
+
           {/* Navbar Showcase */}
           <ShowcaseSection
             id="navbar"
@@ -4571,10 +4682,10 @@ export default async function DocsPage() {
           <HelpersSection data={data} sectionData={helpersSection} />
 
           {/* Sitemap Section */}
-          <SitemapSection data={data} />
+          <SitemapSection data={data} sectionData={sitemapSection} />
 
           {/* Robots Section */}
-          <RobotsSection data={data} />
+          <RobotsSection data={data} sectionData={robotsSection} />
         </div>
       </div>
     </div>

@@ -268,6 +268,82 @@ forms: [
   },
 ],`,
   },
+  {
+    id: 'section',
+    name: 'sectionRegistry',
+    signature: 'sectionRegistry() / sectionsRegistry()',
+    schemaType: 'WebPageElement',
+    schemaUrl: 'https://schema.org/WebPageElement',
+    description: 'Declares structured content sections (articles, headings, qualifiers, prose blocks) with automated Schema.org WebPageElement JSON-LD graph generation and plain-text extraction for AI agents.',
+    fields: [
+      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique section identifier key (e.g. "hero", "features")' },
+      { name: 'pageId', type: 'string', required: false, schemaOrgMapping: 'isPartOf (WebPage)', description: 'Route scoping id binding this section to a specific page' },
+      { name: 'title', type: 'string', required: false, schemaOrgMapping: 'name', description: 'Section heading text displayed in UI and search graphs' },
+      { name: 'subtitle', type: 'string', required: false, schemaOrgMapping: '—', description: 'Optional section subheading or eyebrow text' },
+      { name: 'description', type: 'string', required: false, schemaOrgMapping: 'description', description: 'Section summary or lead paragraph' },
+      { name: 'anchor', type: 'string', required: false, schemaOrgMapping: 'url', description: 'HTML fragment anchor id (e.g. "features")' },
+      { name: 'content', type: 'ContentBlock[]', required: false, schemaOrgMapping: 'text', description: 'Portable content blocks (paragraphs, headings, lists, code, callouts)' },
+      { name: 'type', type: 'string', required: false, schemaOrgMapping: '@type', description: 'Schema.org element type (defaults to "WebPageElement")' },
+    ],
+    sampleCode: `// data/site.schema.ts
+import { defineSchema, sectionRegistry } from 'contextual-ui/server';
+
+export const siteSchema = defineSchema({
+  sections: sectionRegistry(),
+});`,
+    sampleData: `// Ingested connector data
+sections: [
+  {
+    id: 'hero',
+    pageId: 'home',
+    title: 'Next-Gen Semantic Web',
+    description: 'Structured content with built-in Agentic AI and Schema.org SEO.',
+    content: [
+      { type: 'paragraph', role: 'normal', text: 'Define content once in your data layer.' },
+    ],
+  },
+],`,
+  },
+  {
+    id: 'collection',
+    name: 'collectionRegistry',
+    signature: 'collectionRegistry() / collectionsRegistry()',
+    schemaType: 'ItemList',
+    schemaUrl: 'https://schema.org/ItemList',
+    description: 'Declares ordered or unordered collections of structured items (features, steps, catalog items) with stable ID resolution, position indexing, and automated Schema.org ItemList / ListItem graph nodes.',
+    fields: [
+      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique collection identifier (e.g. "features", "quickstart-steps")' },
+      { name: 'pageId', type: 'string', required: false, schemaOrgMapping: 'isPartOf (WebPage)', description: 'Route scoping id binding this collection to a specific page' },
+      { name: 'title', type: 'string', required: false, schemaOrgMapping: 'name', description: 'Collection heading title' },
+      { name: 'description', type: 'string', required: false, schemaOrgMapping: 'description', description: 'Collection descriptive summary' },
+      { name: 'ordered', type: 'boolean', required: false, schemaOrgMapping: 'itemListOrder', description: 'Specifies whether items represent a sequential ordered list' },
+      { name: 'items', type: 'CollectionItem[]', required: true, schemaOrgMapping: 'itemListElement: ListItem[]', description: 'Array of collection items with stable IDs, titles, descriptions, and content blocks' },
+      { name: 'items[].id', type: 'string', required: true, schemaOrgMapping: 'ListItem.@id', description: 'Stable unique identifier for the item' },
+      { name: 'items[].title', type: 'string', required: false, schemaOrgMapping: 'ListItem.name', description: 'Item display title' },
+      { name: 'items[].description', type: 'string', required: false, schemaOrgMapping: 'ListItem.description', description: 'Item summary or description' },
+      { name: 'items[].content', type: 'ContentBlock[]', required: false, schemaOrgMapping: 'ListItem.text', description: 'Structured portable content blocks for the item' },
+      { name: 'items[].order', type: 'number', required: false, schemaOrgMapping: 'ListItem.position', description: '1-based sequential position index' },
+    ],
+    sampleCode: `// data/site.schema.ts
+import { defineSchema, collectionRegistry } from 'contextual-ui/server';
+
+export const siteSchema = defineSchema({
+  collections: collectionRegistry(),
+});`,
+    sampleData: `// Ingested connector data
+collections: [
+  {
+    id: 'quickstart-steps',
+    pageId: 'docs',
+    title: 'Quickstart Guide',
+    ordered: true,
+    items: [
+      { id: 'install', title: 'Install Dependencies', order: 1 },
+      { id: 'schema', title: 'Define Site Schema', order: 2 },
+    ],
+  },
+],`,
+  },
 ];
 
 export const schemaRegistriesCollection: CollectionRecord = {
