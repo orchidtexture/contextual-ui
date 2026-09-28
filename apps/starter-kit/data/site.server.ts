@@ -38,24 +38,24 @@ const connector = staticConnector({
       url: '/docs',
       description: 'Learn how to use Contextual UI.',
     },
-    {
-      id: 'schema',
-      name: 'Schema Inspector - Contextual UI',
-      url: '/schema',
-      description: 'Inspect the generated Schema.org JSON-LD graph.',
-    },
-    {
-      id: 'studio',
-      name: 'Studio Playground - Contextual UI',
-      url: '/studio',
-      description: 'Interactive playground and code generator for Contextual UI.',
-    },
-    {
-      id: 'cms',
-      name: 'CMS Dashboard - Contextual UI',
-      url: '/cms',
-      description: 'Manage content and validate schemas.',
-    },
+    // {
+    //   id: 'schema',
+    //   name: 'Schema Inspector - Contextual UI',
+    //   url: '/schema',
+    //   description: 'Inspect the generated Schema.org JSON-LD graph.',
+    // },
+    // {
+    //   id: 'studio',
+    //   name: 'Studio Playground - Contextual UI',
+    //   url: '/studio',
+    //   description: 'Interactive playground and code generator for Contextual UI.',
+    // },
+    // {
+    //   id: 'cms',
+    //   name: 'CMS Dashboard - Contextual UI',
+    //   url: '/cms',
+    //   description: 'Manage content and validate schemas.',
+    // },
     {
       id: 'privacy',
       name: 'Privacy Policy - Contextual UI',
@@ -132,8 +132,8 @@ const connector = staticConnector({
     links: [
       { id: '1', label: 'Home', href: '/' },
       { id: '2', label: 'Docs', href: '/docs' },
-      { id: '3', label: 'Schema Graph', href: '/schema' },
-      { id: '4', label: 'Studio', href: '/studio' },
+      // { id: '3', label: 'Schema Graph', href: '/schema' },
+      // { id: '4', label: 'Studio', href: '/studio' },
       // { id: '5', label: 'CMS Dashboard', href: '/cms' },
     ]
   },
@@ -150,7 +150,7 @@ const connector = staticConnector({
         title: 'Resources',
         links: [
           { id: '1', label: 'Docs', href: '/docs' },
-          { id: '2', label: 'Schema Graph', href: '/schema' },
+          // { id: '2', label: 'Schema Graph', href: '/schema' },
           { id: '3', label: '/api/graph.json ↗', href: '/api/graph.json', external: true },
         ],
       },

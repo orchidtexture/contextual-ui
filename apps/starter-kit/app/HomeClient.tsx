@@ -204,14 +204,14 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                     <span>/api/graph.json</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
-                  <a
+                  {/* <a
                     href="/schema"
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent/10 hover:bg-accent/20 text-xs font-mono text-accent border border-accent/30 transition-colors"
                     title="Interactive visualization demo of this site's graph"
                   >
                     <Network className="w-3.5 h-3.5" />
                     <span>Visualizer Demo</span>
-                  </a>
+                  </a> */}
                 </div>
               </div>
 
@@ -272,14 +272,6 @@ export function HomeClient({ data: explicitData }: { data?: SiteData } = {}) {
                         {'}'}
                       </code>
                     </pre>
-                  </div>
-
-                  <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-500">
-                    <span className="text-emerald-400">● Live AI Feed</span>
-                    <a href="/schema" className="text-accent hover:underline flex items-center gap-1">
-                      <span>Explore visualizer demo</span>
-                      <span>&rarr;</span>
-                    </a>
                   </div>
                 </div>
               </div>
