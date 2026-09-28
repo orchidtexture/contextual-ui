@@ -50,6 +50,27 @@ import { z } from 'zod';
 import type { SiteData } from '@/data/site.server';
 import { quickstartCollection } from '@/data/quickstart';
 import { docsSections } from '@/data/docs.content';
+import {
+  REGISTRIES_DATA,
+  schemaRegistriesCollection,
+  type RegistryItem,
+  type SchemaField,
+} from '@/data/registries.content';
+import {
+  SHOWCASE_COMPONENTS_DATA,
+  showcaseSections,
+} from '@/data/showcases.content';
+import {
+  AUTO_FORM_PROPS,
+  STATIC_FORM_SUBCOMPONENTS,
+} from '@/data/forms.content';
+import {
+  HELPER_FIELDS,
+  SITEMAP_FIELDS,
+  ROBOTS_FIELDS,
+} from '@/data/helpers.content';
+
+export type { SchemaField, RegistryItem };
 
 const contactSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -63,14 +84,6 @@ function highlightCode(code: string, lang: 'tsx' | 'jsx' | 'typescript' | 'json'
   const grammar = Prism.languages[lang] || Prism.languages.typescript || Prism.languages.javascript;
   if (!grammar) return code;
   return Prism.highlight(code, grammar, lang);
-}
-
-export interface SchemaField {
-  name: string;
-  type: string;
-  required?: boolean;
-  schemaOrgMapping?: string;
-  description: string;
 }
 
 function SchemaFieldsTable({ fields }: { fields: SchemaField[] }) {
@@ -456,268 +469,6 @@ function QuickstartSection({ collectionsData }: { collectionsData?: any }) {
   );
 }
 
-interface RegistryItem {
-  id: string;
-  name: string;
-  signature: string;
-  schemaType: string;
-  schemaUrl: string;
-  description: string;
-  fields: SchemaField[];
-  sampleCode: string;
-  sampleData: string;
-}
-
-const REGISTRIES_DATA: RegistryItem[] = [
-  {
-    id: 'website',
-    name: 'websiteRegistry',
-    signature: 'websiteRegistry()',
-    schemaType: 'WebSite',
-    schemaUrl: 'https://schema.org/WebSite',
-    description: 'Declares domain-level website metadata, site display title, description, canonical URL, and search action.',
-    fields: [
-      { name: 'name', type: 'string', required: true, schemaOrgMapping: 'name', description: 'Primary display name of the website' },
-      { name: 'url', type: 'string', required: true, schemaOrgMapping: 'url', description: 'Canonical root domain URL' },
-      { name: 'description', type: 'string', required: false, schemaOrgMapping: 'description', description: 'Website meta description for search engines' },
-      { name: 'inLanguage', type: 'string', required: false, schemaOrgMapping: 'inLanguage', description: 'Language code (e.g. "en-US")' },
-      { name: 'publisher', type: 'Reference', required: false, schemaOrgMapping: 'publisher', description: 'Cross-reference pointing to the Organization entity' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, websiteRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  website: websiteRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-website: {
-  name: 'Contextual UI Starter Kit',
-  url: 'https://contextual.site',
-  description: 'Headless UI components with built-in Agentic AI and Schema.org SEO.',
-  inLanguage: 'en-US',
-},`,
-  },
-  {
-    id: 'organization',
-    name: 'organizationRegistry',
-    signature: 'organizationRegistry()',
-    schemaType: 'Organization',
-    schemaUrl: 'https://schema.org/Organization',
-    description: 'Declares brand or publisher profile, legal name, social profiles (sameAs), logo, and contact channels.',
-    fields: [
-      { name: 'name', type: 'string', required: true, schemaOrgMapping: 'name', description: 'Official business or project brand name' },
-      { name: 'url', type: 'string', required: false, schemaOrgMapping: 'url', description: 'Official homepage URL' },
-      { name: 'logo', type: 'string', required: false, schemaOrgMapping: 'logo', description: 'URL or path to organization logo image' },
-      { name: 'legalName', type: 'string', required: false, schemaOrgMapping: 'legalName', description: 'Registered legal business name' },
-      { name: 'description', type: 'string', required: false, schemaOrgMapping: 'description', description: 'Brand summary description' },
-      { name: 'sameAs', type: 'string[]', required: false, schemaOrgMapping: 'sameAs', description: 'Verified social URLs (GitHub, Twitter, LinkedIn)' },
-      { name: 'email', type: 'string', required: false, schemaOrgMapping: 'email', description: 'Customer support / contact email' },
-      { name: 'telephone', type: 'string', required: false, schemaOrgMapping: 'telephone', description: 'Customer support phone number' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, organizationRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  organization: organizationRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-organization: {
-  name: 'Tasuku Studio',
-  url: 'https://tasuku.io',
-  logo: '/images/onigiri_logo.svg',
-  description: 'Creator and maintainer of Contextual UI.',
-  sameAs: [
-    'https://github.com/orchidtexture',
-    'https://twitter.com/orchidtexture',
-  ],
-},`,
-  },
-  {
-    id: 'webpage',
-    name: 'webpageRegistry',
-    signature: 'webpageRegistry() / webpagesRegistry()',
-    schemaType: 'WebPage',
-    schemaUrl: 'https://schema.org/WebPage',
-    description: 'Declares route documents, page titles, canonical URLs, meta descriptions, and part connections. Supports single or array of routes.',
-    fields: [
-      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique page identifier key (e.g. "home", "docs", "pricing")' },
-      { name: 'name', type: 'string', required: true, schemaOrgMapping: 'name', description: 'Page document title tag' },
-      { name: 'url', type: 'string', required: true, schemaOrgMapping: 'url', description: 'Canonical route URL (e.g. "/docs")' },
-      { name: 'description', type: 'string', required: false, schemaOrgMapping: 'description', description: 'Route-specific meta description' },
-      { name: 'inLanguage', type: 'string', required: false, schemaOrgMapping: 'inLanguage', description: 'Language code for this route' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, webpageRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  webpage: webpageRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-webpage: [
-  {
-    id: 'home',
-    name: 'Home - Contextual UI',
-    url: '/',
-    description: 'Semantic SEO and Knowledge Graph starter kit.',
-  },
-  {
-    id: 'docs',
-    name: 'Documentation - Contextual UI',
-    url: '/docs',
-    description: 'Learn how to use Contextual UI.',
-  },
-],`,
-  },
-  {
-    id: 'navbar',
-    name: 'navbarRegistry',
-    signature: 'navbarRegistry()',
-    schemaType: 'SiteNavigationElement',
-    schemaUrl: 'https://schema.org/SiteNavigationElement',
-    description: 'Declares header navigation, brand logo, home link, and hierarchical menu links with automatic Schema.org microdata.',
-    fields: [
-      { name: 'brand.name', type: 'string', required: true, schemaOrgMapping: 'name', description: 'Brand or application display title' },
-      { name: 'brand.href', type: 'string', required: true, schemaOrgMapping: 'url', description: 'Destination URL for brand link' },
-      { name: 'brand.logo', type: 'string', required: false, schemaOrgMapping: 'image', description: 'Brand icon image URL' },
-      { name: 'links', type: 'Array<{ id, label, href, children? }>', required: true, schemaOrgMapping: 'SiteNavigationElement', description: 'Menu items array' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, navbarRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  navbar: navbarRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-navbar: {
-  brand: { name: 'Contextual', href: '/', logo: '/images/onigiri_logo.svg' },
-  links: [
-    { id: '1', label: 'Home', href: '/' },
-    { id: '2', label: 'Docs', href: '/docs' },
-    { id: '3', label: 'Schema Graph', href: '/schema' },
-  ],
-},`,
-  },
-  {
-    id: 'footer',
-    name: 'footerRegistry',
-    signature: 'footerRegistry()',
-    schemaType: 'WPFooter',
-    schemaUrl: 'https://schema.org/WPFooter',
-    description: 'Declares multi-column navigation links, brand bio, social profiles, legal documents, and copyright attribution.',
-    fields: [
-      { name: 'brand', type: '{ name, href, logo?, description? }', required: false, schemaOrgMapping: 'brand', description: 'Footer brand details' },
-      { name: 'columns', type: 'Array<{ id, title, links }>', required: false, schemaOrgMapping: 'SiteNavigationElement', description: 'Categorized navigation columns' },
-      { name: 'links', type: 'Array<{ id, label, href }>', required: false, schemaOrgMapping: 'SiteNavigationElement', description: 'Flat navigation link list' },
-      { name: 'legalLinks', type: 'Array<{ id, label, href }>', required: false, schemaOrgMapping: 'significantLink', description: 'Privacy & Terms links' },
-      { name: 'socials', type: 'Array<{ id, platform, href, label? }>', required: false, schemaOrgMapping: 'sameAs', description: 'Social platform links' },
-      { name: 'copyright', type: '{ holder, year?, text? }', required: false, schemaOrgMapping: 'copyrightHolder', description: 'Copyright ownership statement' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, footerRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  footer: footerRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-footer: {
-  brand: { name: 'Contextual', href: '/', description: 'Headless UI components.' },
-  columns: [
-    { id: 'res', title: 'Resources', links: [{ id: '1', label: 'Docs', href: '/docs' }] },
-  ],
-  copyright: { holder: 'Tasuku Studio', year: 2026 },
-},`,
-  },
-  {
-    id: 'breadcrumb',
-    name: 'breadcrumbRegistry',
-    signature: 'breadcrumbRegistry()',
-    schemaType: 'BreadcrumbList',
-    schemaUrl: 'https://schema.org/BreadcrumbList',
-    description: 'Declares navigational breadcrumb trails with automated position indexing for search engine rich results.',
-    fields: [
-      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique step identifier' },
-      { name: 'label', type: 'string', required: true, schemaOrgMapping: 'name', description: 'Display name of the breadcrumb item' },
-      { name: 'url', type: 'string', required: false, schemaOrgMapping: 'item', description: 'Destination route URL' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, breadcrumbRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  breadcrumb: breadcrumbRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-breadcrumb: [
-  { id: '1', label: 'Home', url: '/' },
-  { id: '2', label: 'Docs', url: '/docs' },
-  { id: '3', label: 'Schemas' },
-],`,
-  },
-  {
-    id: 'faq',
-    name: 'faqRegistry',
-    signature: 'faqRegistry()',
-    schemaType: 'FAQPage',
-    schemaUrl: 'https://schema.org/FAQPage',
-    description: 'Declares question-and-answer pairs forming Schema.org Question and acceptedAnswer entities.',
-    fields: [
-      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique question identifier' },
-      { name: 'question', type: 'string', required: true, schemaOrgMapping: 'name', description: 'Question title string' },
-      { name: 'answer', type: 'string', required: true, schemaOrgMapping: 'acceptedAnswer.text', description: 'Answer text content' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, faqRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  faq: faqRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-faq: [
-  { id: '1', question: 'What is Contextual UI?', answer: 'An open-source SSOT starter kit.' },
-  { id: '2', question: 'How does SEO work?', answer: 'Injects Schema.org JSON-LD graphs.' },
-],`,
-  },
-  {
-    id: 'forms',
-    name: 'formRegistry',
-    signature: 'formRegistry()',
-    schemaType: 'ContactAction / Action',
-    schemaUrl: 'https://schema.org/PotentialAction',
-    description: 'Declares CMS-driven forms with dynamic in-memory Zod validation, headless <AutoForm> rendering, and machine-readable Schema.org PotentialAction graphs for AI agents.',
-    fields: [
-      { name: 'id', type: 'string', required: true, schemaOrgMapping: '@id', description: 'Unique identifier for the form (e.g. "contact-sales")' },
-      { name: 'name / title', type: 'string', required: false, schemaOrgMapping: 'name', description: 'Display title for the form action' },
-      { name: 'actionType', type: 'string', required: false, schemaOrgMapping: '@type', description: 'Schema.org Action type (e.g. "ContactAction", "SearchAction", "SubscribeAction")' },
-      { name: 'endpoint', type: 'string', required: true, schemaOrgMapping: 'target.urlTemplate', description: 'HTTP API endpoint for form submission' },
-      { name: 'method', type: 'POST | GET | PUT', required: false, schemaOrgMapping: 'target.httpMethod', description: 'HTTP method used to submit the payload' },
-      { name: 'fields', type: 'FormField[]', required: true, schemaOrgMapping: 'object (PropertyValueSpecification)', description: 'Array of input fields with type, label, required, and validation rules' },
-      { name: 'submitLabel', type: 'string', required: false, schemaOrgMapping: '—', description: 'Custom submit button display label' },
-      { name: 'successMessage', type: 'string', required: false, schemaOrgMapping: '—', description: 'Success notification text shown upon successful submission' },
-    ],
-    sampleCode: `// data/site.schema.ts
-import { defineSchema, formRegistry } from 'contextual-ui/server';
-
-export const siteSchema = defineSchema({
-  forms: formRegistry(),
-});`,
-    sampleData: `// Ingested connector data
-forms: [
-  {
-    id: 'contact-sales',
-    name: 'Contact Sales',
-    actionType: 'ContactAction',
-    endpoint: '/api/contact',
-    method: 'POST',
-    fields: [
-      { name: 'name', type: 'text', label: 'Full Name', required: true },
-      { name: 'email', type: 'email', label: 'Work Email', required: true },
-      { name: 'message', type: 'textarea', label: 'Message', required: true },
-    ],
-    submitLabel: 'Send Inquiry',
-  },
-],`,
-  },
-];
-
 function RegistrySelector({
   registries,
   selectedId,
@@ -816,11 +567,18 @@ function RegistrySelector({
   );
 }
 
-function SchemaRegistriesSection({ sectionData }: { sectionData?: any } = {}) {
+function SchemaRegistriesSection({
+  sectionData,
+  collectionsData,
+}: {
+  sectionData?: any;
+  collectionsData?: any;
+} = {}) {
   const [selectedRegistryId, setSelectedRegistryId] = useState<string>('website');
   const [codeMode, setCodeMode] = useState<'schema' | 'data'>('schema');
 
-  const selectedRegistry = REGISTRIES_DATA.find((r) => r.id === selectedRegistryId) || REGISTRIES_DATA[0];
+  const registries = REGISTRIES_DATA;
+  const selectedRegistry = registries.find((r) => r.id === selectedRegistryId) || registries[0];
   const title = sectionData?.title || 'Schema Registries & defineSchema';
   const description = sectionData?.description || 'defineSchema allows you to compose pre-built, type-validated Schema.org registries and custom Zod schemas into a unified contract. Each registry automatically validates runtime data, generates compile-time TypeScript types, and compiles referentially linked Schema.org @graph JSON-LD nodes.';
 
@@ -1175,68 +933,7 @@ export default async function ContactPage() {
   ]
 }`;
 
-  const autoFormPropsRef = [
-    {
-      name: 'data',
-      type: 'FormData',
-      required: 'Yes (or form)',
-      description: 'Ingested forms data from connector/registry (single FormEntity or FormEntity[] array).',
-    },
-    {
-      name: 'formId',
-      type: 'string',
-      required: 'Optional',
-      description: 'Matches a specific form by its id when data contains multiple forms.',
-    },
-    {
-      name: 'form',
-      type: 'FormEntity',
-      required: 'Optional',
-      description: 'Explicit form entity object override (bypassing data lookup).',
-    },
-    {
-      name: 'components',
-      type: 'AutoFormCustomComponents',
-      required: 'Optional',
-      description: 'Custom UI slots for Form, Field, Label, Input, TextArea, Select, Checkbox, ErrorMessage, Submit, Section.',
-    },
-    {
-      name: 'action',
-      type: 'string',
-      required: 'Optional',
-      description: 'Overrides the form submit endpoint (defaults to form.endpoint).',
-    },
-    {
-      name: 'method',
-      type: "'POST' | 'GET' | 'PUT' | 'PATCH'",
-      required: 'Optional',
-      description: 'Overrides HTTP method (defaults to form.method or "POST").',
-    },
-    {
-      name: 'onSubmit',
-      type: '(values, form) => void | Promise<void>',
-      required: 'Optional',
-      description: 'Custom submit handler. If omitted, AutoForm performs a JSON POST fetch to the endpoint automatically.',
-    },
-    {
-      name: 'onSuccess',
-      type: '(result) => void',
-      required: 'Optional',
-      description: 'Callback invoked after successful form submission.',
-    },
-    {
-      name: 'onError',
-      type: '(error: ZodError) => void',
-      required: 'Optional',
-      description: 'Callback invoked when client-side validation fails.',
-    },
-    {
-      name: 'submitLabel',
-      type: 'string',
-      required: 'Optional',
-      description: 'Overrides the submit button text (defaults to form.submitLabel or "Submit").',
-    },
-  ];
+  const autoFormPropsRef = AUTO_FORM_PROPS;
 
   const autoFormCustomSlots = {
     Field: ({ children, className }: any) => (
@@ -1575,48 +1272,7 @@ export function ContactFormCard() {
   {/* Field components */}
 </ContactForm.Root>`;
 
-  const formSubcomponents = [
-    {
-      name: 'Form.Root',
-      props: 'onSubmit, onError?, className?, id?',
-      description: 'Top-level context provider for static forms. Manages state, errors, blur validation, and async lifecycle.',
-    },
-    {
-      name: 'Form.Field',
-      props: 'name: keyof Schema, className?',
-      description: 'Scopes field context by name. Strictly type-checked against schema keys at compile time.',
-    },
-    {
-      name: 'Form.Label',
-      props: 'asChild?, className?, style?',
-      description: 'Accessible <label> automatically bound to the input through the field htmlFor attribute.',
-    },
-    {
-      name: 'Form.Input',
-      props: 'asChild?, ...InputHTMLAttributes',
-      description: 'Controlled input element bound to field value, onChange, onBlur validation, and data-invalid attribute.',
-    },
-    {
-      name: 'Form.TextArea',
-      props: 'asChild?, ...TextareaHTMLAttributes',
-      description: 'Controlled multi-line textarea with automatic onBlur validation and data-invalid attribute binding.',
-    },
-    {
-      name: 'Form.ErrorMessage',
-      props: 'asChild?, className?, style?',
-      description: 'Conditionally renders active validation error strings for the scoped field.',
-    },
-    {
-      name: 'Form.Submit',
-      props: 'asChild?, ...ButtonHTMLAttributes',
-      description: 'Submit button automatically disabled while an async onSubmit promise is pending.',
-    },
-    {
-      name: 'Form.Section',
-      props: 'title?, description?, asChild?, className?',
-      description: 'Semantic container for grouping related fields with an optional title and description header.',
-    },
-  ];
+  const formSubcomponents = STATIC_FORM_SUBCOMPONENTS;
 
   return (
     <section id="create-form" className="border-b border-base shadow-sm scroll-mt-28 pb-12 space-y-8">
@@ -2082,29 +1738,7 @@ export const generateMetadata = () =>
     `new URL("${baseUrl}")`
   );
 
-  const helperFields: SchemaField[] = [
-    {
-      name: 'pageIdOrOptions',
-      type: 'string | GetMetadataOptions',
-      required: false,
-      schemaOrgMapping: 'WebPage.@id / url',
-      description: 'Page identifier (e.g. "privacy", "home") or options object. Defaults to "home" or root website when omitted.',
-    },
-    {
-      name: 'overrides',
-      type: 'Partial<Metadata>',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Custom metadata overrides (e.g. title, openGraph images, twitter card, keywords, robots).',
-    },
-    {
-      name: 'returns',
-      type: 'Promise<Metadata>',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'Next.js App Router-compatible Metadata object with metadataBase, title, description, alternates, openGraph, and twitter.',
-    },
-  ];
+  const helperFields: SchemaField[] = HELPER_FIELDS;
 
   return (
     <section id="helpers" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
@@ -2380,64 +2014,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 }`;
 
-  const sitemapFields: SchemaField[] = [
-    {
-      name: 'options.baseUrl',
-      type: 'string',
-      required: false,
-      schemaOrgMapping: 'WebSite.url',
-      description: 'Base canonical domain (e.g. "https://example.com"). Defaults to siteApp.baseUrl or data.website.url.',
-    },
-    {
-      name: 'options.exclude',
-      type: 'string[]',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Paths or glob patterns to omit (e.g. ["/cms", "/cms/*", "/admin", "/studio*"]).',
-    },
-    {
-      name: 'options.additionalRoutes',
-      type: 'SitemapItem[]',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Additional routes or dynamic records outside the primary schema to append with deduplication.',
-    },
-    {
-      name: 'options.defaultPriority',
-      type: 'number',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Default priority (0.0 to 1.0). Root "/" defaults to 1.0, subpages default to 0.8.',
-    },
-    {
-      name: 'options.defaultChangeFrequency',
-      type: 'SitemapChangeFrequency',
-      required: false,
-      schemaOrgMapping: '—',
-      description: '"always" | "hourly" | "daily" | "weekly" | "monthly" | "yearly" | "never". Root defaults to "daily", subpages to "weekly".',
-    },
-    {
-      name: 'returns (getSitemap)',
-      type: 'Promise<MetadataRoute.Sitemap>',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'Array of items typed directly for Next.js App Router app/sitemap.ts export.',
-    },
-    {
-      name: 'returns (generateSitemapXml)',
-      type: 'Promise<string>',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'RFC-compliant XML string conforming to Sitemaps 0.9 specification with entity escaping.',
-    },
-    {
-      name: 'returns (createSitemapHandler)',
-      type: '{ GET: (req: Request) => Promise<Response> }',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'Standard Web Response route handler for Next.js, Remix, Astro, or TanStack.',
-    },
-  ];
+  const sitemapFields: SchemaField[] = SITEMAP_FIELDS;
 
   return (
     <section id="sitemap" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
@@ -2746,64 +2323,7 @@ export const { GET } = siteApp.createRobotsHandler({
   cacheControl: 'public, max-age=3600, s-maxage=86400',
 });`;
 
-  const robotsFields: SchemaField[] = [
-    {
-      name: 'options.baseUrl',
-      type: 'string',
-      required: false,
-      schemaOrgMapping: 'WebSite.url',
-      description: 'Base canonical domain. Used to formulate "Sitemap: ${baseUrl}/sitemap.xml" and "Host: hostname".',
-    },
-    {
-      name: 'options.disallow',
-      type: 'string | string[]',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Paths forbidden for standard crawlers (e.g. ["/cms", "/cms/"]).',
-    },
-    {
-      name: 'options.allow',
-      type: 'string | string[]',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Paths explicitly permitted (defaults to "/").',
-    },
-    {
-      name: 'options.ai',
-      type: 'RobotsAiOptions',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Preset policies for AI training and search bots (GPTBot, ClaudeBot, PerplexityBot, Google-Extended, CCBot, Bytespider).',
-    },
-    {
-      name: 'options.sitemap',
-      type: 'string | string[] | boolean',
-      required: false,
-      schemaOrgMapping: '—',
-      description: 'Sitemap URL directive. Defaults to true ("${baseUrl}/sitemap.xml"). Set false to suppress.',
-    },
-    {
-      name: 'returns (getRobots)',
-      type: 'Promise<MetadataRoute.Robots>',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'Structured object typed directly for Next.js App Router app/robots.ts export.',
-    },
-    {
-      name: 'returns (generateRobotsTxt)',
-      type: 'Promise<string>',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'RFC 9309 compliant robots.txt plain-text representation.',
-    },
-    {
-      name: 'returns (createRobotsHandler)',
-      type: '{ GET: (req: Request) => Promise<Response> }',
-      required: true,
-      schemaOrgMapping: '—',
-      description: 'Standard Web Response route handler for Next.js, Remix, Astro, or TanStack.',
-    },
-  ];
+  const robotsFields: SchemaField[] = ROBOTS_FIELDS;
 
   return (
     <section id="robots" className="border-b border-base shadow-sm scroll-mt-28 pb-12">
@@ -3145,6 +2665,13 @@ export function DocsClient({ data }: { data: SiteData }) {
   const createFormSection = sectionList.find((s: any) => s.id === 'create-form');
   const connectorsSection = sectionList.find((s: any) => s.id === 'connectors');
   const helpersSection = sectionList.find((s: any) => s.id === 'helpers');
+
+  const csSection = sectionList.find((s: any) => s.id === 'showcase-contextual-site');
+  const webpageSection = sectionList.find((s: any) => s.id === 'showcase-webpage');
+  const navbarSection = sectionList.find((s: any) => s.id === 'showcase-navbar');
+  const footerSection = sectionList.find((s: any) => s.id === 'showcase-footer');
+  const breadcrumbSection = sectionList.find((s: any) => s.id === 'showcase-breadcrumb');
+  const faqSection = sectionList.find((s: any) => s.id === 'showcase-faq');
 
   const handleNavClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     e.preventDefault();
@@ -4825,13 +4352,16 @@ export default async function DocsPage() {
           <QuickstartSection collectionsData={(data as any)?.collections} />
 
           {/* Schema Registries & defineSchema */}
-          <SchemaRegistriesSection sectionData={schemaRegSection} />
+          <SchemaRegistriesSection
+            sectionData={schemaRegSection}
+            collectionsData={(data as any)?.collections}
+          />
 
           {/* ContextualSite Showcase */}
           <ShowcaseSection
             id="contextual-site"
-            title="<ContextualSite /> Provider"
-            description="The root provider that coordinates domain-level data distribution to all contextual UI components. In single-page apps (SPAs), it compiles and injects the unified Schema.org JSON-LD @graph."
+            title={csSection?.title || "<ContextualSite /> Provider"}
+            description={csSection?.description || "The root provider that coordinates domain-level data distribution to all contextual UI components. In single-page apps (SPAs), it compiles and injects the unified Schema.org JSON-LD @graph."}
             fields={contextualSiteFields}
             codeString={contextualSiteCode}
             schemaString={contextualSiteSchema}
@@ -4842,8 +4372,8 @@ export default async function DocsPage() {
           {/* WebPage Showcase */}
           <ShowcaseSection
             id="webpage"
-            title="<WebPage /> Wrapper"
-            description="The route-level React Server Component that coordinates page-level Schema.org metadata and automatically injects the canonical @graph script tag for that specific URL."
+            title={webpageSection?.title || "<WebPage /> Wrapper"}
+            description={webpageSection?.description || "The route-level React Server Component that coordinates page-level Schema.org metadata and automatically injects the canonical @graph script tag for that specific URL."}
             fields={webpageFields}
             codeString={webpageCode}
             schemaString={webpageSchema}
@@ -4854,8 +4384,8 @@ export default async function DocsPage() {
           {/* Navbar Showcase */}
           <ShowcaseSection
             id="navbar"
-            title="Navbar"
-            description="The Navbar component renders accessible navigation structures with full semantic support."
+            title={navbarSection?.title || "Navbar"}
+            description={navbarSection?.description || "The Navbar component renders accessible navigation structures with full semantic support."}
             controls={navbarControls}
             fields={navbarFields}
             codeString={navbarCode}
@@ -4889,8 +4419,8 @@ export default async function DocsPage() {
           {/* Footer Showcase */}
           <ShowcaseSection
             id="footer"
-            title="Footer"
-            description="The Footer component organizes structured site links, brand metadata, columnar resources, social profiles, and legal attribution with automatic Schema.org WPFooter structured data injection."
+            title={footerSection?.title || "Footer"}
+            description={footerSection?.description || "The Footer component organizes structured site links, brand metadata, columnar resources, social profiles, and legal attribution with automatic Schema.org WPFooter structured data injection."}
             controls={footerControls}
             fields={footerFields}
             codeString={footerCode}
@@ -4966,8 +4496,8 @@ export default async function DocsPage() {
           {/* Breadcrumb Showcase */}
           <ShowcaseSection
             id="breadcrumb"
-            title="Breadcrumb"
-            description="The Breadcrumb component automatically injects Schema.org BreadcrumbList JSON-LD for search engine indexing while enforcing accessible semantic navigation."
+            title={breadcrumbSection?.title || "Breadcrumb"}
+            description={breadcrumbSection?.description || "The Breadcrumb component automatically injects Schema.org BreadcrumbList JSON-LD for search engine indexing while enforcing accessible semantic navigation."}
             controls={breadcrumbControls}
             fields={breadcrumbFields}
             codeString={breadcrumbCode}
@@ -5005,8 +4535,8 @@ export default async function DocsPage() {
           {/* FAQ Showcase */}
           <ShowcaseSection
             id="faq"
-            title="FAQ"
-            description="The FAQ component organizes collapsible question-and-answer pairs with automatic Schema.org FAQPage structured data injection."
+            title={faqSection?.title || "FAQ"}
+            description={faqSection?.description || "The FAQ component organizes collapsible question-and-answer pairs with automatic Schema.org FAQPage structured data injection."}
             controls={faqControls}
             fields={faqFields}
             codeString={faqCode}

@@ -4,6 +4,8 @@ import { createContextualApp, InferData } from 'contextual-ui/server';
 import { quickstartCollection } from './quickstart';
 import { heroSection, pipelineSection, foundationsSection, pipelineStagesCollection } from './home.content';
 import { docsSections } from './docs.content';
+import { schemaRegistriesCollection } from './registries.content';
+import { showcaseSections } from './showcases.content';
 
 const siteUrl = process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || 'https://contextual.site';
 
@@ -259,6 +261,7 @@ const connector = staticConnector({
       ],
     },
     ...docsSections,
+    ...showcaseSections,
   ],
   collections: [
     pipelineStagesCollection,
@@ -366,6 +369,7 @@ const connector = staticConnector({
       ],
     },
     quickstartCollection,
+    schemaRegistriesCollection,
   ],
   announcement: {
     enabled: true,
